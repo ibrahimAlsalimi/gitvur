@@ -14,7 +14,10 @@
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "e2e": "playwright test",
+    "check:contrast": "node scripts/check-contrast.ts",
+    "e2e": "node scripts/gen-synthetic.ts --quiet && playwright test",
+    "e2e:perf": "node scripts/gen-synthetic.ts --quiet && GITVUR_PERF=1 playwright test -g budgets --project light --workers 1",
+    "gen:synthetic": "node scripts/gen-synthetic.ts",
     "gen:types": "cd .. && GITVUR_WRITE_BINDINGS=1 cargo test -q -p gitvur-app --lib bindings",
     "tauri": "tauri"
   },

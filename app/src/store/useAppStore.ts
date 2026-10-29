@@ -39,6 +39,10 @@ interface AppState {
   validate: () => Promise<void>;
   select: (id: string | null) => void;
   toggle: (id: string, expanded?: boolean) => void;
+  /** Expands all of `ids` unless they are all expanded already, in which case collapses them. */
+  toggleFiles: (ids: string[]) => void;
+  expandAllFiles: () => void;
+  collapseAllFiles: () => void;
   setLens: (lens: Lens) => void;
   setTheme: (theme: Theme) => void;
   setPane: (pane: "explorer" | "inspector", width: number) => void;
@@ -182,6 +186,31 @@ export const useAppStore = create<AppState>()((set, get) => {
       if (open) next.add(id);
       else next.delete(id);
       set({ expandedIds: next });
+    },
+
+    toggleFiles(ids) {
+      const next = new Set(get().expandedIds);
+      const allOpen = ids.every((id) => next.has(id));
+      for (const id of ids) {
+        if (allOpen) next.delete(id);
+        else next.add(id);
+      }
+      set({ expandedIds: next });
+    },
+
+    expandAllFiles() {
+      const { model, expandedIds } = get();
+      if (!model) return;
+      const next = new Set(expandedIds);
+      for (const node of model.nodes.values()) if (node.kind === "file") next.add(node.id);
+      set({ expandedIds: next });
+    },
+
+    collapseAllFiles() {
+      const { model, expandedIds } = get();
+      if (!model) return;
+      const kept = [...expandedIds].filter((id) => model.nodes.get(id)?.kind === "module");
+      set({ expandedIds: new Set(kept) });
     },
 
     setLens(lens) {

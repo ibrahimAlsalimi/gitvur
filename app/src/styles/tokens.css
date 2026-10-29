@@ -1,135 +1,243 @@
 /*
- * Design tokens: every colour, spacing, radius and type size used by the app.
- * Components must reference these variables, never raw values.
+ * Design tokens: every colour, spacing, radius, type size and motion value in the app.
+ * Hex values live only in this file. Components reference these variables.
  *
- * Phase 06 placeholder palette (neutral greys + one accent, checked for AA contrast).
- * Phase 07 replaces the colour values with the real visual language.
+ * Direction: a calm technical instrument. Cool neutral surfaces, one accent (selection and
+ * focus), colour only where it carries meaning: kind, status, provenance, change, module
+ * identity. `pnpm check:contrast` enforces the contrast and hue rules below.
  */
+
 :root {
-  /* Type */
-  --font-ui: "Inter", system-ui, sans-serif;
-  --font-code: "JetBrains Mono", ui-monospace, monospace;
-  --text-xs: 11px;
-  --text-sm: 12px;
-  --text-md: 13px;
-  --text-lg: 15px;
-  --text-xl: 20px;
-  --weight-regular: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-  --line-tight: 1.25;
-  --line-normal: 1.5;
+  /* ---- Type ---------------------------------------------------------------------- */
+  --gv-font-ui: "Inter", system-ui, sans-serif;
+  --gv-font-code: "JetBrains Mono", ui-monospace, monospace;
+  --gv-text-2xs: 10px;
+  --gv-text-xs: 11px;
+  --gv-text-sm: 12px;
+  --gv-text-md: 13px;
+  --gv-text-lg: 15px;
+  --gv-text-xl: 18px;
+  --gv-text-2xl: 26px;
+  --gv-weight-regular: 400;
+  --gv-weight-medium: 500;
+  --gv-weight-semibold: 600;
+  --gv-line-tight: 1.25;
+  --gv-line-normal: 1.5;
+  --gv-tracking-caps: 0.04em;
 
-  /* Space (4px grid) */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
+  /* ---- Space (4px grid) ---------------------------------------------------------- */
+  --gv-space-1: 4px;
+  --gv-space-2: 8px;
+  --gv-space-3: 12px;
+  --gv-space-4: 16px;
+  --gv-space-5: 20px;
+  --gv-space-6: 24px;
+  --gv-space-7: 28px;
+  --gv-space-8: 32px;
+  --gv-space-12: 48px;
 
-  /* Shape */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-pill: 999px;
-  --border-width: 1px;
-  --focus-width: 2px;
+  /* ---- Shape --------------------------------------------------------------------- */
+  --gv-radius-sm: 4px;
+  --gv-radius-md: 8px;
+  --gv-radius-lg: 12px;
+  --gv-radius-pill: 999px;
+  --gv-hairline: 1px;
+  --gv-border-emphasis: 2px;
+  --gv-focus-width: 2px;
+  --gv-band-width: 4px;
 
-  /* Layout */
-  --topbar-height: 48px;
-  --statusbar-height: 28px;
-  --handle-width: 5px;
-  --tree-indent: 16px;
-  --tree-row-height: 26px;
-  --rail-width: 32px;
+  /* ---- Motion -------------------------------------------------------------------- */
+  --gv-motion-fast: 120ms;
+  --gv-motion-base: 180ms;
+  --gv-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --gv-opacity-dimmed: 0.28;
 
-  /* Motion */
-  --duration-fast: 120ms;
+  /* ---- App frame ----------------------------------------------------------------- */
+  --gv-layout-topbar: 48px;
+  --gv-layout-statusbar: 28px;
+  --gv-layout-pane-header: 36px;
+  --gv-layout-handle: 5px;
+  --gv-layout-rail: 32px;
+  --gv-layout-tree-indent: 16px;
+  --gv-layout-tree-row: 26px;
+  --gv-layout-control: 30px;
 
-  /* Colour: light */
+  /* ---- Map geometry (must match src/layout/constants.ts) ------------------------ */
+  --gv-map-module-header: 72px;
+  --gv-map-file-header: 64px;
+
+  /* ---- Colour: light ------------------------------------------------------------- */
   color-scheme: light;
-  --color-bg: #f6f7f9;
-  --color-surface: #ffffff;
-  --color-surface-sunken: #eef0f3;
-  --color-surface-hover: #e9ecf1;
-  --color-border: #d9dde3;
-  --color-border-strong: #b9c0ca;
-  --color-text: #1b1f24;
-  --color-text-muted: #59616c;
-  --color-text-faint: #747c87;
-  --color-accent: #2f5fd0;
-  --color-accent-hover: #264fae;
-  --color-accent-contrast: #ffffff;
-  --color-accent-soft: #e3eafb;
-  --color-selection: #dbe5fb;
-  --color-focus: #2f5fd0;
-  --color-status-documented: #1f8a4c;
-  --color-status-stale: #b86e00;
-  --color-status-undocumented: #8a929c;
-  --color-danger: #c4352f;
-  --color-danger-soft: #fbe7e6;
-  --color-warning-soft: #fdf1dc;
-  --shadow-panel: 0 1px 2px rgb(0 0 0 / 6%), 0 4px 16px rgb(0 0 0 / 6%);
-  --shadow-dialog: 0 12px 48px rgb(0 0 0 / 22%);
-  --color-backdrop: rgb(15 18 23 / 45%);
+  --gv-bg-canvas: #f3f5f8;
+  --gv-bg-surface: #ffffff;
+  --gv-bg-surface-raised: #ffffff;
+  --gv-bg-sunken: #ebeef3;
+  --gv-bg-hover: #e6eaf0;
+  --gv-border-subtle: #e3e7ed;
+  --gv-border-default: #d3d9e1;
+  --gv-border-strong: #a9b3c0;
+  --gv-text-primary: #171b21;
+  --gv-text-secondary: #4f5864;
+  --gv-text-tertiary: #636c78;
+  --gv-text-on-accent: #ffffff;
+  --gv-accent: #2b5fd9;
+  --gv-accent-hover: #2350bb;
+  --gv-accent-soft: #e2eafc;
+  --gv-focus-ring: #2b5fd9;
+
+  --gv-kind-project: #3c4654;
+  --gv-kind-module: #2b5fd9;
+  --gv-kind-file: #5b6676;
+  --gv-kind-class: #8a4fc4;
+  --gv-kind-function: #1f7f8c;
+  --gv-kind-class-tint: #f4edfb;
+
+  /* Module identity: one calm family, hues kept clear of the status and diff hues. */
+  --gv-module-1: #8a7a12;
+  --gv-module-2: #2b8a7e;
+  --gv-module-3: #1b86a6;
+  --gv-module-4: #3e73c4;
+  --gv-module-5: #9550b8;
+  --gv-module-6: #b04f9a;
+  --gv-module-7: #b8506a;
+  --gv-module-8: #5f8f1c;
+  --gv-module-neutral: #8d96a3;
+
+  --gv-status-documented: #1e8048;
+  --gv-status-stale: #b26500;
+  --gv-status-undocumented: #737d8a;
+  --gv-status-error: #c42f2a;
+  --gv-status-error-soft: #fbe6e5;
+  --gv-status-warning-soft: #fdf0d9;
+
+  --gv-prov-syntactic: #4a5566;
+  --gv-prov-semantic: #2b5fd9;
+  --gv-prov-ai: #a3489b;
+
+  --gv-diff-added: #1f8a3d;
+  --gv-diff-removed: #c4352f;
+  --gv-diff-modified: #a86a00;
+  --gv-diff-moved: #6b52c8;
+
+  --gv-shadow-float: 0 1px 2px rgb(16 24 40 / 6%), 0 6px 20px rgb(16 24 40 / 8%);
+  --gv-shadow-dialog: 0 12px 48px rgb(16 24 40 / 22%);
+  --gv-backdrop: rgb(15 18 23 / 45%);
 }
 
+/* Dark: same hierarchy, rebuilt rather than inverted. Surfaces step up in lightness from
+   canvas to raised, so cards still sit "above" containers. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --color-bg: #15181d;
-    --color-surface: #1c2026;
-    --color-surface-sunken: #12151a;
-    --color-surface-hover: #262b33;
-    --color-border: #2e343d;
-    --color-border-strong: #454d58;
-    --color-text: #e6e9ee;
-    --color-text-muted: #a3abb6;
-    --color-text-faint: #8a929d;
-    --color-accent: #7ea2f2;
-    --color-accent-hover: #9ab6f5;
-    --color-accent-contrast: #0f1726;
-    --color-accent-soft: #1f2b45;
-    --color-selection: #243656;
-    --color-focus: #7ea2f2;
-    --color-status-documented: #4cc27e;
-    --color-status-stale: #e0a43c;
-    --color-status-undocumented: #7c8590;
-    --color-danger: #f07a73;
-    --color-danger-soft: #3a1f1f;
-    --color-warning-soft: #3a2e18;
-    --shadow-panel: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 16px rgb(0 0 0 / 30%);
-    --shadow-dialog: 0 12px 48px rgb(0 0 0 / 55%);
-    --color-backdrop: rgb(0 0 0 / 60%);
+    --gv-bg-canvas: #111418;
+    --gv-bg-surface: #181c22;
+    --gv-bg-surface-raised: #1f242b;
+    --gv-bg-sunken: #0d1014;
+    --gv-bg-hover: #272d36;
+    --gv-border-subtle: #242a32;
+    --gv-border-default: #313843;
+    --gv-border-strong: #4d5664;
+    --gv-text-primary: #e7eaef;
+    --gv-text-secondary: #aab2bd;
+    --gv-text-tertiary: #959eab;
+    --gv-text-on-accent: #0c1424;
+    --gv-accent: #7fa3f5;
+    --gv-accent-hover: #9cb8f7;
+    --gv-accent-soft: #1d2a46;
+    --gv-focus-ring: #7fa3f5;
+
+    --gv-kind-project: #c3cad4;
+    --gv-kind-module: #7fa3f5;
+    --gv-kind-file: #98a2b0;
+    --gv-kind-class: #c29bf0;
+    --gv-kind-function: #5cc3cf;
+    --gv-kind-class-tint: #2a2236;
+
+    --gv-module-1: #c9b44a;
+    --gv-module-2: #4fbfae;
+    --gv-module-3: #4db4d6;
+    --gv-module-4: #6f9ae6;
+    --gv-module-5: #c48ae6;
+    --gv-module-6: #db7ec4;
+    --gv-module-7: #e47f98;
+    --gv-module-8: #9cc85a;
+    --gv-module-neutral: #6b7482;
+
+    --gv-status-documented: #4cc27e;
+    --gv-status-stale: #e5a540;
+    --gv-status-undocumented: #858e9b;
+    --gv-status-error: #f07a73;
+    --gv-status-error-soft: #3a1f1f;
+    --gv-status-warning-soft: #392d17;
+
+    --gv-prov-syntactic: #a6b0bd;
+    --gv-prov-semantic: #7fa3f5;
+    --gv-prov-ai: #e08ad6;
+
+    --gv-diff-added: #56c26f;
+    --gv-diff-removed: #f07a73;
+    --gv-diff-modified: #e0a43c;
+    --gv-diff-moved: #a493f2;
+
+    --gv-shadow-float: 0 1px 2px rgb(0 0 0 / 35%), 0 8px 24px rgb(0 0 0 / 40%);
+    --gv-shadow-dialog: 0 12px 48px rgb(0 0 0 / 55%);
+    --gv-backdrop: rgb(0 0 0 / 60%);
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --color-bg: #15181d;
-  --color-surface: #1c2026;
-  --color-surface-sunken: #12151a;
-  --color-surface-hover: #262b33;
-  --color-border: #2e343d;
-  --color-border-strong: #454d58;
-  --color-text: #e6e9ee;
-  --color-text-muted: #a3abb6;
-  --color-text-faint: #8a929d;
-  --color-accent: #7ea2f2;
-  --color-accent-hover: #9ab6f5;
-  --color-accent-contrast: #0f1726;
-  --color-accent-soft: #1f2b45;
-  --color-selection: #243656;
-  --color-focus: #7ea2f2;
-  --color-status-documented: #4cc27e;
-  --color-status-stale: #e0a43c;
-  --color-status-undocumented: #7c8590;
-  --color-danger: #f07a73;
-  --color-danger-soft: #3a1f1f;
-  --color-warning-soft: #3a2e18;
-  --shadow-panel: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 16px rgb(0 0 0 / 30%);
-  --shadow-dialog: 0 12px 48px rgb(0 0 0 / 55%);
-  --color-backdrop: rgb(0 0 0 / 60%);
+  --gv-bg-canvas: #111418;
+  --gv-bg-surface: #181c22;
+  --gv-bg-surface-raised: #1f242b;
+  --gv-bg-sunken: #0d1014;
+  --gv-bg-hover: #272d36;
+  --gv-border-subtle: #242a32;
+  --gv-border-default: #313843;
+  --gv-border-strong: #4d5664;
+  --gv-text-primary: #e7eaef;
+  --gv-text-secondary: #aab2bd;
+  --gv-text-tertiary: #959eab;
+  --gv-text-on-accent: #0c1424;
+  --gv-accent: #7fa3f5;
+  --gv-accent-hover: #9cb8f7;
+  --gv-accent-soft: #1d2a46;
+  --gv-focus-ring: #7fa3f5;
+
+  --gv-kind-project: #c3cad4;
+  --gv-kind-module: #7fa3f5;
+  --gv-kind-file: #98a2b0;
+  --gv-kind-class: #c29bf0;
+  --gv-kind-function: #5cc3cf;
+  --gv-kind-class-tint: #2a2236;
+
+  --gv-module-1: #c9b44a;
+  --gv-module-2: #4fbfae;
+  --gv-module-3: #4db4d6;
+  --gv-module-4: #6f9ae6;
+  --gv-module-5: #c48ae6;
+  --gv-module-6: #db7ec4;
+  --gv-module-7: #e47f98;
+  --gv-module-8: #9cc85a;
+  --gv-module-neutral: #6b7482;
+
+  --gv-status-documented: #4cc27e;
+  --gv-status-stale: #e5a540;
+  --gv-status-undocumented: #858e9b;
+  --gv-status-error: #f07a73;
+  --gv-status-error-soft: #3a1f1f;
+  --gv-status-warning-soft: #392d17;
+
+  --gv-prov-syntactic: #a6b0bd;
+  --gv-prov-semantic: #7fa3f5;
+  --gv-prov-ai: #e08ad6;
+
+  --gv-diff-added: #56c26f;
+  --gv-diff-removed: #f07a73;
+  --gv-diff-modified: #e0a43c;
+  --gv-diff-moved: #a493f2;
+
+  --gv-shadow-float: 0 1px 2px rgb(0 0 0 / 35%), 0 8px 24px rgb(0 0 0 / 40%);
+  --gv-shadow-dialog: 0 12px 48px rgb(0 0 0 / 55%);
+  --gv-backdrop: rgb(0 0 0 / 60%);
 }

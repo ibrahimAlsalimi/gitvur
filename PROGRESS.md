@@ -420,6 +420,84 @@ Followed `agent/codeDOC.md` literally on isolated copies of both fixtures, in a 
 - Open questions:
   1. Add `pnpm e2e` to CI (install the Chromium headless shell, upload screenshots as an artifact)? About 1 minute of extra CI time.
 
+### 2026-10-30 — Phase 07 — Graph rendering and visual language
+
+(Run at the user's request together with Phase 08; Phase 08 depends on this canvas.)
+
+- Done:
+  - **Containment layout** (`app/src/layout/`, decision and reasoning in its README):
+    - the project header bar on top;
+    - module containers placed by Dagre (TB, ranksep 96, nodesep 64, margins 48) along module dependencies aggregated from the extractor's file imports and calls;
+    - file cards in a `clamp(1, ceil(sqrt(n×1.6)), 6)`-column grid, row-major by path;
+    - class and function rows stacked inside expanded files, with methods and nested functions indented 16px per level.
+
+    The layout is pure, snapped to the 4px grid, and runs in a Web Worker (`layout.worker.ts`, with an inline fallback for tests). Two caches make expansion incremental: module grids, keyed by a per-module signature, and the Dagre ranking, keyed by module widths and edges. Expanding a file recomputes only that module's grid plus a cheap vertical pass at Level 2.
+  - **Tokens:**
+    - the binding `--gv-*` set for both themes, with dark rebuilt rather than inverted (surfaces step up canvas → surface → raised);
+    - eight module identity colours whose hues are kept clear of the status and diff hues;
+    - hex values only in `tokens.css`; the Phase 06 CSS migrated to the `--gv-*` names;
+    - `pnpm check:contrast` (`scripts/check-contrast.ts`): **243 checks pass**. Text ≥ 4.5:1 on all four surfaces; kind/status/provenance/diff/module colours ≥ 3:1 on `--gv-bg-surface`; module colours ≥ 0.06 apart in OKLab and ≥ 15° from every status and diff hue; and the two copies of the dark theme must be identical.
+  - **Node visual language** (`app/src/canvas/`), every kind with its own shape:
+    - project: a full-width bar, no border;
+    - module: a radius-lg container with a 4px identity band, a ring for documented %, and a dashed grey border for "Unassigned files";
+    - file: a raised radius-md card with a language glyph, a middle-truncated directory, a child-count chip, a chevron and a reserved 16px status slot;
+    - class: a row tinted with `--gv-kind-class-tint`, with a filled `C` square;
+    - function: an unfilled row with an `ƒ` circle, outline-only for methods.
+
+    Every node has hover, selected, focused and (reserved) dimmed states. Glyphs are inline SVG in `glyphs.tsx`.
+  - **Interaction:** modules open and files collapsed by default; chevron or Enter on a focused file expands it; Shift+click on a module header toggles all its files.
+    - Toolbar: Fit, Zoom in, Zoom out, Expand all, Collapse all, Lens (Structure).
+    - Three semantic-zoom levels through a selector that re-renders only when the level changes.
+    - Expand/collapse animates over `--gv-motion-base` with `--gv-ease-out`, with no animation under reduced motion.
+    - Initial fit with 48px padding, falling back to the top two ranks below zoom 0.2.
+    - Explorer and canvas share `expandedIds` and `selectedId`, so they always agree.
+  - **Minimap:** a custom one (see Performance). Modules in their identity colours, files as grey blocks, an accent viewport rectangle; click to centre.
+  - **`pnpm gen:synthetic`:** a seeded, deterministic generator (defaults 20 modules / 400 files / 5,000 functions, plus one 40-child file) writing `.synthetic/bundle.json`, loaded lazily with `?fixture=synthetic`. The `?perf=1` overlay (or Ctrl+Shift+P) shows FPS, rendered nodes and layout timings. `pnpm e2e:perf` measures the budgets alone.
+- **Performance** (synthetic, 5,000 functions; `pnpm e2e:perf`, headless Chromium, 3 isolated runs):
+
+  | Metric | Budget | Measured |
+  | --- | --- | --- |
+  | First layout, collapsed, in worker | < 400 ms | **86–101 ms** |
+  | Expand one file with 40 children, to settled positions | < 50 ms | **24.6–26.9 ms** (0.6 ms of it in the worker) |
+  | Pan/zoom | ≥ 50 fps | **61 fps** (headless Chromium) |
+  | Memory after load (JS heap) | < 400 MB | **61–74 MB** |
+
+  Three misses fixed along the way:
+  1. **Expand took 152 ms in the worker** because Dagre re-ran on every expand (~90–100 ms for 20 modules and 129 module edges). Fixed by caching the ranking, since expanding changes only heights.
+  2. **Expand then took ~92 ms on the main thread.** `buildFlow` rebuilt all ~5,600 node objects, and React Flow's own MiniMap redrew one shape per node, rows included, on every change. Fixed with `reuseNodes` (unchanged nodes keep their identity, which React Flow skips) and a custom minimap that draws only modules and files.
+  3. **"First layout: 1.1 ms" was a measurement bug.** StrictMode's cancelled first request did the real cold work, and only the warm second one was recorded. The cold result is now recorded even when superseded.
+
+  **Not measured: pan/zoom fps in `pnpm tauri dev` on WebKitGTK.** The real app starts cleanly with the new tokens (log checked, window captured). But opening a repository there needs the native folder dialog, which I can't operate (no input-automation tool on this system), and Playwright's WebKit doesn't install on Arch (host-requirements check fails). Please open `fixtures/py-small` in `pnpm tauri dev` and toggle Ctrl+Shift+P to read FPS while panning.
+- **Design review** (screenshots `map-01` … `map-06` in light and dark, plus a greyscale `map-01g`):
+  - *Kinds apart in under a second, in greyscale?* Yes. Shape alone separates them: a container with a band, a raised card, a tinted row with a filled square, and a plain row with a circle (outlined for methods).
+  - *One focal point?* With a selection, yes: an accent border plus a soft fill, and nothing else uses the accent. Without one, the top-rank module under the header connector draws the eye. The ring is the only other colour in a module header.
+  - *Gaps on the 4px grid, containers aligned?* Yes. All boxes are snapped (unit-tested), and modules in a rank share a top edge.
+  - *Clipping or overlap?* Names, descriptions and paths truncate with ellipses (middle truncation for paths). The floating toolbar and minimap can cover map content at some viewports, which is standard for floating panels.
+  - *Module colours one family, calm next to status?* Yes. All are mid-chroma (OKLab C 0.09–0.17) at similar lightness. The bands are thin (4px), and the minimap uses them at 30% opacity, so the green documented ring stays distinct.
+  - *Dark has the same hierarchy?* Yes. Surfaces step up in lightness from canvas to raised, so cards still sit above containers. Borders and shadows are retuned rather than inverted.
+  - **Observations, not changed:**
+    - Small repos fit width-bound at zoom 0.45–0.6, where LOD 1 shows module descriptions too small to read. The prompt's LOD table puts the full header at 0.35–0.8.
+    - The synthetic map is tall and thin: its import chains produce about 15 Dagre ranks. That's a property of the data, not the layout.
+- Tests:
+  - Vitest, 31 total:
+    - layout (10): the column formula, grid packing, tallest-card rows, 4px snapping, dependency direction, no overlapping modules, row depth and indent, expand recomputing one module and reusing the ranking, determinism;
+    - canvas builder (6): module colours, nesting, selection identity, `reuseNodes`, LOD mapping, middle truncation.
+  - Playwright: the six screenshot sets plus greyscale; the LOD per zoom level; toolbar expand/collapse and Enter on a focused file; Shift+click on a module header; reduced motion; selection syncing explorer and inspector; and the budget test. **44 passing**; the budget test is skipped in the normal run and runs via `e2e:perf`.
+- Acceptance:
+  - [x] Containment layout implemented and documented; runs in a worker
+  - [x] Tokens complete for both themes; `pnpm check:contrast` passes (243 checks)
+  - [x] All five node kinds match the visual language table, including greyscale distinguishability
+  - [x] Collapse/expand, toolbar, minimap, three LOD levels, reduced-motion behaviour
+  - [~] Performance budgets measured and recorded: three of four in Chromium; WebKitGTK fps is a manual step (above)
+  - [x] Six screenshot sets captured and reviewed; review answers recorded
+  - Rust (127 tests), clippy, fmt; `pnpm typecheck && lint && test && check:contrast && e2e` pass.
+- Dependencies added: none (`@xyflow/react` and `@dagrejs/dagre` were installed in Phase 00).
+- Deviations:
+  - **Minimap:** a small custom component instead of React Flow's `<MiniMap>`, which redrew every row node on every change and cost about 60 ms per expand on the synthetic repo.
+  - **Level 2 "re-layout" on expand is the cached Dagre ranking plus a vertical pass.** Rank tops are placed below the previous rank's tallest module (top-aligned, `ranksep` 96). The first layout uses the same rule, so both paths agree.
+  - **Dev-only `window.__gitvurMap`** (setViewport, focusNodes, getZoom) for screenshots at exact zoom levels; it is not present in production builds.
+  - **The Lens switch lists only "Structure"**, as the prompt says; the store's `Lens` type also has `coverage`, for Phase 09.
+
 ## Parking lot
 
 - Help dialog: render `codeDOC.md` as formatted Markdown instead of raw text (Phase 11).

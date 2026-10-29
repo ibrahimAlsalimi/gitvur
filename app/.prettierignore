@@ -6,3 +6,4 @@ src/generated
 e2e/__screenshots__
 test-results
 playwright-report
+.synthetic

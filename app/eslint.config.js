@@ -6,7 +6,16 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "src-tauri", "src/generated", "test-results", "playwright-report"] },
+  {
+    ignores: [
+      "dist",
+      "src-tauri",
+      "src/generated",
+      "test-results",
+      "playwright-report",
+      ".synthetic",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   {

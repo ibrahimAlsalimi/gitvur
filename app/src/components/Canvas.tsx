@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { MapCanvas } from "../canvas/MapCanvas";
 import { useAppStore } from "../store/useAppStore";
 import { AlertIcon, DocIcon, FolderIcon } from "./Icons";
 
@@ -31,7 +32,6 @@ export function Canvas() {
   const bundle = useAppStore((s) => s.bundle);
   const model = useAppStore((s) => s.model);
   const recent = useAppStore((s) => s.recent);
-  const selectedId = useAppStore((s) => s.selectedId);
   const store = useAppStore.getState();
 
   let content: ReactNode;
@@ -110,35 +110,34 @@ export function Canvas() {
         </div>
       </StatePanel>
     );
-  } else if (phase === "ready" && bundle && bundle.annotations === null) {
-    content = (
-      <StatePanel
-        icon={<DocIcon className="state-icon" />}
-        title="Structure loaded — no descriptions yet"
-        text="Browse files, classes and functions in the explorer. A documenting agent adds modules and descriptions."
-      >
-        <div className="state-actions">
-          <button
-            type="button"
-            className="button button-primary"
-            onClick={() => {
-              store.setHelpOpen(true);
-            }}
-          >
-            Show how to document
-          </button>
-        </div>
-      </StatePanel>
-    );
   } else if (phase === "ready" && model) {
-    const selected = selectedId !== null ? model.nodes.get(selectedId) : undefined;
+    const notice =
+      bundle?.annotations === null ? (
+        <div className="canvas-notice">
+          <StatePanel
+            icon={<DocIcon className="state-icon" />}
+            title="Structure loaded — no descriptions yet"
+            text="A documenting agent adds modules and descriptions."
+          >
+            <div className="state-actions">
+              <button
+                type="button"
+                className="button button-primary"
+                onClick={() => {
+                  store.setHelpOpen(true);
+                }}
+              >
+                Show how to document
+              </button>
+            </div>
+          </StatePanel>
+        </div>
+      ) : null;
     content = (
-      <div className="canvas-placeholder">
-        <strong>Map view</strong>
-        <span>
-          {selected ? `Selected: ${selected.name}` : "Select an element in the explorer."}
-        </span>
-      </div>
+      <>
+        <MapCanvas />
+        {notice}
+      </>
     );
   } else {
     content = (
