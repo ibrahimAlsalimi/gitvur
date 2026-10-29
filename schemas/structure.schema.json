@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Structure",
+  "type": "object",
+  "properties": {
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Edge"
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Node"
+      }
+    },
+    "unresolvedCalls": {
+      "description": "Calls with two or more in-repo candidate targets.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/UnresolvedCall"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "nodes",
+    "edges",
+    "unresolvedCalls"
+  ],
+  "$defs": {
+    "Edge": {
+      "description": "A directed relationship between two nodes.",
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "from": {
+          "type": "string"
+        },
+        "note": {
+          "description": "Free-text explanation; written by the agent for `ai` edges.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "to": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/EdgeType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to",
+        "type",
+        "provenance",
+        "evidence"
+      ]
+    },
+    "EdgeType": {
+      "description": "Kind of relationship. Declared in alphabetical order so the derived `Ord`\nmatches the order of the serialised strings.",
+      "type": "string",
+      "enum": [
+        "calls",
+        "depends_on",
+        "imports",
+        "references"
+      ]
+    },
+    "Evidence": {
+      "description": "A location that justifies an edge: the line where the relationship is visible.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Path relative to the repository root, `/`-separated.",
+          "type": "string"
+        },
+        "line": {
+          "description": "1-based line number.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "line"
+      ]
+    },
+    "Node": {
+      "type": "object",
+      "properties": {
+        "contentHash": {
+          "description": "`sha256:<64 lowercase hex>`. Absent only on the project node.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "parentId": {
+          "description": "Absent only on the project node.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "description": "Absent only on the project node.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceRange"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "$ref": "#/$defs/NodeType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "name"
+      ]
+    },
+    "NodeType": {
+      "description": "Node kinds the extractor produces. `module` nodes exist only in `annotations.json`.",
+      "type": "string",
+      "enum": [
+        "project",
+        "file",
+        "class",
+        "function"
+      ]
+    },
+    "Provenance": {
+      "description": "Who established a relationship. Order (used only as a sort tie-breaker):\n`syntactic`, `semantic`, `ai`.",
+      "type": "string",
+      "enum": [
+        "syntactic",
+        "semantic",
+        "ai"
+      ]
+    },
+    "SourceRange": {
+      "description": "The lines an element occupies in a file. Lines are 1-based and inclusive.",
+      "type": "object",
+      "properties": {
+        "endLine": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 1
+        },
+        "file": {
+          "description": "Path relative to the repository root, `/`-separated.",
+          "type": "string"
+        },
+        "startLine": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "startLine",
+        "endLine"
+      ]
+    },
+    "UnresolvedCall": {
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "description": "Every in-repo node the call could target; always two or more.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "from": {
+          "description": "The calling function.",
+          "type": "string"
+        },
+        "name": {
+          "description": "The called name as written at the call site (the last segment for `a.b.name()`).",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "name",
+        "evidence",
+        "candidates"
+      ]
+    }
+  }
+}

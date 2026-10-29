@@ -1,0 +1,253 @@
+{
+  "modules": [
+    {
+      "id": "module:catalogue",
+      "name": "Catalogue",
+      "description": "Item types that can be ordered: books and toys.",
+      "files": [
+        "file:shop/models.py"
+      ]
+    },
+    {
+      "id": "module:entry-point",
+      "name": "Entry point",
+      "description": "Command-line program that runs the sample order flow.",
+      "files": [
+        "file:app.py"
+      ]
+    },
+    {
+      "id": "module:orders",
+      "name": "Orders",
+      "description": "Order placement and receipts, connecting catalogue items to storage.",
+      "files": [
+        "file:shop/orders.py"
+      ]
+    },
+    {
+      "id": "module:storage",
+      "name": "Storage",
+      "description": "Where ordered items are kept: a JSON file store and an in-memory cache.",
+      "files": [
+        "file:shop/cache.py",
+        "file:shop/store.py"
+      ]
+    },
+    {
+      "id": "module:support",
+      "name": "Support",
+      "description": "Shared formatting helpers and the package definition.",
+      "files": [
+        "file:shop/__init__.py",
+        "file:shop/utils.py"
+      ]
+    }
+  ],
+  "descriptions": [
+    {
+      "id": "class:shop/cache.py:Cache",
+      "text": "In-memory item cache keyed by name; nothing is written to disk.",
+      "basedOnHash": "sha256:eb63b6edd8b2dc7dc85157642a03a8071ad559efbfcee77091c1b4a17956aae5"
+    },
+    {
+      "id": "class:shop/models.py:Book",
+      "text": "A catalogue book with a name and a price.",
+      "basedOnHash": "sha256:21071b702a709752e5ed5c374371e76eeb1a378f063b340bb2e80ec5032b93b8"
+    },
+    {
+      "id": "class:shop/models.py:Toy",
+      "text": "A catalogue toy with a name and a price, displayed with an upper-case label.",
+      "basedOnHash": "sha256:9b1455316344365bb9c2d13750fa5cfa0ec17df86c8b349700fa470ec0cf60c2"
+    },
+    {
+      "id": "class:shop/orders.py:OrderService",
+      "text": "Places orders: keeps cheap items in a cache and others in a file store, and produces receipt lines.",
+      "basedOnHash": "sha256:40e78b154ba29fa5a061633ecddb4f853adfba673ee2f2a5699321596141e306"
+    },
+    {
+      "id": "class:shop/store.py:Store",
+      "text": "Persistent item store: keeps saved items in memory and mirrors them to a JSON file at a given path.",
+      "basedOnHash": "sha256:e6f6919879e9c721092c71f1a62f1e9d61281aae31437016c103efa27e504e31"
+    },
+    {
+      "id": "file:app.py",
+      "text": "Command-line entry point: builds an order service and places two sample orders, printing each receipt.",
+      "basedOnHash": "sha256:d49d7a1da2306eaa82af6f224eff41e4362f644fc2115c4407a652bec5ec1dba"
+    },
+    {
+      "id": "file:shop/__init__.py",
+      "text": "Package marker for the shop package; its docstring names the parts: catalogue models, storage back-ends and order handling.",
+      "basedOnHash": "sha256:f97dfc09f51aeab28c4a0f7fc5a13bb28f39a3a563dd23fdf403ca978e001b67"
+    },
+    {
+      "id": "file:shop/cache.py",
+      "text": "In-memory cache with the same save interface as the file store, keyed by item name.",
+      "basedOnHash": "sha256:22bee02d863a14781b754288b40794320f67d7fb8b83d9f0d6c872a3b4bb80f9"
+    },
+    {
+      "id": "file:shop/models.py",
+      "text": "Catalogue item models: books and toys, each with a name and a price.",
+      "basedOnHash": "sha256:1581756568c5728c56632c89bc4b1246ca4e46461e5e0ed6e0edc6521425c0fc"
+    },
+    {
+      "id": "file:shop/orders.py",
+      "text": "Order handling: places orders, keeps each item in a cache or file store, and builds receipt lines.",
+      "basedOnHash": "sha256:1392d21cdda9f1804c86d1b532d7f98331408a3e0cad0ffb84f17ce60453b976"
+    },
+    {
+      "id": "file:shop/store.py",
+      "text": "File-backed store that keeps saved catalogue items and writes them to a JSON file.",
+      "basedOnHash": "sha256:94e1f01f628d9e01901b153ff8cbb47f12447b17be8e53d548700aba874a5cf4"
+    },
+    {
+      "id": "file:shop/utils.py",
+      "text": "Formatting helpers: currency-prefixed prices, hyphenated slugs and number parsing.",
+      "basedOnHash": "sha256:98ef4e9f129d5605482b24b45a9f015f6668f4139b9534d0596124e9dbf2bc04"
+    },
+    {
+      "id": "function:app.py:main",
+      "text": "Creates an OrderService (orders file from the first argument, default orders.json), places a sample book and toy, and prints their receipts.",
+      "basedOnHash": "sha256:c710cc7a9bd89e9e411b9b2257daf2408e255c8111224d5f197a33d59d322d1f"
+    },
+    {
+      "id": "function:shop/cache.py:Cache.__init__",
+      "text": "Starts with an empty name-to-item mapping.",
+      "basedOnHash": "sha256:b5856d18f0aa68a734d5508125ead4bd3279b185e289c3775eaa3d78bfddfe9a"
+    },
+    {
+      "id": "function:shop/cache.py:Cache.create",
+      "text": "Static factory that returns a new, empty cache.",
+      "basedOnHash": "sha256:81a3c8a557c4bde2695ddfa7b53ce1d2320c2877639fc52032caf77690a9c496"
+    },
+    {
+      "id": "function:shop/cache.py:Cache.lookup",
+      "text": "Returns the cached item for a name, or None if there is none.",
+      "basedOnHash": "sha256:33da0bf266bd1329410d6907b973c68512c52afb835643a07b3474acfb650c87"
+    },
+    {
+      "id": "function:shop/cache.py:Cache.save",
+      "text": "Stores an item under its name, replacing any previous item with that name.",
+      "basedOnHash": "sha256:f5e164857a4081a06b0f49d748dd1923f27abfade775f2215f975baebfb8f15c"
+    },
+    {
+      "id": "function:shop/models.py:Book.__init__",
+      "text": "Stores the book's name and price.",
+      "basedOnHash": "sha256:fde6fbfc0e36070dedacb5ecbc5fb8d37ae1ae43c584a3fd4e4ebf8a103e3a12"
+    },
+    {
+      "id": "function:shop/models.py:Book.describe",
+      "text": "Returns a display string for the book, e.g. 'Book: Dune'.",
+      "basedOnHash": "sha256:e29fd004edeb34a79df6c4597010aa37b03b6ebee81c430991994ecfc45b8669"
+    },
+    {
+      "id": "function:shop/models.py:Toy.__init__",
+      "text": "Stores the toy's name and price.",
+      "basedOnHash": "sha256:fde6fbfc0e36070dedacb5ecbc5fb8d37ae1ae43c584a3fd4e4ebf8a103e3a12"
+    },
+    {
+      "id": "function:shop/models.py:Toy.describe",
+      "text": "Returns a display string for the toy built from its upper-case label, e.g. 'Toy: KITE'.",
+      "basedOnHash": "sha256:4e2844c5014fed9e0a5b74ec8cea32b66a46a980f82aaa0fa48a42673300beb8"
+    },
+    {
+      "id": "function:shop/models.py:Toy.label",
+      "text": "Returns the toy's name in upper case.",
+      "basedOnHash": "sha256:fa926ec081bfb7a942b927db1c4cfcaf512e056dc266ab56bf9f1aadab6e74e3"
+    },
+    {
+      "id": "function:shop/orders.py:OrderService.__init__",
+      "text": "Creates a file store at the given path and an in-memory cache.",
+      "basedOnHash": "sha256:0b848274f42bf7732c2daedc88c1672724011d0d3964d810a1ef0831ef2ca518"
+    },
+    {
+      "id": "function:shop/orders.py:OrderService.place",
+      "text": "Records an item and returns its receipt line.",
+      "basedOnHash": "sha256:1cb1758ba0aa19c99cd35aefcc00110fb3c38a7ddf06500100aed836a99bf249"
+    },
+    {
+      "id": "function:shop/orders.py:OrderService.receipt",
+      "text": "Builds a receipt line from the item's slugified name and formatted price.",
+      "basedOnHash": "sha256:ec7cd8a5b3e022e649a9162c4732ecfb50b2b93ec49b0e548e1721c28962fbdb"
+    },
+    {
+      "id": "function:shop/orders.py:OrderService.remember",
+      "text": "Saves an item to the cache if it costs under 10, otherwise to the file store, which writes to disk.",
+      "basedOnHash": "sha256:0f792a3253db1a2b95cc9963509419cc911bcb696f4b7581d0f90c4ea59125ea"
+    },
+    {
+      "id": "function:shop/store.py:Store.__init__",
+      "text": "Remembers the target file path and starts with an empty item list.",
+      "basedOnHash": "sha256:8a65ce76dcca623617b16aac4ce07e5f42b72f0864980ac592d58272d8178612"
+    },
+    {
+      "id": "function:shop/store.py:Store.save",
+      "text": "Appends an item and rewrites the whole JSON file with every saved item's name and price (writes to disk).",
+      "basedOnHash": "sha256:b349cfecc1682a864aad60dd11965d8d571085c1efeb7cb3006e11cc180e3615"
+    },
+    {
+      "id": "function:shop/store.py:Store.save.encode",
+      "text": "Converts one item to a name/price dictionary for the JSON file.",
+      "basedOnHash": "sha256:c0a3b45c0111f35a30ed8866dfc48b8f04a163c1f3461bbfe18c44e2579083f0"
+    },
+    {
+      "id": "function:shop/utils.py:format_price",
+      "text": "Formats an amount with two decimals, prefixed by its currency symbol (EUR by default).",
+      "basedOnHash": "sha256:7e2e146ab23de570e0c5993fe68c2fdf8c27ef7ea2c4204ab71d880252250240"
+    },
+    {
+      "id": "function:shop/utils.py:format_price.with_symbol",
+      "text": "Prefixes text with the symbol of the enclosing call's currency, falling back to the currency code itself.",
+      "basedOnHash": "sha256:009f23cdea61b9b8043daff7d2b6379505fbfc23f1dbbbda027f6171cbbc0479"
+    },
+    {
+      "id": "function:shop/utils.py:slugify",
+      "text": "Turns text into a lower-case, hyphen-separated slug.",
+      "basedOnHash": "sha256:4d0bc17064e8d4f33990753aa1136c33ecaf692c480ba7058912a08800943534"
+    },
+    {
+      "id": "function:shop/utils.py:to_amount",
+      "text": "Parses a value as a float. Shadowed by the later to_amount definition, so it is never used at runtime.",
+      "basedOnHash": "sha256:e0a6e5777ac1497c268985893fc516ca7ac037c1fc97d43ca459d3c3e2e03d4a"
+    },
+    {
+      "id": "function:shop/utils.py:to_amount#2",
+      "text": "Parses a value as a float rounded to two decimals; this definition replaces the earlier one.",
+      "basedOnHash": "sha256:4728205be03418aa68f57da3dde8294d30c3c60739f4671c4da4fd0619c58855"
+    }
+  ],
+  "edges": [
+    {
+      "from": "function:app.py:main",
+      "to": "function:shop/orders.py:OrderService.place",
+      "type": "calls",
+      "provenance": "ai",
+      "evidence": {
+        "file": "app.py",
+        "line": 13
+      },
+      "note": "service is the OrderService created on line 11, so service.place is OrderService.place."
+    },
+    {
+      "from": "function:shop/orders.py:OrderService.remember",
+      "to": "function:shop/cache.py:Cache.save",
+      "type": "calls",
+      "provenance": "ai",
+      "evidence": {
+        "file": "shop/orders.py",
+        "line": 21
+      },
+      "note": "backend is self.cache when the price is under 10 (line 20); self.cache is a Cache (line 13)."
+    },
+    {
+      "from": "function:shop/orders.py:OrderService.remember",
+      "to": "function:shop/store.py:Store.save",
+      "type": "calls",
+      "provenance": "ai",
+      "evidence": {
+        "file": "shop/orders.py",
+        "line": 21
+      },
+      "note": "backend is self.store otherwise (line 20); self.store is a Store (line 12)."
+    }
+  ]
+}

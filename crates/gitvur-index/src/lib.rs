@@ -1,20 +1,125 @@
 //! Deterministic structure extractor: nodes, ranges, hashes, imports and calls.
 //!
-//! Phase 02 (Python) and Phase 03 (TypeScript) replaces the placeholder below with the real implementation.
+//! No AI, no network, and no code from the analysed repository is ever executed.
+//! Resolution rules are documented in this crate's `README.md`.
 
-/// Name of this crate.
-///
-/// Placeholder so the crate has a public item and a test until Phase 02 (Python) and Phase 03 (TypeScript).
-pub fn crate_name() -> &'static str {
-    env!("CARGO_PKG_NAME")
+use std::collections::BTreeSet;
+use std::fs;
+use std::path::{Path, PathBuf};
+
+use gitvur_schema::{ExtractorInfo, Manifest, SCHEMA_VERSION, Structure, UNCOMMITTED};
+
+pub mod git;
+pub mod lang;
+mod output;
+mod resolve;
+pub mod walk;
+
+use lang::LanguageBackend;
+use lang::python::Python;
+use lang::typescript::TypeScript;
+pub use output::write_output;
+use resolve::SourceFile;
+
+/// Inputs that are not read from the repository.
+#[derive(Debug, Clone)]
+pub struct IndexOptions {
+    /// Written to `manifest.generatedAt`. The CLI passes the current time; tests pass a
+    /// fixed value so the output is reproducible.
+    pub generated_at: String,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[derive(Debug, Clone)]
+pub struct IndexOutput {
+    pub manifest: Manifest,
+    pub structure: Structure,
+    /// Non-fatal problems (unparseable files, unreadable paths), in discovery order.
+    pub warnings: Vec<String>,
+}
 
-    #[test]
-    fn crate_name_matches_package() {
-        assert_eq!(crate_name(), "gitvur-index");
+#[derive(Debug, thiserror::Error)]
+pub enum IndexError {
+    #[error("cannot open repository {path}: {source}")]
+    Repo {
+        path: PathBuf,
+        source: std::io::Error,
+    },
+}
+
+/// Indexes the repository at `repo`.
+pub fn index(repo: &Path, opts: &IndexOptions) -> Result<IndexOutput, IndexError> {
+    let root = repo.canonicalize().map_err(|source| IndexError::Repo {
+        path: repo.to_path_buf(),
+        source,
+    })?;
+    let backends: Vec<Box<dyn LanguageBackend>> =
+        vec![Box::new(Python::new()), Box::new(TypeScript::new())];
+    let backend_for = |relpath: &str| {
+        backends
+            .iter()
+            .find(|b| b.handles(relpath))
+            .map(AsRef::as_ref)
+    };
+
+    let (relpaths, mut warnings) = walk::discover(&root, |p| backend_for(p).is_some());
+    let mut files = Vec::with_capacity(relpaths.len());
+    let mut languages = BTreeSet::new();
+    for relpath in relpaths {
+        let Some(backend) = backend_for(&relpath) else {
+            continue;
+        };
+        let bytes = match fs::read(root.join(&relpath)) {
+            Ok(bytes) => bytes,
+            Err(err) => {
+                warnings.push(format!("{relpath}: cannot read: {err}; skipped"));
+                continue;
+            }
+        };
+        let text = String::from_utf8(bytes).unwrap_or_else(|e| {
+            warnings.push(format!(
+                "{relpath}: not valid UTF-8; invalid bytes replaced"
+            ));
+            String::from_utf8_lossy(e.as_bytes()).into_owned()
+        });
+        // Parse normalised text so parser rows match the contract's line numbering.
+        let text = text.replace("\r\n", "\n").replace('\r', "\n");
+        let parsed = match backend.parse(&relpath, &text) {
+            Ok(parsed) => Some(parsed),
+            Err(err) => {
+                warnings.push(format!(
+                    "{relpath}: {err}; indexed as a file without children"
+                ));
+                None
+            }
+        };
+        languages.insert(backend.language());
+        files.push(SourceFile {
+            relpath,
+            text,
+            parsed,
+            backend,
+        });
     }
+
+    let project_name = root
+        .file_name()
+        .map_or_else(|| "root".to_owned(), |n| n.to_string_lossy().into_owned());
+    let structure = resolve::build_structure(&project_name, &files);
+    let mut manifest = Manifest {
+        schema_version: SCHEMA_VERSION.into(),
+        project_name,
+        commit_sha: git::head_short_sha(&root).unwrap_or_else(|| UNCOMMITTED.into()),
+        generated_at: opts.generated_at.clone(),
+        extractor: ExtractorInfo {
+            name: "gitvur-index".into(),
+            version: env!("CARGO_PKG_VERSION").into(),
+        },
+        languages: languages.into_iter().collect(),
+    };
+    manifest.canonicalize();
+    Ok(IndexOutput {
+        manifest,
+        structure,
+        warnings,
+    })
 }

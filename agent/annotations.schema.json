@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Annotations",
+  "type": "object",
+  "properties": {
+    "descriptions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Description"
+      }
+    },
+    "edges": {
+      "description": "Hidden relationships; every one must have `provenance: \"ai\"` and evidence.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Edge"
+      }
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Module"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "modules",
+    "descriptions",
+    "edges"
+  ],
+  "$defs": {
+    "Description": {
+      "type": "object",
+      "properties": {
+        "basedOnHash": {
+          "description": "The node's `contentHash` when the description was written.",
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "id": {
+          "description": "ID of the described node.",
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "text",
+        "basedOnHash"
+      ]
+    },
+    "Edge": {
+      "description": "A directed relationship between two nodes.",
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "from": {
+          "type": "string"
+        },
+        "note": {
+          "description": "Free-text explanation; written by the agent for `ai` edges.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "to": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/EdgeType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to",
+        "type",
+        "provenance",
+        "evidence"
+      ]
+    },
+    "EdgeType": {
+      "description": "Kind of relationship. Declared in alphabetical order so the derived `Ord`\nmatches the order of the serialised strings.",
+      "type": "string",
+      "enum": [
+        "calls",
+        "depends_on",
+        "imports",
+        "references"
+      ]
+    },
+    "Evidence": {
+      "description": "A location that justifies an edge: the line where the relationship is visible.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Path relative to the repository root, `/`-separated.",
+          "type": "string"
+        },
+        "line": {
+          "description": "1-based line number.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "line"
+      ]
+    },
+    "Module": {
+      "description": "A logical grouping of files, chosen by the agent.",
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "files": {
+          "description": "File node IDs (`file:<relpath>`).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "description": "`module:<slug>`, slug matching `[a-z0-9-]+`.",
+          "type": "string",
+          "pattern": "^module:[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "description",
+        "files"
+      ]
+    },
+    "Provenance": {
+      "description": "Who established a relationship. Order (used only as a sort tie-breaker):\n`syntactic`, `semantic`, `ai`.",
+      "type": "string",
+      "enum": [
+        "syntactic",
+        "semantic",
+        "ai"
+      ]
+    }
+  }
+}

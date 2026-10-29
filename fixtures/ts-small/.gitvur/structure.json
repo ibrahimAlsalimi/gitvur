@@ -1,0 +1,603 @@
+{
+  "nodes": [
+    {
+      "id": "class:src/auth/session.ts:Session",
+      "type": "class",
+      "name": "Session",
+      "parentId": "file:src/auth/session.ts",
+      "source": {
+        "file": "src/auth/session.ts",
+        "startLine": 1,
+        "endLine": 7
+      },
+      "contentHash": "sha256:f6898f1372bdbdcbe428823e408c4ea28bfa1655629540a547626b8d687819b8"
+    },
+    {
+      "id": "class:src/db/repo.ts:Repo",
+      "type": "class",
+      "name": "Repo",
+      "parentId": "file:src/db/repo.ts",
+      "source": {
+        "file": "src/db/repo.ts",
+        "startLine": 3,
+        "endLine": 17
+      },
+      "contentHash": "sha256:5f2bcc553bdb298d48f28fdfc591c5210151220edb7ab2f46db8864c9b7ab680"
+    },
+    {
+      "id": "class:src/views.ts:JsonView",
+      "type": "class",
+      "name": "JsonView",
+      "parentId": "file:src/views.ts",
+      "source": {
+        "file": "src/views.ts",
+        "startLine": 1,
+        "endLine": 5
+      },
+      "contentHash": "sha256:b61eed7e2f80619ac827d9b197d4e68325c5544bd283d21e17c513da28acefb1"
+    },
+    {
+      "id": "class:src/views.ts:TextView",
+      "type": "class",
+      "name": "TextView",
+      "parentId": "file:src/views.ts",
+      "source": {
+        "file": "src/views.ts",
+        "startLine": 7,
+        "endLine": 11
+      },
+      "contentHash": "sha256:28b1091f49505a009739d4b2b6be6aa4b26af27b88d569f6a3fa52e2c85a7ea0"
+    },
+    {
+      "id": "file:src/auth/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/auth/index.ts",
+        "startLine": 1,
+        "endLine": 2
+      },
+      "contentHash": "sha256:895c09a5b982e4a9f64879ba584dd2e17b2851abd02e0c9452713c4ec8c9cffb"
+    },
+    {
+      "id": "file:src/auth/login.ts",
+      "type": "file",
+      "name": "login.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/auth/login.ts",
+        "startLine": 1,
+        "endLine": 14
+      },
+      "contentHash": "sha256:2a96994cb21392e4cc44b97ee42b5d72e3806f8d614b11f44a1a7c919e6b35d1"
+    },
+    {
+      "id": "file:src/auth/session.ts",
+      "type": "file",
+      "name": "session.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/auth/session.ts",
+        "startLine": 1,
+        "endLine": 7
+      },
+      "contentHash": "sha256:f6898f1372bdbdcbe428823e408c4ea28bfa1655629540a547626b8d687819b8"
+    },
+    {
+      "id": "file:src/db/repo.ts",
+      "type": "file",
+      "name": "repo.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/db/repo.ts",
+        "startLine": 1,
+        "endLine": 17
+      },
+      "contentHash": "sha256:b6bb508e51e29ab2918a841008a4d16dd3ce1f737a49df8fa545df2cab51b1b3"
+    },
+    {
+      "id": "file:src/handlers.ts",
+      "type": "file",
+      "name": "handlers.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/handlers.ts",
+        "startLine": 1,
+        "endLine": 12
+      },
+      "contentHash": "sha256:df2feaa907a4912d0094c5789b9d44b67b407f90add95159ed857c08c0fcb6c9"
+    },
+    {
+      "id": "file:src/main.ts",
+      "type": "file",
+      "name": "main.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/main.ts",
+        "startLine": 1,
+        "endLine": 13
+      },
+      "contentHash": "sha256:294e8b3429ba118dccaf8e30a331e782f16c3ec4867d266ab6b6421e8fc3bf43"
+    },
+    {
+      "id": "file:src/types.d.ts",
+      "type": "file",
+      "name": "types.d.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/types.d.ts",
+        "startLine": 1,
+        "endLine": 10
+      },
+      "contentHash": "sha256:758ed24b5fbd2453acebfad9c1baa2d5e0d6f93b9aff37b91f2e377f96a93fd9"
+    },
+    {
+      "id": "file:src/util.ts",
+      "type": "file",
+      "name": "util.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/util.ts",
+        "startLine": 1,
+        "endLine": 7
+      },
+      "contentHash": "sha256:93a8c37ffdfdbc6c6947af3cb50da46e2884166ec87231c850b90f04db8b3961"
+    },
+    {
+      "id": "file:src/views.ts",
+      "type": "file",
+      "name": "views.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/views.ts",
+        "startLine": 1,
+        "endLine": 17
+      },
+      "contentHash": "sha256:021db784bd105d8b9290d30817279dcdcc854c366c4b0293a1366fdec62404be"
+    },
+    {
+      "id": "function:src/auth/login.ts:greet",
+      "type": "function",
+      "name": "greet",
+      "parentId": "file:src/auth/login.ts",
+      "source": {
+        "file": "src/auth/login.ts",
+        "startLine": 12,
+        "endLine": 14
+      },
+      "contentHash": "sha256:a99eda764d6f768bc3a41eb15bffee55f5805465699feb904ae3da197123eaf1"
+    },
+    {
+      "id": "function:src/auth/login.ts:login",
+      "type": "function",
+      "name": "login",
+      "parentId": "file:src/auth/login.ts",
+      "source": {
+        "file": "src/auth/login.ts",
+        "startLine": 4,
+        "endLine": 10
+      },
+      "contentHash": "sha256:7cbd9cfb231640727efc521c2eb3b8cf8dc5cecd2b27b0f1d3e974f68e1b7fc4"
+    },
+    {
+      "id": "function:src/auth/session.ts:Session.constructor",
+      "type": "function",
+      "name": "constructor",
+      "parentId": "class:src/auth/session.ts:Session",
+      "source": {
+        "file": "src/auth/session.ts",
+        "startLine": 2,
+        "endLine": 2
+      },
+      "contentHash": "sha256:b79d0540481aa061f189b40dec601bd4425a20a89cfc50fa09b1891599a6a887"
+    },
+    {
+      "id": "function:src/auth/session.ts:Session.describe",
+      "type": "function",
+      "name": "describe",
+      "parentId": "class:src/auth/session.ts:Session",
+      "source": {
+        "file": "src/auth/session.ts",
+        "startLine": 4,
+        "endLine": 6
+      },
+      "contentHash": "sha256:e284da9d069f4457ef7af15c3040ea60facf103a968d1f917c4f94b270a6b110"
+    },
+    {
+      "id": "function:src/db/repo.ts:Repo.constructor",
+      "type": "function",
+      "name": "constructor",
+      "parentId": "class:src/db/repo.ts:Repo",
+      "source": {
+        "file": "src/db/repo.ts",
+        "startLine": 6,
+        "endLine": 8
+      },
+      "contentHash": "sha256:0e961620bc7ef3647f6b8c86090a3157907d9f199c41157da38e9058c0e65330"
+    },
+    {
+      "id": "function:src/db/repo.ts:Repo.findById",
+      "type": "function",
+      "name": "findById",
+      "parentId": "class:src/db/repo.ts:Repo",
+      "source": {
+        "file": "src/db/repo.ts",
+        "startLine": 10,
+        "endLine": 12
+      },
+      "contentHash": "sha256:12815a895290b5c6a72fd1589c2bd95132deab11930c6fb022730b83dbe3d23f"
+    },
+    {
+      "id": "function:src/db/repo.ts:Repo.save",
+      "type": "function",
+      "name": "save",
+      "parentId": "class:src/db/repo.ts:Repo",
+      "source": {
+        "file": "src/db/repo.ts",
+        "startLine": 14,
+        "endLine": 16
+      },
+      "contentHash": "sha256:5637f29f9f5d3d1ced8b60cf176968bd54ada124743f5fde720e464ea4ca8e12"
+    },
+    {
+      "id": "function:src/handlers.ts:handler",
+      "type": "function",
+      "name": "handler",
+      "parentId": "file:src/handlers.ts",
+      "source": {
+        "file": "src/handlers.ts",
+        "startLine": 4,
+        "endLine": 7
+      },
+      "contentHash": "sha256:760541c1f94db3052727f331d6ff7ed6a5b52b7a0c6b29cdac5e07cd30b67baa"
+    },
+    {
+      "id": "function:src/handlers.ts:openSession",
+      "type": "function",
+      "name": "openSession",
+      "parentId": "file:src/handlers.ts",
+      "source": {
+        "file": "src/handlers.ts",
+        "startLine": 12,
+        "endLine": 12
+      },
+      "contentHash": "sha256:6e23d8eebdd06547f73b03b1290edcea8e94c15559277871841eb85b02671e56"
+    },
+    {
+      "id": "function:src/handlers.ts:pickView",
+      "type": "function",
+      "name": "pickView",
+      "parentId": "file:src/handlers.ts",
+      "source": {
+        "file": "src/handlers.ts",
+        "startLine": 9,
+        "endLine": 10
+      },
+      "contentHash": "sha256:e46e06e893528cea99b4f3ca1686eb2fb7f5d5b083218e86b43dbc72e09c72f2"
+    },
+    {
+      "id": "function:src/main.ts:main",
+      "type": "function",
+      "name": "main",
+      "parentId": "file:src/main.ts",
+      "source": {
+        "file": "src/main.ts",
+        "startLine": 6,
+        "endLine": 11
+      },
+      "contentHash": "sha256:249f896b7c0e0a5986b818c1d2a2536251006526bc395d41dc2c095cd69eab6c"
+    },
+    {
+      "id": "function:src/util.ts:capitalize",
+      "type": "function",
+      "name": "capitalize",
+      "parentId": "file:src/util.ts",
+      "source": {
+        "file": "src/util.ts",
+        "startLine": 1,
+        "endLine": 3
+      },
+      "contentHash": "sha256:5cc7becc893d924b2d60ddee595c0f59dc4949e125f19e2a6b2e1766926f6112"
+    },
+    {
+      "id": "function:src/util.ts:pad",
+      "type": "function",
+      "name": "pad",
+      "parentId": "file:src/util.ts",
+      "source": {
+        "file": "src/util.ts",
+        "startLine": 5,
+        "endLine": 7
+      },
+      "contentHash": "sha256:5a73ea9375275fb047eba026b64fa5ef2fe68b9e5961b1b05a20103429bc8388"
+    },
+    {
+      "id": "function:src/views.ts:JsonView.render",
+      "type": "function",
+      "name": "render",
+      "parentId": "class:src/views.ts:JsonView",
+      "source": {
+        "file": "src/views.ts",
+        "startLine": 2,
+        "endLine": 4
+      },
+      "contentHash": "sha256:3938ff29c4defa05f752b5cd475db6a8e3c818d0de372f2d12c76904cf28e454"
+    },
+    {
+      "id": "function:src/views.ts:TextView.render",
+      "type": "function",
+      "name": "render",
+      "parentId": "class:src/views.ts:TextView",
+      "source": {
+        "file": "src/views.ts",
+        "startLine": 8,
+        "endLine": 10
+      },
+      "contentHash": "sha256:5c4413ec6621074c52a16efb7fdf43b35429a802c2d3585c51ff72678624b6f2"
+    },
+    {
+      "id": "function:src/views.ts:format",
+      "type": "function",
+      "name": "format",
+      "parentId": "file:src/views.ts",
+      "source": {
+        "file": "src/views.ts",
+        "startLine": 15,
+        "endLine": 17
+      },
+      "contentHash": "sha256:ac4cdd77e0bf32affcd7b52c92951030fbaca974bbb21b1d9b4eac8430354370"
+    },
+    {
+      "id": "project:root",
+      "type": "project",
+      "name": "ts-small"
+    }
+  ],
+  "edges": [
+    {
+      "from": "file:src/auth/index.ts",
+      "to": "file:src/auth/login.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/auth/index.ts",
+        "line": 1
+      }
+    },
+    {
+      "from": "file:src/auth/index.ts",
+      "to": "file:src/auth/session.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/auth/index.ts",
+        "line": 2
+      }
+    },
+    {
+      "from": "file:src/auth/login.ts",
+      "to": "file:src/db/repo.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/auth/login.ts",
+        "line": 1
+      }
+    },
+    {
+      "from": "file:src/auth/login.ts",
+      "to": "file:src/util.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/auth/login.ts",
+        "line": 2
+      }
+    },
+    {
+      "from": "file:src/db/repo.ts",
+      "to": "file:src/types.d.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/db/repo.ts",
+        "line": 1
+      }
+    },
+    {
+      "from": "file:src/handlers.ts",
+      "to": "file:src/auth/index.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/handlers.ts",
+        "line": 2
+      }
+    },
+    {
+      "from": "file:src/handlers.ts",
+      "to": "file:src/views.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/handlers.ts",
+        "line": 1
+      }
+    },
+    {
+      "from": "file:src/main.ts",
+      "to": "file:src/auth/index.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.ts",
+        "line": 2
+      }
+    },
+    {
+      "from": "file:src/main.ts",
+      "to": "file:src/db/repo.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.ts",
+        "line": 1
+      }
+    },
+    {
+      "from": "file:src/main.ts",
+      "to": "file:src/handlers.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.ts",
+        "line": 3
+      }
+    },
+    {
+      "from": "file:src/main.ts",
+      "to": "file:src/util.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.ts",
+        "line": 4
+      }
+    },
+    {
+      "from": "function:src/auth/login.ts:greet",
+      "to": "function:src/util.ts:capitalize",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/auth/login.ts",
+        "line": 13
+      }
+    },
+    {
+      "from": "function:src/auth/login.ts:login",
+      "to": "function:src/auth/login.ts:greet",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/auth/login.ts",
+        "line": 9
+      }
+    },
+    {
+      "from": "function:src/db/repo.ts:Repo.constructor",
+      "to": "function:src/db/repo.ts:Repo.save",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/db/repo.ts",
+        "line": 7
+      }
+    },
+    {
+      "from": "function:src/handlers.ts:handler",
+      "to": "function:src/handlers.ts:pickView",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/handlers.ts",
+        "line": 5
+      }
+    },
+    {
+      "from": "function:src/handlers.ts:openSession",
+      "to": "class:src/auth/session.ts:Session",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/handlers.ts",
+        "line": 12
+      }
+    },
+    {
+      "from": "function:src/handlers.ts:pickView",
+      "to": "class:src/views.ts:JsonView",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/handlers.ts",
+        "line": 10
+      }
+    },
+    {
+      "from": "function:src/handlers.ts:pickView",
+      "to": "class:src/views.ts:TextView",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/handlers.ts",
+        "line": 10
+      }
+    },
+    {
+      "from": "function:src/main.ts:main",
+      "to": "class:src/db/repo.ts:Repo",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.ts",
+        "line": 7
+      }
+    },
+    {
+      "from": "function:src/main.ts:main",
+      "to": "function:src/auth/login.ts:login",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.ts",
+        "line": 8
+      }
+    },
+    {
+      "from": "function:src/main.ts:main",
+      "to": "function:src/handlers.ts:handler",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.ts",
+        "line": 10
+      }
+    },
+    {
+      "from": "function:src/main.ts:main",
+      "to": "function:src/util.ts:pad",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.ts",
+        "line": 9
+      }
+    },
+    {
+      "from": "function:src/views.ts:TextView.render",
+      "to": "function:src/views.ts:format",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/views.ts",
+        "line": 9
+      }
+    }
+  ],
+  "unresolvedCalls": [
+    {
+      "from": "function:src/handlers.ts:handler",
+      "name": "render",
+      "evidence": {
+        "file": "src/handlers.ts",
+        "line": 6
+      },
+      "candidates": [
+        "function:src/views.ts:JsonView.render",
+        "function:src/views.ts:TextView.render"
+      ]
+    }
+  ]
+}

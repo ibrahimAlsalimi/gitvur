@@ -1,0 +1,146 @@
+{
+  "schemaVersion": "0.2",
+  "commitSha": "83c8bd6",
+  "summary": {
+    "documented": 33,
+    "stale": 0,
+    "undocumented": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  "elements": [
+    {
+      "id": "class:src/auth/session.ts:Session",
+      "status": "documented"
+    },
+    {
+      "id": "class:src/db/repo.ts:Repo",
+      "status": "documented"
+    },
+    {
+      "id": "class:src/views.ts:JsonView",
+      "status": "documented"
+    },
+    {
+      "id": "class:src/views.ts:TextView",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/auth/index.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/auth/login.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/auth/session.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/db/repo.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/handlers.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/main.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/types.d.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/util.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/views.ts",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/auth/login.ts:greet",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/auth/login.ts:login",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/auth/session.ts:Session.constructor",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/auth/session.ts:Session.describe",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/db/repo.ts:Repo.constructor",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/db/repo.ts:Repo.findById",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/db/repo.ts:Repo.save",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/handlers.ts:handler",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/handlers.ts:openSession",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/handlers.ts:pickView",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/main.ts:main",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/util.ts:capitalize",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/util.ts:pad",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/views.ts:JsonView.render",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/views.ts:TextView.render",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/views.ts:format",
+      "status": "documented"
+    },
+    {
+      "id": "module:app",
+      "status": "documented"
+    },
+    {
+      "id": "module:auth",
+      "status": "documented"
+    },
+    {
+      "id": "module:data",
+      "status": "documented"
+    },
+    {
+      "id": "module:presentation",
+      "status": "documented"
+    }
+  ],
+  "issues": []
+}
