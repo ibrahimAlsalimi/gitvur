@@ -13,3 +13,7 @@
 .vscode/
 *.swp
 .DS_Store
+
+# Playwright output (screenshots in app/e2e/__screenshots__ are committed)
+/app/test-results/
+/app/playwright-report/

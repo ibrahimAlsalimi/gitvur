@@ -2,7 +2,134 @@
  * Design tokens: every colour, spacing, radius and type size used by the app.
  * Components must reference these variables, never raw values.
  *
- * Empty for now — Phase 07 fills it.
+ * Phase 06 placeholder palette (neutral greys + one accent, checked for AA contrast).
+ * Phase 07 replaces the colour values with the real visual language.
  */
 :root {
+  /* Type */
+  --font-ui: "Inter", system-ui, sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, monospace;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-md: 13px;
+  --text-lg: 15px;
+  --text-xl: 20px;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --line-tight: 1.25;
+  --line-normal: 1.5;
+
+  /* Space (4px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+  --border-width: 1px;
+  --focus-width: 2px;
+
+  /* Layout */
+  --topbar-height: 48px;
+  --statusbar-height: 28px;
+  --handle-width: 5px;
+  --tree-indent: 16px;
+  --tree-row-height: 26px;
+  --rail-width: 32px;
+
+  /* Motion */
+  --duration-fast: 120ms;
+
+  /* Colour: light */
+  color-scheme: light;
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #eef0f3;
+  --color-surface-hover: #e9ecf1;
+  --color-border: #d9dde3;
+  --color-border-strong: #b9c0ca;
+  --color-text: #1b1f24;
+  --color-text-muted: #59616c;
+  --color-text-faint: #747c87;
+  --color-accent: #2f5fd0;
+  --color-accent-hover: #264fae;
+  --color-accent-contrast: #ffffff;
+  --color-accent-soft: #e3eafb;
+  --color-selection: #dbe5fb;
+  --color-focus: #2f5fd0;
+  --color-status-documented: #1f8a4c;
+  --color-status-stale: #b86e00;
+  --color-status-undocumented: #8a929c;
+  --color-danger: #c4352f;
+  --color-danger-soft: #fbe7e6;
+  --color-warning-soft: #fdf1dc;
+  --shadow-panel: 0 1px 2px rgb(0 0 0 / 6%), 0 4px 16px rgb(0 0 0 / 6%);
+  --shadow-dialog: 0 12px 48px rgb(0 0 0 / 22%);
+  --color-backdrop: rgb(15 18 23 / 45%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-bg: #15181d;
+    --color-surface: #1c2026;
+    --color-surface-sunken: #12151a;
+    --color-surface-hover: #262b33;
+    --color-border: #2e343d;
+    --color-border-strong: #454d58;
+    --color-text: #e6e9ee;
+    --color-text-muted: #a3abb6;
+    --color-text-faint: #8a929d;
+    --color-accent: #7ea2f2;
+    --color-accent-hover: #9ab6f5;
+    --color-accent-contrast: #0f1726;
+    --color-accent-soft: #1f2b45;
+    --color-selection: #243656;
+    --color-focus: #7ea2f2;
+    --color-status-documented: #4cc27e;
+    --color-status-stale: #e0a43c;
+    --color-status-undocumented: #7c8590;
+    --color-danger: #f07a73;
+    --color-danger-soft: #3a1f1f;
+    --color-warning-soft: #3a2e18;
+    --shadow-panel: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 16px rgb(0 0 0 / 30%);
+    --shadow-dialog: 0 12px 48px rgb(0 0 0 / 55%);
+    --color-backdrop: rgb(0 0 0 / 60%);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #15181d;
+  --color-surface: #1c2026;
+  --color-surface-sunken: #12151a;
+  --color-surface-hover: #262b33;
+  --color-border: #2e343d;
+  --color-border-strong: #454d58;
+  --color-text: #e6e9ee;
+  --color-text-muted: #a3abb6;
+  --color-text-faint: #8a929d;
+  --color-accent: #7ea2f2;
+  --color-accent-hover: #9ab6f5;
+  --color-accent-contrast: #0f1726;
+  --color-accent-soft: #1f2b45;
+  --color-selection: #243656;
+  --color-focus: #7ea2f2;
+  --color-status-documented: #4cc27e;
+  --color-status-stale: #e0a43c;
+  --color-status-undocumented: #7c8590;
+  --color-danger: #f07a73;
+  --color-danger-soft: #3a1f1f;
+  --color-warning-soft: #3a2e18;
+  --shadow-panel: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 16px rgb(0 0 0 / 30%);
+  --shadow-dialog: 0 12px 48px rgb(0 0 0 / 55%);
+  --color-backdrop: rgb(0 0 0 / 60%);
 }

@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::common::{Edge, canonicalize_edges};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Annotations {
     pub modules: Vec<Module>,
@@ -17,6 +18,7 @@ pub struct Annotations {
 
 /// A logical grouping of files, chosen by the agent.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Module {
     /// `module:<slug>`, slug matching `[a-z0-9-]+`.
@@ -29,6 +31,7 @@ pub struct Module {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Description {
     /// ID of the described node.

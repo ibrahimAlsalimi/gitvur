@@ -6,7 +6,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "src-tauri"] },
+  { ignores: ["dist", "src-tauri", "src/generated", "test-results", "playwright-report"] },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   {
@@ -24,6 +24,8 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      // Numbers always stringify predictably; other types still need an explicit String().
+      "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
     },
   },
   {

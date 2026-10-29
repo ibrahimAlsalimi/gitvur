@@ -342,7 +342,87 @@ Followed `agent/codeDOC.md` literally on isolated copies of both fixtures, in a 
   - Fixture `commitSha` comes from the enclosing checkout, as intended (Phase 05 open question 2).
 - State: fmt, clippy (`-D warnings`) and 114 tests pass (1 ignored). Both fixtures still validate with 0 errors and 0 warnings, and their `report.json` is byte-unchanged.
 
+### 2026-10-30 — Phase 06 — App shell and data loading
+
+- Done:
+  - **Rust (`app/src-tauri`).** Split into a library plus a thin `main`.
+    - `bundle.rs`: `open_repository`, `read_source` and path resolution. Every repo-relative path is canonicalised and kept inside the root; `..`, absolute paths, backslashes and symlink escapes give `path-escape`.
+    - `commands.rs`: async Tauri commands using `spawn_blocking`: `open_repository`, `index_repository`, `validate_repository`, `read_source`, `recent_repositories`, plus `get_settings`/`set_settings`.
+    - `error.rs`: `AppError` serialises as `{ code, message, detail? }` with the six codes. Warning codes: `annotations-missing`, `annotations-invalid`, `report-missing`, `report-invalid`, `report-stale` (`report.json` older than `structure.json`).
+    - `settings.rs`: the recent list (10 entries) and UI settings in the app config dir, never in the repository.
+    - Only `index_repository` and `validate_repository` write, and only into `.gitvur/`, through `gitvur_validate::gitvur_dir`, which refuses a symlinked `.gitvur`. Nothing from the repository is executed.
+  - **TypeScript contract types generated with ts-rs** into `app/src/generated/contract.ts`: 31 types (21 contract, 10 app), with a drift test. `pnpm gen:types` regenerates them.
+  - **`buildModel(bundle)`** (`app/src/model/buildModel.ts`), pure:
+    - module nodes from annotations; files re-parented under their module, or under the synthetic `module:__unassigned` ("Unassigned files");
+    - descriptions, `docStatus`, `selfChanged`/`childChanged` from the report, or computed with the validator's rules when the report is missing or doesn't cover an element;
+    - edges from both layers tagged with `origin` and provenance; `unresolvedCalls` indexed by `from`;
+    - `childrenById`, `parentById`, `depthById`, per-module stats, incoming/outgoing indexes, totals.
+
+    `tree.ts`: visible explorer rows, the default expansion (modules open, so the tree is collapsed at file level) and ancestors.
+  - **Frame:**
+    - top bar: logo, project, commit chip, Index, Validate, and a `⋯` menu with Open, How to document, and Theme;
+    - explorer as an ARIA `tree` (`aria-expanded`/`level`/`posinset`/`setsize`, roving focus, arrows/Home/End/Enter);
+    - canvas placeholder, inspector (collapsible to a rail), status bar (files · nodes · edges · documented % · warnings · last indexed in UTC);
+    - drag- and keyboard-resizable panes (16px steps, Home/End), widths and theme saved to app config;
+    - zustand store with `selectedId`, `expandedIds`, `lens`, `theme`;
+    - placeholder tokens in `tokens.css` for light and dark; Inter and JetBrains Mono bundled locally.
+  - **The five states from Part D**, plus a generic error panel for `not-a-directory`, `path-escape`, `io` and `index-failed`. "Show how to document" opens a dialog with the bundled `agent/codeDOC.md`.
+  - **Mock mode:** `pnpm dev:mock` with `?fixture=py-small|ts-small` and `?state=no-gitvur|schema-invalid|structure-only|indexing`. All backend calls go through `app/src/api/`. The mock and its bundled fixtures are dead code in the production build (verified: no fixture strings or `mock://` in `dist/`).
+  - **Playwright:** `light`/`dark` projects at 1440×900; `pnpm e2e` writes 22 screenshots into `app/e2e/__screenshots__/{light,dark}/`.
+- Tests:
+  - **Rust (`gitvur-app`), 13 tests:**
+    - opening py-small/ts-small with correct counts;
+    - `not-a-directory`, `no-gitvur`, `schema-invalid` (bad structure, wrong schema version);
+    - the four optional-file warnings and `report-stale`;
+    - `read_source` context, clamping, the 2,000-line cap and language;
+    - **path escapes** (`../`, `shop/../`, absolute, `./`, backslash, empty) and **symlinks to outside** (a source file and `.gitvur`);
+    - settings and recent list;
+    - the bindings drift test.
+  - **Vitest, 15 tests:** re-parenting, nesting order, descriptions, edge indexes, module and total counts, the unassigned group, structure-only, **status without a report equals the validator's report for every element of both fixtures**, stale propagation, empty descriptions, tree rows and keyboard model, and the **10k-node benchmark: 9.2 ms** (best of 5; limit 100 ms).
+  - **Playwright, 12 tests × 2 themes:** every state; the py-small tree and counts; ts-small; tree keyboard navigation; keyboard resize plus persistence across reload plus collapse; no horizontal scroll at 1280×720 and 2560×1440; a narrow tiled 926×476 window.
+- Acceptance:
+  - [x] All five commands implemented; path-escape tests pass (`../`, absolute path, symlink to outside)
+  - [x] TS contract types generated (ts-rs), not hand-written
+  - [x] `buildModel` unit tests: re-parenting, unassigned group, status without report, 10k-node benchmark under 100 ms
+  - [x] Frame works from 1280×720 to 2560×1440 with no horizontal scroll, and down to 926×476
+  - [x] Every Part D state reachable and screenshotted in light and dark
+  - [~] **Opening `fixtures/py-small` in the real app.** `pnpm tauri dev` starts with no errors or warnings in the log, and a capture of the real window confirmed WebKitGTK renders the frame, fonts and dark theme correctly. I can't operate the native folder dialog, so the open itself was verified through the same Rust code path (`open_repository` on `fixtures/py-small`: 7 files, 35 nodes, 18 edges) and through mock mode with the same fixture files (tree with 12 rows, "7 files · 40 nodes · 21 edges · 100% documented"). **Please click Open repository → `fixtures/py-small` once to confirm.**
+  - [x] Screenshots reviewed; findings below
+  - `cargo fmt --check`, clippy (`-D warnings`), 127 Rust tests (1 ignored); `pnpm typecheck && pnpm lint && pnpm test && pnpm e2e` pass. `fixtures/` untouched.
+- **Screenshot review** (all 22 viewed, plus a capture of the real Tauri window). Fixed before finishing:
+  1. **Inspector pushed off-screen in narrow windows.** Found on the real app: Hyprland tiled it to 926×476, below the 1280 minimum, because tiling WMs ignore `minWidth`. The fixed side widths overflowed and hid the collapse button. Side panes now give way (`min(chosen, 28vw / 34vw)`, canvas `minmax(0, 1fr)`); the chosen widths are unchanged from 1280px up. New e2e test at 926×476.
+  2. **Heavy dividers:** 5px solid grey resize handles looked like bars. They are now a 1px line with the same 5px invisible grab area, turning 2px accent on hover or focus.
+  3. **Lone last words in state titles** ("…indexed / yet", "…descriptions / yet"): `text-wrap: balance` on titles and text.
+  4. **Off-centre icons:** the `⋯` icon sat above centre because SVGs had no explicit size and aligned to the text baseline. Button SVGs are now a fixed 16px block.
+  5. **The panel-collapse icon's chevron touched the frame**; the icon was redrawn.
+  6. **Grammar:** a module's file-count label read "1 files".
+  - Checked and fine: contrast of muted text, status dots, warning chips, and the danger icon in both themes; title and button balance in state panels; no clipping at 1280×720 or 2560×1440.
+  - Not fixed (parked): the help dialog shows `codeDOC.md` as raw Markdown (`**`, backticks). Readable, but unpolished; Phase 11 polish.
+- **Bugs found by the tests and fixed:**
+  1. Settings loaded at startup overwrote a pane resize made before they arrived.
+  2. React StrictMode ran `init()` twice in development, reloading the defaults over a change; `init` now runs once.
+  3. A 300 ms debounced settings save was lost on a quick reload or close. Discrete changes (collapse, theme) now save immediately, and a pending drag save is flushed on `pagehide`.
+- Dependencies added:
+  - **Rust:**
+    - `tauri-plugin-dialog` 2.8.4 (named in the prompt);
+    - `ts-rs` 12.0.1 (named; chosen over specta because the app needs plain `.ts` declarations rather than specta's command-binding layer, and ts-rs reads the existing serde attributes, so the schema needed only feature-gated derives);
+    - `serde` 1.0.229, `serde_json` 1.0.154 (command types, reading `.gitvur/`);
+    - `thiserror` 2.0.21 (`AppError`);
+    - dev `tempfile` 3.27.0.
+  - **npm:** `@tauri-apps/plugin-dialog` 2.8.4, `@fontsource/inter` 5.3.0 and `@fontsource/jetbrains-mono` 5.3.0 (all named); dev `@playwright/test` 1.64.1 (named). Playwright's Chromium headless shell was installed into `~/.cache/ms-playwright`.
+- Deviations:
+  - **`gitvur-schema` gained a `ts` cargo feature:** `#[cfg_attr(feature = "ts", derive(ts_rs::TS))]` plus `ts(optional)` on fields omitted when empty. These are derive attributes only, no logic change, enabled only by the app. JSON output and schemas are unchanged (drift test passes).
+  - Two extra commands, `get_settings`/`set_settings`, so pane widths and theme persist in app config as the prompt asks. In mock mode the same API uses `localStorage`.
+  - `annotations.json`/`report.json` that fail to parse are **warnings** (with `null`) rather than errors, so the structure still opens. Only `manifest.json`/`structure.json` problems are `schema-invalid` errors, which show the "Re-index" state.
+  - `lens` exists in the store with `"structure" | "coverage"`; the lenses themselves are Phase 07/09.
+  - ESLint `restrict-template-expressions` now allows numbers (other types still need `String()`).
+  - `pnpm e2e` is not in CI: the prompt's CI step list predates it, and it needs a Playwright browser. It runs locally in about 6 s.
+- Open questions:
+  1. Add `pnpm e2e` to CI (install the Chromium headless shell, upload screenshots as an artifact)? About 1 minute of extra CI time.
+
 ## Parking lot
+
+- Help dialog: render `codeDOC.md` as formatted Markdown instead of raw text (Phase 11).
 
 - `gitvur-index` `resolve.rs`: precompute a `(file, parent, name) → defs` map instead of scanning all definitions in `children()` per call site (review finding, performance only).
 
