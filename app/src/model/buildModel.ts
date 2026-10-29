@@ -25,6 +25,8 @@ export interface ModelNode {
   source?: SourceRange;
   contentHash?: string;
   description?: string;
+  /** `basedOnHash` of the description shown (to tell which version it describes). */
+  descriptionHash?: string;
   docStatus: DocStatus;
   /** Only set when `docStatus` is `stale`. */
   selfChanged?: boolean;
@@ -148,7 +150,10 @@ export function buildModel(bundle: RepoBundle): Model {
     };
     if (n.source) node.source = n.source;
     if (n.contentHash) node.contentHash = n.contentHash;
-    if (chosen) node.description = chosen.text;
+    if (chosen) {
+      node.description = chosen.text;
+      node.descriptionHash = chosen.basedOnHash;
+    }
     nodes.set(n.id, node);
     if (n.parentId) structuralParent.set(n.id, n.parentId);
   }

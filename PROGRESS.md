@@ -498,6 +498,18 @@ Followed `agent/codeDOC.md` literally on isolated copies of both fixtures, in a 
   - **Dev-only `window.__gitvurMap`** (setViewport, focusNodes, getZoom) for screenshots at exact zoom levels; it is not present in production builds.
   - **The Lens switch lists only "Structure"**, as the prompt says; the store's `Lens` type also has `coverage`, for Phase 09.
 
+### 2026-10-30 — Phase 08 — Inspector and relationships (IN PROGRESS, stopped at usage limit)
+
+- Done (committed as a checkpoint; all checks pass):
+  - `app/src/model/aggregateEdges.ts`: pure edge aggregation to the nearest visible ancestor (rows → collapsed file → module at low LOD), grouped by (source, target, type, provenance), 1-hop and 2-hop, self-loops dropped; 7 unit tests.
+  - Canvas edges (`app/src/canvas/edges/`): bezier relation edge between facing sides with parallel offsets; provenance strokes (syntactic 1.5 solid, semantic 2.5 solid, AI 1.5 dashed 6 4 with open arrow and "AI" pill, ambiguous 1 dashed 2 3, no marker); count badge ("3 calls") whose hover lists the underlying pairs; edge type beside the line on hover; click opens evidence (store). Selection draws 1-hop or 2-hop (toolbar toggle; 2nd hop at 50%), hover draws a lighter preview, everything outside the neighbourhood is dimmed to `--gv-opacity-dimmed`, Esc clears. Collapsible legend with real stroke samples.
+  - Store: `hops`, `evidence`, `ambiguousOpen`, selection history (`back`/`forward`), `navigateTo` (the canvas centres the node, zooming to 0.9 below 0.6, instant with reduced motion). `ModelNode.descriptionHash`.
+  - Inspector building blocks, **not yet wired into the UI**: `inspector/highlighter.ts` (Shiki core with the JS regex engine — no WASM, so the CSP stays strict), `sourceCache.ts` (cache by file + contentHash, failures not cached), `CodeViewer.tsx` (real line numbers, muted context, highlight line, missing/out-of-range warning with Re-index, "Open full" cap).
+- Left to do:
+  - Inspector component: breadcrumb, header with copy path, description / empty state with "AI-written · based on version …", relationship lists (Calls, Called by, Imports, Imported by, References) with evidence buttons, "Possible targets" toggle, module and file variants; replace `components/Inspector.tsx`; evidence-mode header with Back; history buttons and Alt+←/→.
+  - CSS for the inspector and code viewer (Shiki `--shiki-light`/`--shiki-dark` by theme, `--gv-bg-sunken` background, 60% height cap).
+  - Mock `?missing=1` for the missing-source screenshot; Playwright tests and the six screenshot sets; the review checklist answers; PROGRESS entry; commit and push.
+
 ## Parking lot
 
 - Help dialog: render `codeDOC.md` as formatted Markdown instead of raw text (Phase 11).

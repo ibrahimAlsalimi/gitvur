@@ -8,6 +8,7 @@ const FIT = { padding: "48px", duration: 180 } as const;
 export function Toolbar() {
   const rf = useReactFlow();
   const lens = useAppStore((s) => s.lens);
+  const hops = useAppStore((s) => s.hops);
   const store = useAppStore.getState();
   return (
     <Panel position="top-left" className="gv-toolbar" aria-label="Map controls">
@@ -54,6 +55,22 @@ export function Toolbar() {
       >
         Collapse all
       </button>
+      <span className="gv-tool-divider" aria-hidden="true" />
+      <div className="gv-segmented" role="group" aria-label="Relationship depth">
+        {([1, 2] as const).map((h) => (
+          <button
+            key={h}
+            type="button"
+            className="gv-tool"
+            aria-pressed={hops === h}
+            onClick={() => {
+              store.setHops(h);
+            }}
+          >
+            {h}-hop
+          </button>
+        ))}
+      </div>
       <span className="gv-tool-divider" aria-hidden="true" />
       <label className="gv-tool-select">
         <span className="visually-hidden">Lens</span>

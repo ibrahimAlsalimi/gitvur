@@ -151,14 +151,27 @@ export function buildFlow(
 }
 
 /**
- * Marks the selected node. Nodes whose selection state doesn't change keep their object
- * identity, so React Flow re-renders only the old and new selection.
+ * Marks the selected node and dims nodes outside `focus` (when there is a selection).
+ * Nodes whose state doesn't change keep their object identity, so React Flow re-renders
+ * only what changed.
  */
-export function applySelection(nodes: MapNode[], selectedId: string | null): MapNode[] {
+export function applyFocus(
+  nodes: MapNode[],
+  selectedId: string | null,
+  focus: ReadonlySet<string> | null,
+): MapNode[] {
   return nodes.map((n) => {
     const selected = n.id === selectedId;
-    return Boolean(n.selected) === selected ? n : { ...n, selected };
+    const className = focus !== null && !focus.has(n.id) ? "gv-dimmed" : "";
+    return Boolean(n.selected) === selected && (n.className ?? "") === className
+      ? n
+      : { ...n, selected, className };
   });
+}
+
+/** Marks the selected node only (no dimming). */
+export function applySelection(nodes: MapNode[], selectedId: string | null): MapNode[] {
+  return applyFocus(nodes, selectedId, null);
 }
 
 function sameData(a: Record<string, unknown>, b: Record<string, unknown>): boolean {

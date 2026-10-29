@@ -1,12 +1,26 @@
-import { type Node, ReactFlow, ReactFlowProvider, useReactFlow } from "@xyflow/react";
+import {
+  type Edge,
+  type Node,
+  ReactFlow,
+  ReactFlowProvider,
+  useReactFlow,
+  useStore,
+} from "@xyflow/react";
 import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { buildLayoutRequest, moduleEdges } from "../layout/fromModel";
 import { runLayout } from "../layout/runLayout";
+import { ancestors } from "../model/tree";
+import { subtree, visibleAncestor } from "../model/aggregateEdges";
 import type { LayoutResult } from "../layout/types";
 import { useAppStore } from "../store/useAppStore";
 import { ConnectorEdge } from "./ConnectorEdge";
-import { applySelection, buildFlow, reuseNodes } from "./buildFlow";
+import { applyFocus, buildFlow, reuseNodes } from "./buildFlow";
+import { EdgeMarkers } from "./edges/Markers";
+import { Legend } from "./edges/Legend";
+import { RelationEdge } from "./edges/RelationEdge";
+import { relationEdges } from "./edges/relationEdges";
+import { lodSelector } from "./lod";
 import { Minimap } from "./Minimap";
 import { minimapRects } from "./minimapRects";
 import { nodeTypes } from "./nodeTypes";
@@ -15,7 +29,9 @@ import { usePerf } from "./perf";
 import { Toolbar } from "./Toolbar";
 import type { MapEdge, MapNode } from "./types";
 
-const edgeTypes = { connector: ConnectorEdge };
+const edgeTypes = { connector: ConnectorEdge, relation: RelationEdge };
+const reducedMotion = () =>
+  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const proOptions = { hideAttribution: true };
 const FIT_PADDING = "48px";
 const MIN_FIT_ZOOM = 0.2;
@@ -44,6 +60,12 @@ function MapInner() {
   const bundle = useAppStore((s) => s.bundle);
   const expandedIds = useAppStore((s) => s.expandedIds);
   const selectedId = useAppStore((s) => s.selectedId);
+  const hops = useAppStore((s) => s.hops);
+  const ambiguousOpen = useAppStore((s) => s.ambiguousOpen);
+  const navigation = useAppStore((s) => s.navigation);
+  const lod = useStore(lodSelector);
+  const [hoverId, setHoverId] = useState<string | null>(null);
+  const handledNavigation = useRef(0);
   const rf = useReactFlow();
   const [flow, setFlow] = useState<Flow | null>(null);
   const [animate, setAnimate] = useState(false);
@@ -144,16 +166,76 @@ function MapInner() {
     };
   }, [rf]);
 
-  const nodes = useMemo(
-    () => (flow ? applySelection(flow.nodes, selectedId) : []),
-    [flow, selectedId],
+  const visibleOf = useMemo(
+    () => (model ? visibleAncestor(model, expandedIds, lod) : () => undefined),
+    [model, expandedIds, lod],
   );
+  const relations = useMemo(
+    () =>
+      model
+        ? relationEdges({ model, visibleOf, selectedId, hoverId, hops, ambiguousOpen })
+        : { edges: [], endpoints: new Set<string>() },
+    [model, visibleOf, selectedId, hoverId, hops, ambiguousOpen],
+  );
+  // Dimming: everything but the selection (with its subtree), its ancestors, and its
+  // relationship endpoints.
+  const focus = useMemo(() => {
+    if (!model || selectedId === null || !model.nodes.has(selectedId)) return null;
+    const keep = new Set<string>([
+      model.rootId,
+      ...subtree(model, selectedId),
+      ...ancestors(model, selectedId),
+    ]);
+    for (const id of relations.endpoints) keep.add(id);
+    return keep;
+  }, [model, selectedId, relations.endpoints]);
+  const nodes = useMemo(
+    () => (flow ? applyFocus(flow.nodes, selectedId, focus) : []),
+    [flow, selectedId, focus],
+  );
+  const edges = useMemo<Edge[]>(
+    () => [...(flow?.edges ?? []), ...relations.edges],
+    [flow, relations.edges],
+  );
+
+  // Fly to a node requested by the inspector (relationship lists, breadcrumb, history).
+  useEffect(() => {
+    if (!navigation || handledNavigation.current === navigation.seq || !flow) return;
+    const node = rf.getInternalNode(navigation.id);
+    if (!node) return; // not laid out yet; retried when `flow` changes
+    handledNavigation.current = navigation.seq;
+    const { x, y } = node.internals.positionAbsolute;
+    const width = node.measured.width ?? node.width ?? 0;
+    const height = node.measured.height ?? node.height ?? 0;
+    const zoom = rf.getZoom() < 0.6 ? 0.9 : rf.getZoom();
+    void rf.setCenter(x + width / 2, y + height / 2, { zoom, duration: reducedMotion() ? 0 : 180 });
+  }, [navigation, flow, rf]);
+
+  // Esc clears the selection (outside text fields and dialogs).
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, dialog")) return;
+      useAppStore.getState().select(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
+  }, []);
 
   const miniRects = useMemo(() => (flow ? minimapRects(flow.nodes) : []), [flow]);
 
   const onNodeClick = useCallback((_: unknown, node: Node) => {
     const store = useAppStore.getState();
     store.select(node.type === "project" ? null : node.id);
+  }, []);
+  const onNodeEnter = useCallback((_: unknown, node: Node) => {
+    setHoverId(node.type === "project" ? null : node.id);
+  }, []);
+  const onNodeLeave = useCallback(() => {
+    setHoverId(null);
   }, []);
   const onPaneClick = useCallback(() => {
     useAppStore.getState().select(null);
@@ -175,14 +257,22 @@ function MapInner() {
   };
 
   return (
-    <div className="gv-map" data-animate={animate} onKeyDown={onKeyDown}>
-      <ReactFlow<MapNode, MapEdge>
+    <div
+      className="gv-map"
+      data-animate={animate}
+      data-focus={focus !== null}
+      onKeyDown={onKeyDown}
+    >
+      <EdgeMarkers />
+      <ReactFlow<MapNode>
         nodes={nodes}
-        edges={flow?.edges ?? []}
+        edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
+        onNodeMouseEnter={onNodeEnter}
+        onNodeMouseLeave={onNodeLeave}
         onlyRenderVisibleElements
         nodesDraggable={false}
         nodesConnectable={false}
@@ -195,6 +285,7 @@ function MapInner() {
         aria-label="Repository map"
       >
         <Toolbar />
+        <Legend />
         {flow && (
           <Minimap rects={miniRects} width={flow.layout.width} height={flow.layout.height} />
         )}
