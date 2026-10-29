@@ -1,0 +1,8 @@
+/*
+ * Design tokens: every colour, spacing, radius and type size used by the app.
+ * Components must reference these variables, never raw values.
+ *
+ * Empty for now — Phase 07 fills it.
+ */
+:root {
+}

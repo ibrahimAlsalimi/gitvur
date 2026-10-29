@@ -1,0 +1,10 @@
+[package]
+name = "gitvur-schema"
+description = "Gitvur data contract v0.2: Rust types and JSON Schema."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true

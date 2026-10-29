@@ -1,0 +1,15 @@
+# Rust
+/target/
+
+# Frontend
+/app/node_modules/
+/app/dist/
+
+# Tauri generated schemas (regenerated on every build)
+/app/src-tauri/gen/
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store

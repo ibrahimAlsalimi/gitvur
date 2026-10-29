@@ -1,0 +1,21 @@
+[package]
+name = "gitvur-app"
+description = "Gitvur desktop viewer (Tauri 2)."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+# Not used yet; wired in now so later phases only add code, not manifest churn.
+gitvur-schema.workspace = true
+gitvur-index.workspace = true
+gitvur-validate.workspace = true
+gitvur-diff.workspace = true
+
+[lints]
+workspace = true
