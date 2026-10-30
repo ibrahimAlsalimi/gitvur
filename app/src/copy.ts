@@ -9,6 +9,29 @@ import type { ErrorCode } from "./generated/contract";
 const plural = (n: number, one: string, many = `${one}s`) => `${String(n)} ${n === 1 ? one : many}`;
 
 export const copy = {
+  docs: {
+    empty: "No Markdown files in this repository.",
+    truncated: "This document is larger than 2 MB; showing the beginning.",
+    missing: "This document no longer exists.",
+    failed: "Couldn't read this document.",
+    listFailed: "Couldn't list the repository's documents.",
+    assetBlocked: "Image outside the repository was not loaded.",
+    remoteBlocked: "Remote images are blocked.",
+    loadRemote: "Load remote images",
+    diagramFailed: "Diagram couldn't be rendered",
+    externalPrompt: "Open in your browser?",
+    externalFailed: "Couldn't open this link.",
+    unsupported: "Link not supported",
+    indexing: "Indexing docs…",
+    loading: "Loading document…",
+    refresh: "Refresh list",
+    mentioned: "Mentioned in docs",
+    outline: "On this page",
+    map: "Show Map tab",
+    tab: "Show Docs tab",
+    indexFailed: "Some documents couldn't be indexed.",
+    indexLimit: "Searching the first 500 documents.",
+  },
   app: {
     title: (project?: string) => (project ? `Gitvur — ${project}` : "Gitvur"),
   },
@@ -178,6 +201,7 @@ export const copy = {
 
 /** The keyboard map, listed exactly as the shortcuts sheet shows it. */
 export const SHORTCUTS: readonly { keys: string; action: string }[] = [
+  { keys: "Ctrl/Cmd+1 / 2", action: "Map / Docs tab" },
   { keys: "Ctrl/Cmd+K", action: "Search / palette" },
   { keys: "Ctrl/Cmd+O", action: "Open repository" },
   { keys: "Arrow keys on canvas", action: "Move focus: ↑ parent, ↓ first child, ← → siblings" },

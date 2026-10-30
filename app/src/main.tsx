@@ -7,6 +7,7 @@ import "./styles/tokens.css";
 import "./styles/app.css";
 import "./styles/canvas.css";
 import "./styles/inspector.css";
+import "./docs/docs.css";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

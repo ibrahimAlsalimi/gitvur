@@ -48,6 +48,13 @@ export const PANE_LIMITS = {
 } as const;
 
 interface AppState {
+  activeTab: "map" | "docs";
+  docPath: string | null;
+  docScroll: number;
+  docTarget: { anchor: string; nodeId?: string; seq: number } | null;
+  setActiveTab: (tab: "map" | "docs") => void;
+  openDoc: (path: string, anchor?: string, nodeId?: string) => void;
+  setDocScroll: (scroll: number) => void;
   phase: Phase;
   /** The repository being shown or last attempted. */
   path: string | null;
@@ -195,6 +202,9 @@ export const useAppStore = create<AppState>()((set, get) => {
         sameRepo && previous.selectedId !== null && model.nodes.has(previous.selectedId)
           ? previous.selectedId
           : null;
+      // Restore before exposing the model so an early interaction cannot be overwritten.
+      const api = await getApi();
+      const savedView = sameRepo ? null : await api.getViewState(bundle.root).catch(() => null);
       set({
         phase: "ready",
         bundle,
@@ -207,6 +217,10 @@ export const useAppStore = create<AppState>()((set, get) => {
         ...(sameRepo
           ? {}
           : {
+              activeTab: "map" as const,
+              docPath: null,
+              docScroll: 0,
+              docTarget: null,
               lens: "structure" as const,
               collapsedIds: new Set<string>(),
               viewport: null,
@@ -224,11 +238,7 @@ export const useAppStore = create<AppState>()((set, get) => {
               navigation: null,
             }),
       });
-      const api = await getApi();
-      if (!sameRepo) {
-        const view = await api.getViewState(bundle.root).catch(() => null);
-        if (view && get().bundle === bundle) applyView(view, model);
-      }
+      if (savedView) applyView(savedView, model);
       set({ recent: await api.recentRepositories().catch(() => get().recent) });
     } catch (err) {
       const error = toAppError(err);
@@ -248,7 +258,13 @@ export const useAppStore = create<AppState>()((set, get) => {
     const selected =
       view.selectedId !== undefined && exists(view.selectedId) ? view.selectedId : null;
     set({
-      expandedIds: new Set(view.expandedIds.filter(exists)),
+      activeTab: view.activeTab === "docs" ? "docs" : "map",
+      docPath: view.docPath ?? null,
+      docScroll: Math.max(0, view.docScroll ?? 0),
+      expandedIds: new Set([
+        ...view.expandedIds.filter(exists),
+        ...(selected ? ancestors(model, selected) : []),
+      ]),
       collapsedIds: new Set(
         view.collapsedIds.filter((id) => model.nodes.get(id)?.kind === "class"),
       ),
@@ -296,6 +312,24 @@ export const useAppStore = create<AppState>()((set, get) => {
   };
 
   return {
+    activeTab: "map",
+    docPath: null,
+    docScroll: 0,
+    docTarget: null,
+    setActiveTab(activeTab) {
+      set({ activeTab });
+    },
+    openDoc(docPath, anchor = "", nodeId) {
+      set({
+        activeTab: "docs",
+        docPath,
+        docScroll: 0,
+        docTarget: { anchor, ...(nodeId ? { nodeId } : {}), seq: (get().docTarget?.seq ?? 0) + 1 },
+      });
+    },
+    setDocScroll(docScroll) {
+      set({ docScroll });
+    },
     phase: "idle",
     path: null,
     bundle: null,
@@ -576,6 +610,10 @@ export const useAppStore = create<AppState>()((set, get) => {
       const model = get().model;
       if (!model) return;
       set({
+        activeTab: "map",
+        docPath: null,
+        docScroll: 0,
+        docTarget: null,
         expandedIds: defaultExpanded(model),
         collapsedIds: new Set(),
         selectedId: null,
@@ -663,6 +701,9 @@ function currentView(s: AppState): ViewState {
     // In the Changes lens, the repository's own expansion (not the diff's).
     expandedIds: [...(s.base?.expandedIds ?? s.expandedIds)].sort(),
     collapsedIds: [...s.collapsedIds].sort(),
+    activeTab: s.activeTab,
+    ...(s.docPath ? { docPath: s.docPath } : {}),
+    docScroll: s.docScroll,
     lens: s.lens,
     explorerWidth: s.settings.explorerWidth,
     inspectorWidth: s.settings.inspectorWidth,
@@ -679,6 +720,9 @@ function currentView(s: AppState): ViewState {
 useAppStore.subscribe((s, prev) => {
   if (s.phase !== "ready" || !s.bundle || s.bundle !== prev.bundle) return;
   const changed =
+    s.activeTab !== prev.activeTab ||
+    s.docPath !== prev.docPath ||
+    s.docScroll !== prev.docScroll ||
     s.expandedIds !== prev.expandedIds ||
     s.collapsedIds !== prev.collapsedIds ||
     s.selectedId !== prev.selectedId ||
@@ -697,3 +741,18 @@ useAppStore.subscribe((s, prev) => {
     void getApi().then((api) => api.setViewState(root, currentView(now)).catch(() => undefined));
   }, VIEW_SAVE_MS);
 });
+
+// Flush the last reading position and tab alongside camera state when the window closes.
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", () => {
+    if (viewTimer === undefined) return;
+    clearTimeout(viewTimer);
+    viewTimer = undefined;
+    const state = useAppStore.getState();
+    if (state.phase === "ready" && state.bundle) {
+      const root = state.bundle.root;
+      const view = currentView(state);
+      void getApi().then((api) => api.setViewState(root, view).catch(() => undefined));
+    }
+  });
+}

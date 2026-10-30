@@ -762,9 +762,58 @@ Two sessions: the first stopped at the usage limit after a WIP checkpoint (`c8b8
 - Validation: `cargo fmt --all --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, and `pnpm typecheck && pnpm lint && pnpm test && pnpm check:contrast` pass. Frontend: 61 tests; contrast: 243 checks. No product code changed in this session.
 - Open work: finish Phase 12 evaluation and human ratings; future feature prompts are not evidence that those features exist.
 
+### 2026-10-30 — Phase 13 — Docs tab and safe repository Markdown reader
+
+- Done:
+  - Accessible Map / Docs tabs with arrow-key navigation, Ctrl/Cmd+1 / 2, palette commands and per-repository persistence. The map stays mounted, so its camera, selection and lens survive tab switches. The last document and reading position persist in the existing app-data view file, with a pagehide flush.
+  - `gitvur_index::discover_docs` reuses the existing walker without changing source extraction, the v0.2 contract, validator or map layout. Root README first, then `docs/` / `doc/`, then remaining paths; `.md` and `.markdown`, title from the first 4 KB and file metadata.
+  - Generated command bindings for read-only `list_docs`, `read_doc` (2 MB) and `read_doc_asset` (5 MB). Canonical paths stay inside the repository; traversal, absolute escapes, unsupported image types and symlink escapes are rejected. SVG assets are image sources only.
+  - react-markdown + GFM + heading slugs + rehype-sanitize, with raw HTML skipped and no rehype-raw. Safe app-handled links and anchors, exact unique code mentions with context cards, innermost source-range navigation, folder filtering and confirmed HTTP(S)/mailto opening through the opener plugin.
+  - Shared Shiki engine/themes, fenced-code grammars loaded on demand, copy controls, strict lazy Mermaid rendering with token-based colours. Mermaid resources/config overrides are refused before rendering; the resulting diagram is an image and unsupported diagrams keep their source.
+  - Local images use the bounded backend. Remote images require per-document opt-in and send no referrer. The CSP permits HTTP(S) images for this explicit opt-in; Markdown never creates a remote image before it.
+  - Folder-grouped document list, pinned README, comfortable prose tokens, heading anchors, h2/h3 outline with scroll-spy and a narrow-window outline button. Tables scroll within the reader; native review led to minimum cell widths to keep narrow column headings readable.
+  - Worker-built headings and backlinks, including reference-style Markdown links, capped at 500 documents and 2 MB each. Documents are read in batches of four, with cancellation on repository changes and indexing/error status. Palette searches titles/headings; file/module inspectors link to their first mention.
+  - Fixture README, architecture guide and local SVG added; existing fixture source, golden output and `.gitvur/` data remain unchanged. The unsafe Markdown fixture is under `app/e2e/fixtures/`.
+- Fixes found during verification:
+  - Vite selected a DOM-dependent entity decoder for the Markdown worker. It now resolves the decoder's equivalent DOM-free entry.
+  - Restoring a view could overwrite an early interaction or hide a selected file after module assignments changed. Saved state now loads before exposing the model, and the selected element's current ancestors are expanded.
+  - Search could close again when reopened immediately after Escape. Its native cancel/close handling now keeps the store and dialog in sync; repeated tests in both themes pass.
+  - Added accessible names for read-only task-list checkboxes, adjusted selected-path contrast, and gave backlink buttons a minimum hit area. Existing regression selectors now account for tabs and the extra shortcuts.
+- Acceptance:
+  - [x] Tabs, shortcuts, preserved map state and saved reader state
+  - [x] Shared discovery policy and ordering
+  - [x] Sanitized rendering, URL handling and security tests
+  - [x] Link resolution, code mentions, confirmation and map navigation
+  - [x] Mermaid, Shiki, local assets and explicit remote-image loading
+  - [x] Worker backlinks and palette integration
+  - [x] States and documentation updates
+  - [x] All six screenshot scenes in light/dark at 1440×900 and 1280×720 captured and reviewed
+- Visual review:
+  - The 72ch reading column and 15px / 1.65 prose feel like a document. Tables stay inside their own scrolling container.
+  - Tabs, surfaces, spacing and focus use the existing tokens; the reader shares the app's single interaction accent.
+  - Dotted code mentions stay quieter than explicit links. Hover cards fit the reviewed viewports without clipping.
+  - Mermaid uses the app's surfaces, borders and text colours in both themes. Its image output cannot execute diagram interactions.
+- Validation:
+  - Rust fmt, workspace clippy (`-D warnings`) and workspace tests pass, including discovery ordering/ignore policy, byte caps and existing-file symlink escapes. Existing Python/TypeScript goldens and schema/binding drift checks pass.
+  - Frontend typecheck, lint, **69 Vitest tests**, and **243 contrast checks** pass. The production build passes; Mermaid/language assets stay dynamically loaded (Vite reports its normal large-chunk advisory).
+  - Full Playwright regression: **118 passed, 2 skipped** (the existing opt-in performance checks). Subsequent targeted Docs runs pass after final rendering/security/table refinements. Axe reports zero serious/critical issues in the new reader views.
+  - `pnpm tauri dev` launched successfully. Opened the real `fixtures/py-small` with the native picker, switched to Docs, read the repository notes, and used document search to open the architecture guide; its Mermaid diagram and table rendered correctly in WebKitGTK at a narrow tiled window. Browser tests exercise the remaining link types and mocked external opening; no real external browser launch was performed.
+- Dependencies:
+  - Prompt-named frontend: react-markdown 10.1.0, remark-gfm 4.0.1, rehype-slug 6.0.0, rehype-sanitize 6.0.0, mermaid 12.2.0; opener bridge/plugin 2.7.2.
+  - `unified` 11.0.5, `remark-parse` 11.0.0 and `github-slugger` 2.0.0: parse Markdown for the worker and match rendered heading IDs, rather than guessing links/mentions with regular expressions.
+  - `decode-named-character-reference` 1.3.0: explicitly resolve the parser's DOM-free decoder for worker compatibility.
+  - Rust `base64` 0.22.1: encode bounded image bytes as data URLs without a custom encoder.
+- Deviations / assumptions:
+  - Phase 12 remains unfinished; Phase 13 is independently implemented as the user requested.
+  - Necessary integration edits extend the shell, API/mock adapters, state, palette, copy, tokens and shared highlighter in addition to the phase's named folders. No extractor output, contract schemas, validator or map-layout semantics changed.
+  - `modified` crosses the bridge as Unix seconds encoded as a string, formatted locally for display.
+  - Safe parent-relative image paths within the repository are allowed; escapes are rejected after normalization/canonicalization. Leading `/` means repository-root-relative, as the prompt specifies.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).
+- Docs: `.mdx` support remains out of scope; the reader discovers `.md` and `.markdown` only.
+- Dev rendering: React Flow can emit missing-target-handle warnings and ResizeObserver notifications during Docs-to-Map navigation. The visual/navigation assertions pass; investigate alongside the parked map-edge rendering work.
 - Check the selection focal point with ~15 edges on the synthetic repo (Phase 08 review question, not yet done).
 
 - Diff: detect function renames via a body-only hash (needs a `basedOnSelfHash`-style contract addition; see Phase 10 notes).

@@ -6,7 +6,7 @@ import type { HighlighterCore, ThemedToken } from "shiki/core";
  */
 let highlighter: Promise<HighlighterCore> | undefined;
 
-function getHighlighter(): Promise<HighlighterCore> {
+export function getHighlighter(): Promise<HighlighterCore> {
   highlighter ??= (async () => {
     const [{ createHighlighterCore }, { createJavaScriptRegexEngine }] = await Promise.all([
       import("shiki/core"),

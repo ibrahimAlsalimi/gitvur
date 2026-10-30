@@ -1,5 +1,6 @@
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
+import { TabBar } from "../tabs/TabBar";
 import type { Theme } from "../generated/contract";
 import { useAppStore } from "../store/useAppStore";
 import { copy } from "../copy";
@@ -28,6 +29,7 @@ export function TopBar() {
         <LogoMark className="logo-mark" />
         <span>Gitvur</span>
       </div>
+      <TabBar />
       {bundle && (
         <>
           <span className="topbar-divider" aria-hidden="true" />

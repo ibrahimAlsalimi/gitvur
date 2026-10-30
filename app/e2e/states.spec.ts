@@ -70,7 +70,7 @@ test.describe("loaded repository", () => {
     const tree = page.getByRole("tree", { name: "Repository explorer" });
     await expect(tree.getByRole("treeitem")).toHaveCount(12);
     await expect(page.getByText("py-small", { exact: true })).toBeVisible();
-    await expect(page.locator(".chip")).toContainText(/[0-9a-f]{7}|uncommitted/);
+    await expect(page.locator(".topbar .chip")).toContainText(/[0-9a-f]{7}|uncommitted/);
     for (const text of ["7 files", "40 nodes", "21 edges", "100% documented"]) {
       await expect(page.locator(".statusbar")).toContainText(text);
     }

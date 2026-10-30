@@ -108,6 +108,15 @@ A session is not done until `cargo fmt`, `clippy`, `cargo test`, and (for app wo
 6. **The viewer is read-only.** It never writes to the analysed repository, except `.gitvur/` when the user explicitly clicks "Index" or "Validate".
 7. **Scope discipline.** Do only what the current phase prompt asks. Ideas for later go into the "Parking lot" section of `PROGRESS.md`.
 8. **Dependencies.** Prefer the ones named in the phase prompt. Adding any other dependency needs a one-line justification in `PROGRESS.md`.
+9. **Safe Docs rendering.** Raw HTML is never rendered. Markdown uses react-markdown, GFM, heading slugs and rehype-sanitize without rehype-raw. Local images go through bounded repository-safe commands; SVG is an image source only. Remote images require a per-document opt-in. External HTTP(S)/mailto links require confirmation and use the opener plugin; the webview never navigates away.
+
+## Repository views
+
+- **Map** and **Docs** are top-level tabs (`Ctrl/Cmd+1` and `Ctrl/Cmd+2`). The map stays mounted across tab switches, preserving its viewport, selection and lens. Tab, document path and reading position are saved with the per-repository view in the app data folder.
+- `gitvur_index::discover_docs` reuses the source walker's ignore and skip rules and discovers `.md`/`.markdown` without changing extraction output.
+- Read-only Tauri commands: `list_docs(path)`, `read_doc(path, docPath)` (2 MB), `read_doc_asset(path, docPath, href)` (5 MB; canonical path must stay inside the selected repository).
+- `app/src/docs/` owns safe rendering, pure link resolution, exact unique code mentions, and the worker-built docs/backlink index (first 500 documents). `app/src/tabs/` owns the accessible tab bar. Document titles/headings are searchable in the palette; file/module inspectors show "Mentioned in docs".
+- Mermaid is lazy-loaded in strict mode, rendered as an image, with embedded resources/config overrides refused. Unsupported diagrams fall back to their source. Markdown entity decoding uses the DOM-free package entry so the same parser runs inside the docs worker.
 
 ## Frontend conventions
 

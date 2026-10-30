@@ -175,3 +175,20 @@ pub async fn clear_view_state(app: AppHandle, root: String) -> Result<(), AppErr
     let dir = data_dir(&app)?;
     blocking(move || settings::clear_view_state(&dir, &root)).await
 }
+
+#[tauri::command]
+pub async fn list_docs(path: String) -> Result<Vec<crate::docs::DocEntry>, AppError> {
+    blocking(move || crate::docs::list_docs(&path)).await
+}
+#[tauri::command]
+pub async fn read_doc(path: String, doc_path: String) -> Result<crate::docs::DocContent, AppError> {
+    blocking(move || crate::docs::read_doc(&path, &doc_path)).await
+}
+#[tauri::command]
+pub async fn read_doc_asset(
+    path: String,
+    doc_path: String,
+    href: String,
+) -> Result<crate::docs::AssetData, AppError> {
+    blocking(move || crate::docs::read_doc_asset(&path, &doc_path, &href)).await
+}

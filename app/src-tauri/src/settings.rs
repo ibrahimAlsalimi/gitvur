@@ -135,6 +135,15 @@ pub struct Viewport {
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase", default)]
 pub struct ViewState {
+    #[ts(optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub active_tab: Option<String>,
+    #[ts(optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub doc_path: Option<String>,
+    #[ts(optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub doc_scroll: Option<f64>,
     pub expanded_ids: Vec<String>,
     /// Classes whose rows are folded on the map.
     pub collapsed_ids: Vec<String>,

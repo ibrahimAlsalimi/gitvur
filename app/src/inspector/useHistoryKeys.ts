@@ -6,6 +6,7 @@ import { useAppStore } from "../store/useAppStore";
 export function useHistoryKeys() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (useAppStore.getState().activeTab !== "map") return;
       if (!e.altKey || (e.key !== "ArrowLeft" && e.key !== "ArrowRight")) return;
       const target = e.target as HTMLElement | null;
       if (target?.closest("input, textarea, select, [role='separator']")) return;

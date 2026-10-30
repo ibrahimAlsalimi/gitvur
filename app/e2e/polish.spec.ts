@@ -1,3 +1,4 @@
+import { SHORTCUTS } from "../src/copy";
 import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
 
@@ -56,7 +57,7 @@ test.describe("palette", () => {
     await expect(palette(page)).toBeHidden();
 
     await page.keyboard.press("Control+k");
-    await page.keyboard.type(">doc");
+    await palette(page).getByRole("combobox").fill(">lens documentation");
     await expect(palette(page).getByRole("option").first()).toHaveText("Lens: Documentation");
     await page.keyboard.press("Enter");
     await expect(page.getByRole("combobox", { name: "Lens" })).toHaveValue("coverage");
@@ -109,7 +110,7 @@ test.describe("keyboard", () => {
     await page.keyboard.press("?");
     const sheet = page.getByRole("dialog", { name: "Keyboard shortcuts" });
     await expect(sheet).toBeVisible();
-    await expect(sheet.getByRole("row")).toHaveCount(12); // header + 11 shortcuts
+    await expect(sheet.getByRole("row")).toHaveCount(SHORTCUTS.length + 1); // header plus the current shortcut map
     await shot(page, "polish-02-shortcuts");
     await page.keyboard.press("Escape");
     await expect(sheet).toBeHidden();
@@ -205,7 +206,11 @@ async function smallTargets(page: Page): Promise<string[]> {
     const selector =
       "button, select, input, a[href], [role='button'], [role='option'], [role='treeitem'], [role='separator'][tabindex], [tabindex='0']";
     for (const el of document.querySelectorAll<HTMLElement>(selector)) {
-      if (el.closest(".react-flow__viewport, .react-flow__edgelabel-renderer")) continue;
+      if (
+        el.closest(".react-flow__viewport, .react-flow__edgelabel-renderer, [inert]") ||
+        getComputedStyle(el).visibility === "hidden"
+      )
+        continue;
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
       // A separator's pointer area is its ::after (see app.css).

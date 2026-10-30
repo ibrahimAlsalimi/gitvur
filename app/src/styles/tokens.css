@@ -241,3 +241,12 @@
   --gv-shadow-dialog: 0 12px 48px rgb(0 0 0 / 55%);
   --gv-backdrop: rgb(0 0 0 / 60%);
 }
+
+/* Shared prose scale; theme-independent geometry. */
+:root {
+  --gv-prose-body: 15px;
+  --gv-prose-h1: 28px;
+  --gv-prose-h2: 22px;
+  --gv-prose-h3: 18px;
+  --gv-prose-line: 1.65;
+}

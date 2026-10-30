@@ -3,6 +3,9 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
 
 import type {
+  DocEntry,
+  DocContent,
+  AssetData,
   CommitInfo,
   DiffBundle,
   RecentRepo,
@@ -15,6 +18,14 @@ import type { Api } from "./types";
 
 /** The real backend: Tauri commands in app/src-tauri/src/commands.rs. */
 export const tauriApi: Api = {
+  listDocs: (path) => invoke<DocEntry[]>("list_docs", { path }),
+  readDoc: (path, docPath) => invoke<DocContent>("read_doc", { path, docPath }),
+  readDocAsset: (path, docPath, href) =>
+    invoke<AssetData>("read_doc_asset", { path, docPath, href }),
+  openExternal: async (url) => {
+    const { openUrl } = await import("@tauri-apps/plugin-opener");
+    await openUrl(url);
+  },
   async pickFolder() {
     const picked = await open({ directory: true, multiple: false, title: "Open repository" });
     return typeof picked === "string" ? picked : null;
