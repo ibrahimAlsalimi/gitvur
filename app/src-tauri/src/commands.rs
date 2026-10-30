@@ -6,12 +6,19 @@ use gitvur_index::{IndexOptions, index, write_output};
 use tauri::{AppHandle, Manager};
 
 use crate::bundle::{self, RepoBundle, SourceSlice};
+use crate::diffs::{self, CommitInfo, DiffBundle};
 use crate::error::{AppError, ErrorCode};
 use crate::settings::{self, RecentRepo, Settings};
 
 fn config_dir(app: &AppHandle) -> Result<PathBuf, AppError> {
     app.path().app_config_dir().map_err(|e| {
         AppError::new(ErrorCode::Io, "cannot find the app config folder").with_detail(e.to_string())
+    })
+}
+
+fn cache_dir(app: &AppHandle) -> Result<PathBuf, AppError> {
+    app.path().app_cache_dir().map_err(|e| {
+        AppError::new(ErrorCode::Io, "cannot find the app cache folder").with_detail(e.to_string())
     })
 }
 
@@ -103,4 +110,33 @@ pub async fn get_settings(app: AppHandle) -> Result<Settings, AppError> {
 pub async fn set_settings(app: AppHandle, settings: Settings) -> Result<(), AppError> {
     let dir = config_dir(&app)?;
     blocking(move || settings::save(&dir, &settings)).await
+}
+
+#[tauri::command]
+pub async fn list_commits(path: String, limit: Option<usize>) -> Result<Vec<CommitInfo>, AppError> {
+    blocking(move || diffs::list_commits(&path, limit.unwrap_or(50))).await
+}
+
+/// Indexes both revisions (read via Git into temporary folders, cached) and diffs them.
+#[tauri::command]
+pub async fn diff_revisions(
+    app: AppHandle,
+    path: String,
+    from: String,
+    to: String,
+) -> Result<DiffBundle, AppError> {
+    let cache = cache_dir(&app)?;
+    blocking(move || diffs::diff_revisions(&path, &from, &to, &cache)).await
+}
+
+#[tauri::command]
+pub async fn read_revision_source(
+    path: String,
+    rev: String,
+    file: String,
+    start: u32,
+    end: u32,
+    context: u32,
+) -> Result<SourceSlice, AppError> {
+    blocking(move || diffs::read_revision_source(&path, &rev, &file, start, end, context)).await
 }

@@ -5,7 +5,7 @@
 
 use schemars::{JsonSchema, schema_for};
 
-use crate::{Annotations, Manifest, Report, Structure, to_canonical_json};
+use crate::{Annotations, Manifest, Report, Structure, StructureDiff, to_canonical_json};
 
 /// Every generated schema as `(path relative to the workspace root, canonical JSON)`.
 pub fn generated_files() -> Vec<(&'static str, String)> {
@@ -15,6 +15,7 @@ pub fn generated_files() -> Vec<(&'static str, String)> {
         ("schemas/structure.schema.json", render::<Structure>()),
         ("schemas/annotations.schema.json", annotations.clone()),
         ("schemas/report.schema.json", render::<Report>()),
+        ("schemas/diff.schema.json", render::<StructureDiff>()),
         ("agent/annotations.schema.json", annotations),
     ]
 }

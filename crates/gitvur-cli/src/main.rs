@@ -8,10 +8,8 @@ use anyhow::Context as _;
 use clap::{Parser, Subcommand};
 use gitvur_index::{IndexOptions, index, write_output};
 
+mod diff;
 mod packet;
-
-/// Exit code for commands that exist in the CLI but are not implemented yet.
-const EXIT_NOT_IMPLEMENTED: u8 = 2;
 
 #[derive(Debug, Parser)]
 #[command(
@@ -58,14 +56,21 @@ enum Command {
         #[arg(long)]
         out: Option<PathBuf>,
     },
-    /// Compare the structure of two revisions.
+    /// Compare the structure of two revisions (read via Git; the working tree is untouched).
     Diff {
         /// Path to the repository root.
         repo: PathBuf,
-        /// Base revision.
+        /// Base revision (`HEAD~1`, a branch, a SHA).
         commit_a: String,
-        /// Revision to compare against the base.
+        /// Revision to compare against the base; `worktree` means the files on disk.
         commit_b: String,
+        /// Print the diff as canonical JSON.
+        #[arg(long)]
+        json: bool,
+        /// Rewrite moved element IDs in `.gitvur/annotations.json` (descriptions only when
+        /// their hash still matches). The only option that writes anything.
+        #[arg(long)]
+        carry_annotations: bool,
     },
 }
 
@@ -101,10 +106,19 @@ fn main() -> ExitCode {
                 ExitCode::FAILURE
             }
         },
-        Command::Diff { .. } => {
-            eprintln!("not implemented yet");
-            ExitCode::from(EXIT_NOT_IMPLEMENTED)
-        }
+        Command::Diff {
+            repo,
+            commit_a,
+            commit_b,
+            json,
+            carry_annotations,
+        } => match diff::run(&repo, &commit_a, &commit_b, json, carry_annotations) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(err) => {
+                eprintln!("error: {err:#}");
+                ExitCode::FAILURE
+            }
+        },
     }
 }
 

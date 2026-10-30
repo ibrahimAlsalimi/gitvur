@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StructureDiff",
+  "type": "object",
+  "properties": {
+    "edges": {
+      "description": "Relationships added or removed, keyed by `(from, to, type)` after mapping moved IDs.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EdgeChange"
+      }
+    },
+    "elements": {
+      "description": "Every element that is not `unchanged`, plus unchanged containers with changed\nchildren (none exist with per-element hashes, but the rule is general).",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ElementChange"
+      }
+    },
+    "fromCommit": {
+      "description": "Revision A (the older side), as given or resolved: a full SHA or `worktree`.",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "string"
+    },
+    "summary": {
+      "$ref": "#/$defs/DiffSummary"
+    },
+    "toCommit": {
+      "description": "Revision B (the newer side).",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "fromCommit",
+    "toCommit",
+    "elements",
+    "edges",
+    "summary"
+  ],
+  "$defs": {
+    "ChangeKind": {
+      "description": "Declared in alphabetical order so the derived `Ord` matches the serialised strings.",
+      "type": "string",
+      "enum": [
+        "added",
+        "modified",
+        "moved",
+        "removed",
+        "unchanged"
+      ]
+    },
+    "DiffSummary": {
+      "type": "object",
+      "properties": {
+        "added": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "edgesAdded": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "edgesRemoved": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "modified": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "moved": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "removed": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "unchanged": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "added",
+        "removed",
+        "modified",
+        "moved",
+        "unchanged",
+        "edgesAdded",
+        "edgesRemoved"
+      ]
+    },
+    "EdgeChange": {
+      "type": "object",
+      "properties": {
+        "change": {
+          "description": "`added` or `removed`.",
+          "$ref": "#/$defs/ChangeKind"
+        },
+        "evidence": {
+          "description": "From the side the edge exists on (B for `added`, A for `removed`).",
+          "$ref": "#/$defs/Evidence"
+        },
+        "from": {
+          "description": "IDs in B; an endpoint that was removed keeps its ID in A.",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "to": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/EdgeType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to",
+        "type",
+        "change",
+        "provenance",
+        "evidence"
+      ]
+    },
+    "EdgeType": {
+      "description": "Kind of relationship. Declared in alphabetical order so the derived `Ord`\nmatches the order of the serialised strings.",
+      "type": "string",
+      "enum": [
+        "calls",
+        "depends_on",
+        "imports",
+        "references"
+      ]
+    },
+    "ElementChange": {
+      "type": "object",
+      "properties": {
+        "change": {
+          "$ref": "#/$defs/ChangeKind"
+        },
+        "childChanged": {
+          "description": "Set on `modified` elements (and unchanged containers with changed children): a\ndirect child is added, removed, modified or moved. Same rule as the validator's\n`childChanged` for stale elements.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "The element's ID in B; for `removed`, its ID in A.",
+          "type": "string"
+        },
+        "movedFrom": {
+          "description": "For `moved`: the element's ID in A.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "$ref": "#/$defs/NodeType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "change"
+      ]
+    },
+    "Evidence": {
+      "description": "A location that justifies an edge: the line where the relationship is visible.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Path relative to the repository root, `/`-separated.",
+          "type": "string"
+        },
+        "line": {
+          "description": "1-based line number.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "line"
+      ]
+    },
+    "NodeType": {
+      "description": "Node kinds the extractor produces. `module` nodes exist only in `annotations.json`.",
+      "type": "string",
+      "enum": [
+        "project",
+        "file",
+        "class",
+        "function"
+      ]
+    },
+    "Provenance": {
+      "description": "Who established a relationship. Order (used only as a sort tie-breaker):\n`syntactic`, `semantic`, `ai`.",
+      "type": "string",
+      "enum": [
+        "syntactic",
+        "semantic",
+        "ai"
+      ]
+    }
+  }
+}

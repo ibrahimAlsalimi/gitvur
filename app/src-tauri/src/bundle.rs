@@ -222,7 +222,13 @@ pub fn read_source(
     let root = repo_root(path)?;
     let full = resolve(&root, file)?;
     let bytes = fs::read(&full).map_err(|e| AppError::io(&format!("cannot read `{file}`"), &e))?;
-    let text = String::from_utf8_lossy(&bytes)
+    Ok(slice(file, &bytes, start, end, context))
+}
+
+/// Lines `start..=end` of `bytes` plus `context` on each side, clamped to the text and
+/// capped at [`MAX_SOURCE_LINES`].
+pub fn slice(file: &str, bytes: &[u8], start: u32, end: u32, context: u32) -> SourceSlice {
+    let text = String::from_utf8_lossy(bytes)
         .replace("\r\n", "\n")
         .replace('\r', "\n");
     let body = text.strip_suffix('\n').unwrap_or(&text);
@@ -239,12 +245,12 @@ pub fn read_source(
         .iter()
         .map(|l| (*l).to_owned())
         .collect();
-    Ok(SourceSlice {
+    SourceSlice {
         file: file.to_owned(),
         start_line: first,
         lines,
         language: language_of(file),
-    })
+    }
 }
 
 #[allow(clippy::case_sensitive_file_extension_comparisons)] // matches the extractor's rules

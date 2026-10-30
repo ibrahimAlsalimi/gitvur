@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use gitvur_schema::{Annotations, Description, ElementStatus, NodeType, Status, Structure};
+use gitvur_schema::{Annotations, Description, ElementStatus, NodeType, Status, Structure, tree};
 
 use crate::checks::is_module_id;
 
@@ -34,23 +34,14 @@ pub(crate) fn elements(
         status.insert(node.id.as_str(), s);
     }
 
-    let mut children: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
-    for node in &structure.nodes {
-        if let Some(parent) = &node.parent_id {
-            children
-                .entry(parent.as_str())
-                .or_default()
-                .push(node.id.as_str());
-        }
-    }
+    let children = tree::children_by_parent(&structure.nodes);
 
     let mut elements: Vec<ElementStatus> = status
         .iter()
         .map(|(&id, &s)| {
             let (child_changed, self_changed) = if s == Status::Stale {
-                let child = children
-                    .get(id)
-                    .is_some_and(|cs| cs.iter().any(|c| status.get(c) == Some(&Status::Stale)));
+                let child =
+                    tree::child_changed(&children, id, |c| status.get(c) == Some(&Status::Stale));
                 (Some(child), Some(!child))
             } else {
                 (None, None)

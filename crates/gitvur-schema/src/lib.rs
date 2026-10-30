@@ -6,15 +6,18 @@
 
 mod annotations;
 mod common;
+mod diff;
 mod hash;
 mod json;
 mod manifest;
 mod report;
 pub mod schema;
 mod structure;
+pub mod tree;
 
 pub use annotations::{Annotations, Description, Module};
 pub use common::{Edge, EdgeType, Evidence, Provenance, SourceRange};
+pub use diff::{ChangeKind, DiffSummary, EdgeChange, ElementChange, StructureDiff};
 pub use hash::{content_hash, extract_lines, line_count};
 pub use json::to_canonical_json;
 pub use manifest::{ExtractorInfo, Language, Manifest};

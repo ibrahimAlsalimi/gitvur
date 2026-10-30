@@ -123,3 +123,17 @@ pub fn index(repo: &Path, opts: &IndexOptions) -> Result<IndexOutput, IndexError
         warnings,
     })
 }
+
+/// A predicate for the files [`index`] reads from a directory: every path a language
+/// backend handles, plus `.gitignore` files (which decide what is skipped). Lets callers
+/// that materialise a revision write only what indexing needs; directories in
+/// [`walk::SKIPPED_DIRS`] are still the walker's to skip.
+pub fn index_inputs() -> impl Fn(&str) -> bool {
+    let backends: Vec<Box<dyn LanguageBackend>> =
+        vec![Box::new(Python::new()), Box::new(TypeScript::new())];
+    move |relpath: &str| {
+        relpath == ".gitignore"
+            || relpath.ends_with("/.gitignore")
+            || backends.iter().any(|b| b.handles(relpath))
+    }
+}

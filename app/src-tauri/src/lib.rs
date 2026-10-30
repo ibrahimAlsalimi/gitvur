@@ -6,6 +6,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 pub mod bindings;
 pub mod bundle;
 mod commands;
+pub mod diffs;
 pub mod error;
 pub mod settings;
 
@@ -25,6 +26,9 @@ pub fn run() {
             commands::recent_repositories,
             commands::get_settings,
             commands::set_settings,
+            commands::list_commits,
+            commands::diff_revisions,
+            commands::read_revision_source,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the Gitvur app");

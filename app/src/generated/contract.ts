@@ -141,6 +141,59 @@ id?: string, };
 
 export type Severity = "error" | "warning";
 
+export type StructureDiff = { schemaVersion: string, 
+/**
+ * Revision A (the older side), as given or resolved: a full SHA or `worktree`.
+ */
+fromCommit: string, 
+/**
+ * Revision B (the newer side).
+ */
+toCommit: string, 
+/**
+ * Every element that is not `unchanged`, plus unchanged containers with changed
+ * children (none exist with per-element hashes, but the rule is general).
+ */
+elements: Array<ElementChange>, 
+/**
+ * Relationships added or removed, keyed by `(from, to, type)` after mapping moved IDs.
+ */
+edges: Array<EdgeChange>, summary: DiffSummary, };
+
+export type ChangeKind = "added" | "modified" | "moved" | "removed" | "unchanged";
+
+export type ElementChange = { 
+/**
+ * The element's ID in B; for `removed`, its ID in A.
+ */
+id: string, type: NodeType, change: ChangeKind, 
+/**
+ * For `moved`: the element's ID in A.
+ */
+movedFrom?: string, 
+/**
+ * Set on `modified` elements (and unchanged containers with changed children): a
+ * direct child is added, removed, modified or moved. Same rule as the validator's
+ * `childChanged` for stale elements.
+ */
+childChanged?: boolean, };
+
+export type EdgeChange = { 
+/**
+ * IDs in B; an endpoint that was removed keeps its ID in A.
+ */
+from: string, to: string, type: EdgeType, 
+/**
+ * `added` or `removed`.
+ */
+change: ChangeKind, provenance: Provenance, 
+/**
+ * From the side the edge exists on (B for `added`, A for `removed`).
+ */
+evidence: Evidence, };
+
+export type DiffSummary = { added: number, removed: number, modified: number, moved: number, unchanged: number, edgesAdded: number, edgesRemoved: number, };
+
 export type RepoBundle = { 
 /**
  * Canonical absolute path of the repository root.
@@ -172,3 +225,11 @@ openedAt: number, };
 export type Settings = { explorerWidth: number, inspectorWidth: number, inspectorCollapsed: boolean, theme: Theme, };
 
 export type Theme = "system" | "light" | "dark";
+
+export type CommitInfo = { sha: string, short: string, subject: string, author: string, 
+/**
+ * Committer time, seconds since the Unix epoch.
+ */
+date: number, };
+
+export type DiffBundle = { diff: StructureDiff, from: Structure, to: Structure, };

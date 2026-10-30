@@ -76,10 +76,97 @@ fn stale_prints_sorted_ids_and_json() {
     assert_eq!(ids, ["file:a.py", "function:a.py:f", "function:a.py:g"]);
 }
 
+fn git(dir: &Path, args: &[&str]) {
+    let status = Command::new("git")
+        .args([
+            "-c",
+            "core.hooksPath=/dev/null",
+            "-c",
+            "commit.gpgsign=false",
+        ])
+        .args([
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.invalid",
+        ])
+        .args(args)
+        .current_dir(dir)
+        .env("GIT_CONFIG_GLOBAL", "/dev/null")
+        .env("GIT_CONFIG_NOSYSTEM", "1")
+        .status()
+        .unwrap();
+    assert!(status.success(), "git {args:?}");
+}
+
 #[test]
-fn diff_is_still_not_implemented() {
-    let out = gitvur(&["diff", ".", "a", "b"]);
-    assert_eq!(out.status.code(), Some(2));
+fn diff_prints_a_summary_json_and_carries_annotations() {
+    let dir = repo();
+    git(dir.path(), &["init", "-q", "-b", "main"]);
+    git(dir.path(), &["add", "a.py"]);
+    git(dir.path(), &["commit", "-q", "-m", "one"]);
+    fs::write(
+        dir.path().join("a.py"),
+        "def f():\n    pass\n\ndef g():\n    f()\n\ndef h():\n    return 1\n",
+    )
+    .unwrap();
+    git(dir.path(), &["commit", "-q", "-am", "two"]);
+
+    let out = gitvur(&["diff", path(&dir), "HEAD~1", "HEAD"]);
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let text = String::from_utf8_lossy(&out.stdout);
+    assert!(
+        text.contains("+1 added · −0 removed · ~1 modified · →0 moved"),
+        "{text}"
+    );
+    assert!(text.contains("+ function:a.py:h"), "{text}");
+    assert!(text.contains("~ file:a.py  (contents changed)"), "{text}");
+
+    let json = gitvur(&["diff", path(&dir), "HEAD~1", "HEAD", "--json"]);
+    let value: serde_json::Value = serde_json::from_slice(&json.stdout).unwrap();
+    assert_eq!(value["summary"]["added"], 1);
+    assert_eq!(value["toCommit"].as_str().map(str::len), Some(40));
+
+    // Rename the file; a description of `f` (hash unchanged) follows the move.
+    assert!(gitvur(&["index", path(&dir)]).status.success());
+    let structure: serde_json::Value = serde_json::from_str(
+        &fs::read_to_string(dir.path().join(".gitvur/structure.json")).unwrap(),
+    )
+    .unwrap();
+    let hash = structure["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == "function:a.py:f")
+        .unwrap()["contentHash"]
+        .clone();
+    let annotations = serde_json::json!({
+        "modules": [],
+        "descriptions": [{ "id": "function:a.py:f", "basedOnHash": hash, "text": "Does nothing." }],
+        "edges": []
+    });
+    fs::write(
+        dir.path().join(".gitvur/annotations.json"),
+        annotations.to_string(),
+    )
+    .unwrap();
+    git(dir.path(), &["mv", "a.py", "b.py"]);
+    git(dir.path(), &["commit", "-q", "-m", "three"]);
+    let out = gitvur(&["diff", path(&dir), "HEAD~1", "HEAD", "--carry-annotations"]);
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let carried = fs::read_to_string(dir.path().join(".gitvur/annotations.json")).unwrap();
+    assert!(carried.contains("\"function:b.py:f\""), "{carried}");
+
+    let bad = gitvur(&["diff", path(&dir), "no-such-rev", "HEAD"]);
+    assert_eq!(bad.status.code(), Some(1));
 }
 
 fn packet(dir: &tempfile::TempDir, mode: &str) -> serde_json::Value {

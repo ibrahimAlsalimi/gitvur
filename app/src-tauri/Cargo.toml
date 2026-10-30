@@ -11,7 +11,6 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
-# Not used yet; wired in now so later phases only add code, not manifest churn.
 gitvur-schema = { workspace = true, features = ["ts"] }
 gitvur-index.workspace = true
 gitvur-validate.workspace = true

@@ -11,6 +11,7 @@ name = "gitvur"
 path = "src/main.rs"
 
 [dependencies]
+gitvur-diff.workspace = true
 gitvur-index.workspace = true
 gitvur-schema.workspace = true
 gitvur-validate.workspace = true
