@@ -3,10 +3,11 @@ import { type CSSProperties, useEffect } from "react";
 import { Canvas } from "./components/Canvas";
 import { Explorer } from "./components/Explorer";
 import { HelpDialog } from "./components/HelpDialog";
-import { Inspector, InspectorRail } from "./components/Inspector";
 import { ResizeHandle } from "./components/ResizeHandle";
 import { StatusBar } from "./components/StatusBar";
 import { TopBar } from "./components/TopBar";
+import { Inspector, InspectorRail } from "./inspector/Inspector";
+import { useHistoryKeys } from "./inspector/useHistoryKeys";
 import { PANE_LIMITS, useAppStore } from "./store/useAppStore";
 
 /** The application frame: top bar, explorer | canvas | inspector, status bar. */
@@ -17,6 +18,7 @@ export function App() {
   useEffect(() => {
     void useAppStore.getState().init();
   }, []);
+  useHistoryKeys();
 
   useEffect(() => {
     const root = document.documentElement;

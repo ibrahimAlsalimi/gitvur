@@ -5,6 +5,8 @@
  * - `?fixture=py-small|ts-small` opens that fixture at startup (default: none).
  * - `?state=no-gitvur|schema-invalid|structure-only|indexing` simulates the matching
  *   backend behaviour, for screenshots of each state.
+ * - `?missing=<relpath>` serves that source file as if it had been deleted after indexing,
+ *   for the inspector's missing-source warning.
  */
 import type {
   AppError,
@@ -37,6 +39,7 @@ const PREFIX = "../../../fixtures/";
 const SETTINGS_KEY = "gitvur.mock.settings";
 const params = new URLSearchParams(window.location.search);
 const state = params.get("state");
+const missing = params.get("missing");
 
 function fixtureOf(path: string): string {
   return path.replace(/^mock:\/\//, "");
@@ -106,7 +109,8 @@ export const mockApi: Api = {
   indexRepository: (path) => (state === "indexing" ? never() : bundle(path)),
   validateRepository: bundle,
   readSource(path, relpath, start, end, context): Promise<SourceSlice> {
-    const text = sources[`${PREFIX}${fixtureOf(path)}/${relpath}`];
+    const text =
+      relpath === missing ? undefined : sources[`${PREFIX}${fixtureOf(path)}/${relpath}`];
     if (text === undefined) return fail("io", `cannot open \`${relpath}\``);
     const all = text.replace(/\n$/, "").split("\n");
     const first = Math.min(Math.max(1, start - context), all.length);

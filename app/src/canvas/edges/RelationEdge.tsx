@@ -21,6 +21,9 @@ function rectOf(node: InternalNode | undefined): Rect | null {
   return { x, y, width, height };
 }
 
+/** Vertical distance between badges of parallel lines. */
+const BADGE_STEP = 22;
+
 const shortName = (id: string) => id.slice(id.lastIndexOf(":") + 1);
 
 /**
@@ -53,6 +56,8 @@ export const RelationEdge = memo(function RelationEdge({
   const openEvidence = (edge = data.pairs[0]) => {
     if (edge) useAppStore.getState().showEvidence(edge);
   };
+  // Parallel lines meet near their midpoints, so their badges are stacked apart.
+  const badgeY = labelY + (data.offsetIndex - (data.offsetCount - 1) / 2) * BADGE_STEP;
   // The type label sits beside the line, never on it: offset away from the curve.
   const horizontal = s.position === Position.Left || s.position === Position.Right;
   const typeX = labelX + (horizontal ? 0 : 14);
@@ -97,7 +102,7 @@ export const RelationEdge = memo(function RelationEdge({
             data-hop={data.hop}
             data-preview={data.preview}
             style={{
-              transform: `translate(-50%, -50%) translate(${String(labelX)}px, ${String(labelY)}px)`,
+              transform: `translate(-50%, -50%) translate(${String(labelX)}px, ${String(badgeY)}px)`,
             }}
           >
             {data.provenance === "ai" && <span className="gv-ai-pill">AI</span>}

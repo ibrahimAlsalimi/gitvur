@@ -582,6 +582,12 @@
   pointer-events: stroke;
 }
 
+/* Badges above every edge's hit area, so they stay hoverable where lines cross. Relation
+   edges sit at z 1000, and React Flow adds 1000 to edges touching a selected node. */
+.gv-map .react-flow__edgelabel-renderer {
+  z-index: 3000;
+}
+
 .gv-edge-badge {
   position: absolute;
   display: inline-flex;

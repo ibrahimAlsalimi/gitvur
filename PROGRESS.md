@@ -498,19 +498,51 @@ Followed `agent/codeDOC.md` literally on isolated copies of both fixtures, in a 
   - **Dev-only `window.__gitvurMap`** (setViewport, focusNodes, getZoom) for screenshots at exact zoom levels; it is not present in production builds.
   - **The Lens switch lists only "Structure"**, as the prompt says; the store's `Lens` type also has `coverage`, for Phase 09.
 
-### 2026-10-30 — Phase 08 — Inspector and relationships (IN PROGRESS, stopped at usage limit)
+### 2026-10-30 — Phase 08 — Inspector and relationships
 
-- Done (committed as a checkpoint; all checks pass):
-  - `app/src/model/aggregateEdges.ts`: pure edge aggregation to the nearest visible ancestor (rows → collapsed file → module at low LOD), grouped by (source, target, type, provenance), 1-hop and 2-hop, self-loops dropped; 7 unit tests.
-  - Canvas edges (`app/src/canvas/edges/`): bezier relation edge between facing sides with parallel offsets; provenance strokes (syntactic 1.5 solid, semantic 2.5 solid, AI 1.5 dashed 6 4 with open arrow and "AI" pill, ambiguous 1 dashed 2 3, no marker); count badge ("3 calls") whose hover lists the underlying pairs; edge type beside the line on hover; click opens evidence (store). Selection draws 1-hop or 2-hop (toolbar toggle; 2nd hop at 50%), hover draws a lighter preview, everything outside the neighbourhood is dimmed to `--gv-opacity-dimmed`, Esc clears. Collapsible legend with real stroke samples.
-  - Store: `hops`, `evidence`, `ambiguousOpen`, selection history (`back`/`forward`), `navigateTo` (the canvas centres the node, zooming to 0.9 below 0.6, instant with reduced motion). `ModelNode.descriptionHash`.
-  - Inspector building blocks, **not yet wired into the UI**: `inspector/highlighter.ts` (Shiki core with the JS regex engine — no WASM, so the CSP stays strict), `sourceCache.ts` (cache by file + contentHash, failures not cached), `CodeViewer.tsx` (real line numbers, muted context, highlight line, missing/out-of-range warning with Re-index, "Open full" cap).
-- Left to do:
-  - Inspector component: breadcrumb, header with copy path, description / empty state with "AI-written · based on version …", relationship lists (Calls, Called by, Imports, Imported by, References) with evidence buttons, "Possible targets" toggle, module and file variants; replace `components/Inspector.tsx`; evidence-mode header with Back; history buttons and Alt+←/→.
-  - CSS for the inspector and code viewer (Shiki `--shiki-light`/`--shiki-dark` by theme, `--gv-bg-sunken` background, 60% height cap).
-  - Mock `?missing=1` for the missing-source screenshot; Playwright tests and the six screenshot sets; the review checklist answers; PROGRESS entry; commit and push.
+Two sessions: the first stopped at the usage limit after a WIP checkpoint (`c8b8402`); the second finished the phase.
+
+- Done:
+  - **Edge aggregation** (`app/src/model/aggregateEdges.ts`): pure function lifting edges to the nearest visible ancestor (rows → collapsed file → module at low LOD), grouped by (source, target, type, provenance), 1-hop and 2-hop, self-loops dropped; 7 unit tests.
+  - **Canvas edges** (`app/src/canvas/edges/`): bezier between facing sides, parallel lines offset; provenance strokes per the prompt's table; "AI" pill; count badge whose hover lists the underlying pairs (each pair opens its evidence); edge type beside the line on hover; 1-hop / 2-hop toggle (2nd hop at 50%); hover preview; dimming to `--gv-opacity-dimmed`; Esc clears; collapsible legend drawn with the real strokes.
+  - **Inspector** (`app/src/inspector/Inspector.tsx`, replaces `components/Inspector.tsx`):
+    - breadcrumb (ancestors clickable), back/forward buttons, header with kind glyph, status, kind · path · lines and Copy path;
+    - description with "AI-written · based on version <6 hex>", or "No description yet" plus the hint;
+    - function/class: source, relationship groups (Calls, Called by, Imports, Imported by, References, Referenced by, Depends on, Depended on by; empty groups hidden), each row with glyph · name · file · provenance mark · evidence button, then "Possible targets for `name`" (collapsed by default; expanding draws the candidate lines);
+    - file: outline (clickable, nested) and imports in/out; module: counts, documented %, file list.
+  - `inspector/relations.ts`: pure grouping, outline, unresolved-in-subtree helpers; 5 unit tests.
+  - **Code viewer**: Shiki core with the JS regex engine (no WASM, CSP unchanged), github-light / github-dark with the background overridden by `--gv-bg-sunken`; real line numbers; 3 muted context lines; cache by (file, contentHash); missing file / out-of-range shows the warning with **Re-index**; cap at 60% of the pane height with **Open full**.
+  - **Evidence mode**: clicking an edge on the canvas, a badge pair, or a row's `:line` button shows the evidence file at that line, highlighted with `--gv-accent-soft`, headed "Evidence for: main → place (calls, AI)", with the AI note when present, and **← Back**.
+  - **Navigation**: relationship rows, outline, module files and breadcrumb call `navigateTo` (reveal ancestors, select, centre over `--gv-motion-base`, zoom to 0.9 when below 0.6, instant with reduced motion). History with Alt+←/→ (`inspector/useHistoryKeys.ts`) and the header buttons. Explorer, canvas and inspector share the store selection.
+  - **Fix found by the e2e tests:** React Flow raises edges touching the selected node to z 2000, above the edge-label layer, so where lines crossed, an edge's hit area covered the count badge and its pair list couldn't be hovered. The label layer is now at z 3000. Badges of parallel lines are also stacked 22px apart; they overlapped at the shared midpoint.
+  - Mock: `?missing=<relpath>` serves that source as deleted, for the missing-source screenshot.
+- Tests:
+  - Vitest 43 (12 new: aggregation 7, inspector relations 5).
+  - Playwright `e2e/inspector.spec.ts`: the six screenshot sets (`insp-01` … `insp-06`, light and dark), module/file variants and the empty description, relationship links + breadcrumb + Alt+←/→ + back button + Esc keeping explorer, canvas and inspector in sync. **58 passing** in total, 2 skipped (perf budgets, run via `e2e:perf`).
+- **Visual review** (screenshots above):
+  - *Three provenance styles apart without the legend? In greyscale?* Yes. Syntactic is thin solid, semantic is thick solid, AI is dashed with an open arrow and an "AI" pill, so width and dash alone separate them. The inspector rows repeat the same line samples.
+  - *Selected node still the focal point with many edges?* Yes, at py-small scale: the accent-bordered selection is the only accent fill, and everything outside the neighbourhood drops to 0.28. py-small has no node with 15 edges, so that case hasn't been seen. Re-check on the synthetic repo in Phase 11.
+  - *Edges crossing node text?* Yes, in two places. (1) A line going from a module's outside to a row inside it crosses the module header's description, and its AI pill or count badge can land on the header text or the documented ring (`insp-05`, `insp-06`). (2) Second-hop lines between adjacent rows of one file are very short vertical curves (`insp-02`). Neither is fixed. Routing around containers is a layout change, out of scope here (Parking lot).
+  - *Inspector scannable in five seconds?* Yes. Top to bottom: breadcrumb, name + kind + lines, one-paragraph description, source, then "Calls" / "Called by" with counts.
+- Acceptance:
+  - [x] Edge styles, hover labels, legend, 1-hop/2-hop, dimming, aggregation with tests
+  - [x] Inspector sections for function, class, file, module; empty-description state
+  - [x] Code viewer with real line numbers, context, caching, evidence mode, missing-source warning
+  - [x] Navigation from lists and breadcrumbs, with history
+  - [x] Six screenshot sets reviewed
+  - `pnpm typecheck && lint && test && check:contrast && e2e` pass; Rust fmt, clippy, 127 tests pass (no Rust changes).
+- Dependencies added: none (`shiki` was installed in Phase 00).
+- Deviations / notes:
+  - The breadcrumb's project segment is plain text: the project isn't selectable anywhere else (clicking it on the canvas clears the selection).
+  - "Referenced by", "Depends on" and "Depended on by" groups added beside the prompt's five, so no edge type goes unlisted; empty groups are hidden.
+  - Possible targets: candidate rows have no evidence button (the evidence is the call line, shown in the hint).
+  - Edited `app/src/api/mock.ts` and `app/src/App.tsx` (outside the listed scope) for the `?missing=` simulation and to mount the new inspector and the history keys.
+  - The browser logs "ResizeObserver loop completed with undelivered notifications" in some inspector tests. It is the benign warning that fires when the inspector's scrollbar appears and the canvas resizes; no test or behaviour is affected.
+- Not done: `pnpm tauri dev` against py-small / ts-small. The native folder dialog can't be driven here (same limit as Phase 07). Please select functions in both fixtures there.
 
 ## Parking lot
+
+- Edge routing: lines entering a module to reach a row cross the module header text, and their badges can sit on the header or ring; route around container headers, or move badges off headers (Phase 08 review).
 
 - Help dialog: render `codeDOC.md` as formatted Markdown instead of raw text (Phase 11).
 
