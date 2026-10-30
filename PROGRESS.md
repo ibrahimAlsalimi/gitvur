@@ -753,6 +753,15 @@ Two sessions: the first stopped at the usage limit after a WIP checkpoint (`c8b8
 - Search perf test: also asserts the slowest single run is < 100 ms.
 - `pnpm typecheck && lint && test && check:contrast` pass. `e2e` passes except `states › structure only`, which is flaky (about 1 run in 5, before and after these changes) because `getByText('0% documented')` matches two elements. Review screenshots were regenerated. Not checked in `pnpm tauri dev`.
 
+### 2026-10-30 — Project orientation and merge preparation
+
+- Read the project guide, prototype plan, phase prompts, crate and layout documentation, documenting-agent instructions, fixture notes, and evaluation material.
+- Current state: Phases 01–11 are implemented; Phase 12 has evaluation tooling and extraction/diff measurements, but documentation runs, human ratings, staleness results and viewer measurements remain unfinished. The documenter isolation limitation is recorded in `eval/PROTOCOL.md`.
+- Preserved the existing Phase 13–16 feature prompts (Docs, flow data, Flows UI, Timeline) and their prompt-index additions as future plans; no feature implementation started.
+- Integrated the latest `origin/phases-01-05` evaluation note by fast-forward before preparing the existing pull request for merge into `main`.
+- Validation: `cargo fmt --all --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, and `pnpm typecheck && pnpm lint && pnpm test && pnpm check:contrast` pass. Frontend: 61 tests; contrast: 243 checks. No product code changed in this session.
+- Open work: finish Phase 12 evaluation and human ratings; future feature prompts are not evidence that those features exist.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).
