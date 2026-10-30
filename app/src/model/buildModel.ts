@@ -3,6 +3,7 @@ import type {
   Description,
   Edge,
   ElementStatus,
+  Issue,
   RepoBundle,
   SourceRange,
   Status,
@@ -33,6 +34,8 @@ export interface ModelNode {
   childChanged?: boolean;
   /** True for the "Unassigned files" module, which no file on disk defines. */
   synthetic: boolean;
+  /** Validation issues about this element (from report.json), errors first. */
+  issues: Issue[];
 }
 
 export interface ModelEdge extends Edge {
@@ -44,8 +47,12 @@ export interface ModuleStats {
   files: number;
   classes: number;
   functions: number;
-  /** Documented descendants (files, classes, functions). */
+  /** Documented, stale and undocumented descendants (files, classes, functions). */
   documented: number;
+  stale: number;
+  undocumented: number;
+  /** Error-severity issues on the module and its descendants. */
+  errors: number;
   /** Rounded to an integer, 0 when the module is empty. */
   documentedPct: number;
 }
@@ -62,7 +69,12 @@ export interface Totals {
   /** Elements that can carry a description (everything except the project and synthetic module). */
   documentable: number;
   documented: number;
+  stale: number;
+  undocumented: number;
   documentedPct: number;
+  /** Issue counts from report.json (0 without a report). */
+  errors: number;
+  warnings: number;
 }
 
 export interface Model {
@@ -78,6 +90,8 @@ export interface Model {
   outgoing: Map<string, number[]>;
   incoming: Map<string, number[]>;
   unresolvedByFrom: Map<string, UnresolvedCall[]>;
+  /** All report issues: errors first, then by code, id and message. */
+  issues: Issue[];
   totals: Totals;
 }
 
@@ -116,6 +130,21 @@ function statusFromHashes(candidates: Description[] | undefined, hash: string | 
   return candidates.some((d) => d.basedOnHash === hash) ? "documented" : "stale";
 }
 
+const SEVERITY_ORDER = { error: 0, warning: 1 } as const;
+const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
+/** Errors first, then by code, element id (issues without one last) and message. */
+export function sortIssues(issues: readonly Issue[]): Issue[] {
+  return [...issues].sort(
+    (a, b) =>
+      SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] ||
+      cmp(a.code, b.code) ||
+      (a.id === undefined ? 1 : 0) - (b.id === undefined ? 1 : 0) ||
+      cmp(a.id ?? "", b.id ?? "") ||
+      cmp(a.message, b.message),
+  );
+}
+
 function descriptionsById(annotations: Annotations | null): Map<string, Description[]> {
   const byId = new Map<string, Description[]>();
   for (const d of annotations?.descriptions ?? []) {
@@ -131,6 +160,9 @@ export function buildModel(bundle: RepoBundle): Model {
   const reported = new Map<string, ElementStatus>(
     (report?.elements ?? []).map((e) => [e.id, e] as const),
   );
+  const issues = sortIssues(report?.issues ?? []);
+  const issuesById = new Map<string, Issue[]>();
+  for (const issue of issues) if (issue.id !== undefined) push(issuesById, issue.id, issue);
   const nodes = new Map<string, ModelNode>();
   const structuralParent = new Map<string, string>();
 
@@ -147,6 +179,7 @@ export function buildModel(bundle: RepoBundle): Model {
           ? "documented"
           : (reported.get(n.id)?.status ?? statusFromHashes(descriptions.get(n.id), n.contentHash)),
       synthetic: false,
+      issues: issuesById.get(n.id) ?? [],
     };
     if (n.source) node.source = n.source;
     if (n.contentHash) node.contentHash = n.contentHash;
@@ -174,6 +207,7 @@ export function buildModel(bundle: RepoBundle): Model {
       docStatus:
         reported.get(m.id)?.status ?? (m.description.trim() === "" ? "undocumented" : "documented"),
       synthetic: false,
+      issues: issuesById.get(m.id) ?? [],
     };
     if (m.description.trim() !== "") node.description = m.description;
     nodes.set(m.id, node);
@@ -195,6 +229,7 @@ export function buildModel(bundle: RepoBundle): Model {
           parentId: rootId,
           docStatus: "undocumented",
           synthetic: true,
+          issues: [],
         });
       }
       moduleId = UNASSIGNED_MODULE_ID;
@@ -265,6 +300,9 @@ export function buildModel(bundle: RepoBundle): Model {
       classes: 0,
       functions: 0,
       documented: 0,
+      stale: 0,
+      undocumented: 0,
+      errors: node.issues.filter((i) => i.severity === "error").length,
       documentedPct: 0,
     };
     const todo = [...(childrenById.get(node.id) ?? [])];
@@ -273,7 +311,8 @@ export function buildModel(bundle: RepoBundle): Model {
       if (d.kind === "file") stats.files += 1;
       else if (d.kind === "class") stats.classes += 1;
       else if (d.kind === "function") stats.functions += 1;
-      if (d.docStatus === "documented") stats.documented += 1;
+      stats[d.docStatus] += 1;
+      stats.errors += d.issues.filter((i) => i.severity === "error").length;
       todo.push(...(childrenById.get(d.id) ?? []));
     }
     stats.documentedPct = pct(stats.documented, stats.files + stats.classes + stats.functions);
@@ -304,7 +343,11 @@ export function buildModel(bundle: RepoBundle): Model {
     unresolved: structure.unresolvedCalls.length,
     documentable: 0,
     documented: 0,
+    stale: 0,
+    undocumented: 0,
     documentedPct: 0,
+    errors: issues.filter((i) => i.severity === "error").length,
+    warnings: issues.filter((i) => i.severity === "warning").length,
   };
   for (const node of nodes.values()) {
     if (node.kind === "file") totals.files += 1;
@@ -313,7 +356,7 @@ export function buildModel(bundle: RepoBundle): Model {
     else if (node.kind === "module" && !node.synthetic) totals.modules += 1;
     if (node.kind === "project" || node.synthetic) continue;
     totals.documentable += 1;
-    if (node.docStatus === "documented") totals.documented += 1;
+    totals[node.docStatus] += 1;
   }
   totals.documentedPct = pct(totals.documented, totals.documentable);
 
@@ -329,6 +372,7 @@ export function buildModel(bundle: RepoBundle): Model {
     outgoing,
     incoming,
     unresolvedByFrom,
+    issues,
     totals,
   };
 }

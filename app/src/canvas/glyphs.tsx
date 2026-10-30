@@ -93,25 +93,3 @@ export function Chevron({ expanded }: { expanded: boolean }) {
     </svg>
   );
 }
-
-/** A small ring showing a percentage (documented share of a module). */
-export function PercentRing({ value }: { value: number }) {
-  const r = 7;
-  const c = 2 * Math.PI * r;
-  return (
-    <svg {...svg} className="gv-ring" viewBox="0 0 18 18">
-      <circle cx="9" cy="9" r={r} fill="none" stroke="var(--gv-border-default)" strokeWidth="2.5" />
-      <circle
-        cx="9"
-        cy="9"
-        r={r}
-        fill="none"
-        stroke="var(--gv-status-documented)"
-        strokeWidth="2.5"
-        strokeDasharray={`${String((c * value) / 100)} ${String(c)}`}
-        strokeLinecap="round"
-        transform="rotate(-90 9 9)"
-      />
-    </svg>
-  );
-}

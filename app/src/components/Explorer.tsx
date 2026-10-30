@@ -8,7 +8,7 @@ import {
 } from "react";
 
 import type { ModelNode } from "../model/buildModel";
-import { type TreeRow, visibleRows } from "../model/tree";
+import { type TreeRow, filteredRows, visibleRows } from "../model/tree";
 import { useAppStore } from "../store/useAppStore";
 import { ChevronRight } from "./Icons";
 
@@ -26,12 +26,27 @@ const STATUS_LABEL = {
   undocumented: "No description",
 } as const;
 
+const FILTER_LABEL = {
+  documented: "documented",
+  stale: "stale",
+  undocumented: "undocumented",
+} as const;
+
 /** Modules → files → classes → functions, as an ARIA tree with roving focus. */
 export function Explorer() {
   const model = useAppStore((s) => s.model);
   const expandedIds = useAppStore((s) => s.expandedIds);
   const selectedId = useAppStore((s) => s.selectedId);
-  const rows = useMemo(() => (model ? visibleRows(model, expandedIds) : []), [model, expandedIds]);
+  const statusFilter = useAppStore((s) => s.statusFilter);
+  const rows = useMemo(
+    () =>
+      !model
+        ? []
+        : statusFilter
+          ? filteredRows(model, statusFilter)
+          : visibleRows(model, expandedIds),
+    [model, expandedIds, statusFilter],
+  );
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const tree = useRef<HTMLUListElement>(null);
   const focusAfterRender = useRef(false);
@@ -106,30 +121,51 @@ export function Explorer() {
   };
 
   return (
-    <ul
-      className="tree"
-      role="tree"
-      aria-label="Repository explorer"
-      ref={tree}
-      onKeyDown={onKeyDown}
-    >
-      {rows.map((row) => (
-        <TreeItem
-          key={row.node.id}
-          row={row}
-          focusable={row.node.id === activeId}
-          selected={row.node.id === selectedId}
-          meta={row.node.kind === "module" ? model.moduleStats.get(row.node.id)?.files : undefined}
-          onSelect={() => {
-            setFocusedId(row.node.id);
-            select(row.node.id);
-          }}
-          onToggle={() => {
-            toggle(row.node.id);
-          }}
-        />
-      ))}
-    </ul>
+    <>
+      {statusFilter && (
+        <div className="tree-filter" role="status">
+          <span className="status-dot" data-status={statusFilter} aria-hidden="true" />
+          <span>
+            Showing {model.totals[statusFilter]} {FILTER_LABEL[statusFilter]}
+          </span>
+          <button
+            type="button"
+            className="gv-link"
+            onClick={() => {
+              useAppStore.getState().setStatusFilter(null);
+            }}
+          >
+            Show all
+          </button>
+        </div>
+      )}
+      <ul
+        className="tree"
+        role="tree"
+        aria-label="Repository explorer"
+        ref={tree}
+        onKeyDown={onKeyDown}
+      >
+        {rows.map((row) => (
+          <TreeItem
+            key={row.node.id}
+            row={row}
+            focusable={row.node.id === activeId}
+            selected={row.node.id === selectedId}
+            meta={
+              row.node.kind === "module" ? model.moduleStats.get(row.node.id)?.files : undefined
+            }
+            onSelect={() => {
+              setFocusedId(row.node.id);
+              select(row.node.id);
+            }}
+            onToggle={() => {
+              toggle(row.node.id);
+            }}
+          />
+        ))}
+      </ul>
+    </>
   );
 }
 

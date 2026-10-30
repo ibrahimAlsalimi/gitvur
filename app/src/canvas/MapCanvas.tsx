@@ -26,6 +26,7 @@ import { minimapRects } from "./minimapRects";
 import { nodeTypes } from "./nodeTypes";
 import { PerfOverlay } from "./PerfOverlay";
 import { usePerf } from "./perf";
+import { SummaryCard } from "./SummaryCard";
 import { Toolbar } from "./Toolbar";
 import type { MapEdge, MapNode } from "./types";
 
@@ -61,6 +62,7 @@ function MapInner() {
   const expandedIds = useAppStore((s) => s.expandedIds);
   const selectedId = useAppStore((s) => s.selectedId);
   const hops = useAppStore((s) => s.hops);
+  const lens = useAppStore((s) => s.lens);
   const ambiguousOpen = useAppStore((s) => s.ambiguousOpen);
   const navigation = useAppStore((s) => s.navigation);
   const lod = useStore(lodSelector);
@@ -259,6 +261,7 @@ function MapInner() {
   return (
     <div
       className="gv-map"
+      data-lens={lens}
       data-animate={animate}
       data-focus={focus !== null}
       onKeyDown={onKeyDown}
@@ -286,6 +289,7 @@ function MapInner() {
       >
         <Toolbar />
         <Legend />
+        {lens === "coverage" && <SummaryCard />}
         {flow && (
           <Minimap rects={miniRects} width={flow.layout.width} height={flow.layout.height} />
         )}

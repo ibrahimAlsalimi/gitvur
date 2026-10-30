@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 
 import { unresolvedKey } from "../canvas/edges/relationEdges";
-import { ClassGlyph, FunctionGlyph, LanguageGlyph, PercentRing } from "../canvas/glyphs";
+import { ClassGlyph, FunctionGlyph, LanguageGlyph } from "../canvas/glyphs";
+import { StatusRing } from "../canvas/StatusMark";
+import { SeverityIcon } from "../components/SeverityIcon";
 import { middleTruncate } from "../canvas/text";
 import { PanelIcon } from "../components/Icons";
 import type { UnresolvedCall } from "../generated/contract";
@@ -9,6 +11,7 @@ import type { Model, ModelEdge, ModelNode } from "../model/buildModel";
 import { ancestors } from "../model/tree";
 import { useAppStore } from "../store/useAppStore";
 import { CodeViewer } from "./CodeViewer";
+import { trustText } from "./trust";
 import {
   type RelationItem,
   fileOf,
@@ -270,46 +273,96 @@ function Header({ model, node }: { model: Model; node: ModelNode }) {
   );
 }
 
+/**
+ * Description, trust line and provenance. A stale description stays visible, at reduced
+ * emphasis and labelled; an AI description is always marked as AI-written.
+ */
 function DescriptionBlock({ node }: { node: ModelNode }) {
-  if (node.description === undefined) {
+  if (node.synthetic) {
     return (
       <div className="gv-insp-description" data-empty="true">
-        <p>No description yet</p>
-        <p className="gv-insp-hint">Run the documentation agent to add one.</p>
+        <p>Files that no module claims.</p>
       </div>
     );
   }
+  const stale = node.docStatus === "stale";
   return (
-    <div className="gv-insp-description">
-      <p>{node.description}</p>
-      <p className="gv-insp-hint">
-        AI-written
-        {node.descriptionHash !== undefined &&
-          ` · based on version ${shortHash(node.descriptionHash)}`}
-        {node.docStatus === "stale" &&
-          (node.childChanged ? " · a child changed since" : " · the code changed since")}
+    <div className="gv-insp-description" data-status={node.docStatus}>
+      {node.description !== undefined && (
+        <p className="gv-insp-description-text">
+          {stale && <span className="gv-insp-outdated">possibly outdated</span>}
+          {node.description}
+        </p>
+      )}
+      <p className="gv-insp-trust" data-status={node.docStatus}>
+        <span className="status-dot" data-status={node.docStatus} aria-hidden="true" />
+        <span>{trustText(node)}</span>
       </p>
+      {node.description === undefined ? (
+        <p className="gv-insp-hint">Run the documentation agent to add one.</p>
+      ) : (
+        <p className="gv-insp-hint">
+          AI-written
+          {node.descriptionHash !== undefined &&
+            ` · based on version ${shortHash(node.descriptionHash)}`}
+        </p>
+      )}
     </div>
+  );
+}
+
+/** Validation issues about this element. */
+function IssueList({ node }: { node: ModelNode }) {
+  if (node.issues.length === 0) return null;
+  return (
+    <Section title="Validation issues" count={node.issues.length}>
+      <ul className="gv-insp-issues">
+        {node.issues.map((issue) => (
+          <li
+            key={`${issue.code}|${issue.message}`}
+            className="gv-insp-issue"
+            data-severity={issue.severity}
+          >
+            <SeverityIcon severity={issue.severity} />
+            <div>
+              <code className="inline-code">{issue.code}</code>
+              <p>{issue.message}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Section>
   );
 }
 
 function RelationRow({ model, item }: { model: Model; item: RelationItem }) {
   const { edge } = item;
+  const showEvidence = () => {
+    useAppStore.getState().showEvidence(edge);
+  };
   return (
-    <li className="gv-insp-row">
-      <NodeLink model={model} id={item.otherId} />
-      <ProvenanceMark provenance={edge.provenance} />
-      <button
-        type="button"
-        className="gv-insp-evidence"
-        aria-label={`Show evidence at ${edge.evidence.file}:${String(edge.evidence.line)}`}
-        title="Show evidence"
-        onClick={() => {
-          useAppStore.getState().showEvidence(edge);
-        }}
-      >
-        :{edge.evidence.line}
-      </button>
+    <li className="gv-insp-relation">
+      <div className="gv-insp-row">
+        <NodeLink model={model} id={item.otherId} />
+        <ProvenanceMark provenance={edge.provenance} />
+        <button
+          type="button"
+          className="gv-insp-evidence"
+          aria-label={`Show evidence at ${edge.evidence.file}:${String(edge.evidence.line)}`}
+          title="Show evidence"
+          onClick={showEvidence}
+        >
+          :{edge.evidence.line}
+        </button>
+      </div>
+      {edge.provenance === "ai" && edge.note !== undefined && (
+        <p className="gv-insp-edge-note">
+          {edge.note}{" "}
+          <button type="button" className="gv-link" onClick={showEvidence}>
+            Evidence at {edge.evidence.file}:{edge.evidence.line}
+          </button>
+        </p>
+      )}
     </li>
   );
 }
@@ -415,7 +468,7 @@ function ModuleBody({ model, node }: { model: Model; node: ModelNode }) {
               {stats.files} files · {stats.classes} classes · {stats.functions} functions
             </span>
             <span className="status-label">
-              <PercentRing value={stats.documentedPct} />
+              <StatusRing stats={stats} />
               {stats.documentedPct}% documented
             </span>
           </div>
@@ -506,6 +559,7 @@ function NodeDetails({ model, node }: { model: Model; node: ModelNode }) {
       </div>
       <Header model={model} node={node} />
       <DescriptionBlock node={node} />
+      <IssueList node={node} />
       {evidence ? (
         <EvidenceView model={model} edge={evidence} />
       ) : node.kind === "module" ? (

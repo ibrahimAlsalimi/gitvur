@@ -79,6 +79,9 @@ describe("buildModel on py-small", () => {
       classes: 2,
       functions: 7,
       documented: 11,
+      stale: 0,
+      undocumented: 0,
+      errors: 0,
       documentedPct: 100,
     });
     expect(model.totals).toMatchObject({
@@ -90,7 +93,11 @@ describe("buildModel on py-small", () => {
       unresolved: 1,
       documentable: 39,
       documented: 39,
+      stale: 0,
+      undocumented: 0,
       documentedPct: 100,
+      errors: 0,
+      warnings: 0,
     });
   });
 });

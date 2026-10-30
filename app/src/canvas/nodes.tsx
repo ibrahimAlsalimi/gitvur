@@ -2,8 +2,9 @@ import { Handle, type NodeProps, Position, useStore } from "@xyflow/react";
 import { type CSSProperties, type KeyboardEvent, memo, type MouseEvent } from "react";
 
 import { useAppStore } from "../store/useAppStore";
-import { Chevron, ClassGlyph, FunctionGlyph, LanguageGlyph, PercentRing } from "./glyphs";
+import { Chevron, ClassGlyph, FunctionGlyph, LanguageGlyph } from "./glyphs";
 import { lodSelector } from "./lod";
+import { StatusMark, StatusRing } from "./StatusMark";
 import { middleTruncate } from "./text";
 import type { FileNode, ModuleNode, ProjectNode, RowNode } from "./types";
 
@@ -70,6 +71,7 @@ export const ModuleNodeView = memo(function ModuleNodeView({
       className="gv-module"
       data-selected={selected}
       data-synthetic={data.synthetic}
+      data-status={data.synthetic ? undefined : node.docStatus}
       data-lod={lod}
       style={{ "--gv-module-color": data.color } as CSSProperties}
     >
@@ -77,11 +79,23 @@ export const ModuleNodeView = memo(function ModuleNodeView({
       <div
         className="gv-module-header"
         onClick={onHeaderClick}
-        title={node.description ?? node.name}
+        title={node.description !== undefined ? `AI-written: ${node.description}` : node.name}
       >
         <div className="gv-module-title-row">
           <span className="gv-module-name">{node.name}</span>
-          {lod > 0 && stats && <PercentRing value={stats.documentedPct} />}
+          {stats && stats.errors > 0 && (
+            <span
+              className="gv-chip gv-chip-error"
+              title={`${plural(stats.errors, "validation error")} in this module`}
+            >
+              <span className="visually-hidden">Validation errors: </span>
+              {stats.errors}
+            </span>
+          )}
+          {stats && !data.synthetic && (
+            <span className="gv-module-pct">{stats.documentedPct}%</span>
+          )}
+          {lod > 0 && stats && <StatusRing stats={stats} />}
         </div>
         {lod > 0 && node.description && (
           <div className="gv-module-description">{node.description}</div>
@@ -115,12 +129,15 @@ export const FileNodeView = memo(function FileNodeView({
     }
   };
   if (lod === 0) {
-    return <div className="gv-file gv-file-tile" data-selected={selected} />;
+    return (
+      <div className="gv-file gv-file-tile" data-selected={selected} data-status={node.docStatus} />
+    );
   }
   return (
     <div
       className="gv-file"
       data-selected={selected}
+      data-status={node.docStatus}
       data-expanded={data.expanded}
       onKeyDown={onKeyDown}
     >
@@ -155,7 +172,7 @@ export const FileNodeView = memo(function FileNodeView({
             <Chevron expanded={data.expanded} />
           </button>
         )}
-        <span className="gv-status-slot" aria-hidden="true" />
+        <StatusMark node={node} />
       </div>
       {data.expanded && lod === 1 && (
         <div className="gv-file-stub">{plural(data.childCount, "item")}</div>
@@ -175,6 +192,7 @@ export const RowNodeView = memo(function RowNodeView({ data, selected }: NodePro
       data-kind={node.kind}
       data-method={data.method}
       data-selected={selected}
+      data-status={node.docStatus}
     >
       <Anchors />
       {isClass ? <ClassGlyph /> : <FunctionGlyph method={data.method} />}
@@ -184,7 +202,7 @@ export const RowNodeView = memo(function RowNodeView({ data, selected }: NodePro
       <span className="gv-row-count">
         {isClass ? plural(data.count, "method") : `${String(data.count)} ln`}
       </span>
-      <span className="gv-status-slot" aria-hidden="true" />
+      <StatusMark node={node} />
     </div>
   );
 });

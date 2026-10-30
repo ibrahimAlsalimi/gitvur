@@ -2,6 +2,7 @@ import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import type { Theme } from "../generated/contract";
 import { useAppStore } from "../store/useAppStore";
+import { TrustSummary } from "../topbar/TrustSummary";
 import { LogoMark, MoreIcon } from "./Icons";
 
 const THEMES: { value: Theme; label: string }[] = [
@@ -34,6 +35,8 @@ export function TopBar() {
             <span className="visually-hidden">Commit </span>
             {bundle.manifest.commitSha}
           </span>
+          <span className="topbar-divider" aria-hidden="true" />
+          <TrustSummary />
         </>
       )}
       <span className="topbar-spacer" />

@@ -37,7 +37,9 @@ button {
 
 .frame {
   display: grid;
-  grid-template-rows: var(--gv-layout-topbar) minmax(0, 1fr) var(--gv-layout-statusbar);
+  grid-template-rows:
+    var(--gv-layout-topbar) auto minmax(0, 1fr) auto
+    var(--gv-layout-statusbar);
   height: 100vh;
   width: 100vw;
   overflow: hidden;
@@ -739,4 +741,258 @@ button {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+.tree-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-2);
+  padding: var(--gv-space-2) var(--gv-space-3);
+  border-bottom: var(--gv-hairline) solid var(--gv-border-subtle);
+  background: var(--gv-bg-sunken);
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-sm);
+}
+
+.tree-filter .gv-link {
+  margin-left: auto;
+}
+
+/* ---- Trust summary, banners, issues drawer (Phase 09) ------------------------------ */
+
+.trust-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-3);
+  min-width: 0;
+  overflow: hidden;
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gv-space-1);
+}
+
+.trust-errors {
+  padding: 0 var(--gv-space-1);
+  border: none;
+  border-radius: var(--gv-radius-sm);
+  background: transparent;
+  color: var(--gv-status-error);
+  font: inherit;
+  font-weight: var(--gv-weight-medium);
+  cursor: pointer;
+}
+
+.trust-errors:hover {
+  background: var(--gv-status-error-soft);
+}
+
+.banners {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-3);
+  min-height: 36px;
+  padding: var(--gv-space-1) var(--gv-space-2) var(--gv-space-1) var(--gv-space-4);
+  border-bottom: var(--gv-hairline) solid var(--gv-status-stale);
+  background: var(--gv-status-warning-soft);
+  font-size: var(--gv-text-sm);
+}
+
+.banner[data-severity="error"] {
+  border-bottom-color: var(--gv-status-error);
+  background: var(--gv-status-error-soft);
+}
+
+.banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.banner-action {
+  height: 26px;
+}
+
+.banner-dismiss {
+  width: 26px;
+  height: 26px;
+}
+
+.drawer {
+  min-height: 0;
+  min-width: 0;
+}
+
+.issues-panel {
+  display: flex;
+  flex-direction: column;
+  height: min(260px, 36vh);
+  border-top: var(--gv-hairline) solid var(--gv-border-default);
+  background: var(--gv-bg-surface);
+}
+
+.issues-header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--gv-space-3);
+  height: var(--gv-layout-pane-header);
+  padding: 0 var(--gv-space-2) 0 var(--gv-space-4);
+  border-bottom: var(--gv-hairline) solid var(--gv-border-subtle);
+}
+
+.issues-title {
+  margin: 0;
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-xs);
+  font-weight: var(--gv-weight-semibold);
+  letter-spacing: var(--gv-tracking-caps);
+  text-transform: uppercase;
+}
+
+.issues-counts {
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-sm);
+}
+
+.issues-hint {
+  margin-left: auto;
+  color: var(--gv-text-tertiary);
+  font-size: var(--gv-text-xs);
+}
+
+.issues-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--gv-space-1) var(--gv-space-2) var(--gv-space-2);
+}
+
+.issues-empty {
+  margin: 0;
+  padding: var(--gv-space-3) var(--gv-space-2);
+  color: var(--gv-text-tertiary);
+}
+
+.issues-group-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-2);
+  width: 100%;
+  height: 28px;
+  padding: 0 var(--gv-space-2);
+  border: none;
+  border-radius: var(--gv-radius-sm);
+  background: transparent;
+  color: var(--gv-text-primary);
+  font: inherit;
+  font-size: var(--gv-text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.issues-group-header:hover {
+  background: var(--gv-bg-hover);
+}
+
+.issues-group-count {
+  color: var(--gv-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.issues-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.issue-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-2);
+  width: 100%;
+  min-height: 26px;
+  padding: 0 var(--gv-space-2) 0 calc(var(--gv-space-2) + 16px + var(--gv-space-2));
+  border: none;
+  border-radius: var(--gv-radius-sm);
+  background: transparent;
+  color: var(--gv-text-primary);
+  font: inherit;
+  font-size: var(--gv-text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.issue-row:hover:not([data-static="true"]) {
+  background: var(--gv-bg-hover);
+}
+
+.issue-row[data-static="true"] {
+  cursor: default;
+}
+
+.issue-message {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.issue-id {
+  flex: none;
+  max-width: 45%;
+  overflow: hidden;
+  color: var(--gv-text-tertiary);
+  font-family: var(--gv-font-code);
+  font-size: var(--gv-text-xs);
+  white-space: nowrap;
+}
+
+.statusbar-issues {
+  height: 100%;
+  padding: 0 var(--gv-space-2);
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  gap: var(--gv-space-3);
+  cursor: pointer;
+}
+
+.statusbar-issues:hover,
+.statusbar-issues[aria-expanded="true"] {
+  background: var(--gv-bg-hover);
+}
+
+.statusbar-count {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gv-space-1);
+}
+
+.severity-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.statusbar-count .severity-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.statusbar-count[data-zero="true"] .severity-icon {
+  opacity: 0.45;
 }

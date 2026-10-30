@@ -5,6 +5,8 @@
  * - `?fixture=py-small|ts-small` opens that fixture at startup (default: none).
  * - `?state=no-gitvur|schema-invalid|structure-only|indexing` simulates the matching
  *   backend behaviour, for screenshots of each state.
+ * - `?state=trust` serves hand-crafted validation results (every status and issue code,
+ *   see `mockTrust.ts`); `?state=report-stale` a report older than the structure.
  * - `?missing=<relpath>` serves that source file as if it had been deleted after indexing,
  *   for the inspector's missing-source warning.
  */
@@ -18,6 +20,7 @@ import type {
   SourceSlice,
   Structure,
 } from "../generated/contract";
+import { trustBundle } from "./mockTrust";
 import { type Api, DEFAULT_SETTINGS } from "./types";
 
 const gitvurFiles = import.meta.glob<unknown>("../../../fixtures/*/.gitvur/*.json", {
@@ -98,6 +101,14 @@ function bundle(path: string): Promise<RepoBundle> {
         ]
       : [],
   };
+  if (state === "trust") return Promise.resolve(trustBundle(result));
+  if (state === "report-stale" && result.report) {
+    result.report = { ...result.report, commitSha: "1a2b3c4" };
+    result.warnings.push({
+      code: "report-stale",
+      message: "The report is older than the structure; validate again",
+    });
+  }
   return Promise.resolve(result);
 }
 

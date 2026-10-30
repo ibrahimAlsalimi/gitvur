@@ -1,15 +1,45 @@
 import { create } from "zustand";
 
 import { DEFAULT_SETTINGS, getApi, toAppError } from "../api";
-import type { AppError, RecentRepo, RepoBundle, Settings, Theme } from "../generated/contract";
+import type {
+  AppError,
+  RecentRepo,
+  RepoBundle,
+  Settings,
+  Status,
+  Theme,
+} from "../generated/contract";
 import { type Model, type ModelEdge, buildModel } from "../model/buildModel";
 import { ancestors, defaultExpanded } from "../model/tree";
 
 /** What the app is doing right now. Drives the canvas state panels. */
 export type Phase = "idle" | "opening" | "indexing" | "validating" | "ready" | "error";
 
-/** How the map colours nodes. Only `structure` exists until Phase 09. */
+/** How the map colours nodes: plain, or tinted by documentation status. */
 export type Lens = "structure" | "coverage";
+
+/** Banners the user can dismiss for the session. */
+export type BannerId = "report-missing" | "structure-out-of-date" | "report-stale";
+
+const LENS_KEY = "gitvur.lens:";
+
+/** The lens last used for a repository (per-viewer convenience; storage may be unavailable). */
+function savedLens(root: string): Lens {
+  try {
+    const value = window.localStorage.getItem(LENS_KEY + root);
+    return value === "coverage" ? "coverage" : "structure";
+  } catch {
+    return "structure";
+  }
+}
+
+function saveLens(root: string, lens: Lens): void {
+  try {
+    window.localStorage.setItem(LENS_KEY + root, lens);
+  } catch {
+    // Storage unavailable: the lens just isn't remembered.
+  }
+}
 
 export const PANE_LIMITS = {
   explorer: { min: 200, max: 480 },
@@ -41,6 +71,10 @@ interface AppState {
   /** Ask the canvas to centre a node; `seq` changes on every request. */
   navigation: { id: string; seq: number } | null;
   lens: Lens;
+  /** Explorer shows only elements with this status (and their ancestors). */
+  statusFilter: Status | null;
+  issuesOpen: boolean;
+  dismissedBanners: Set<BannerId>;
   theme: Theme;
 
   init: () => Promise<void>;
@@ -62,6 +96,9 @@ interface AppState {
   expandAllFiles: () => void;
   collapseAllFiles: () => void;
   setLens: (lens: Lens) => void;
+  setStatusFilter: (status: Status | null) => void;
+  setIssuesOpen: (open: boolean) => void;
+  dismissBanner: (id: BannerId) => void;
   setTheme: (theme: Theme) => void;
   setPane: (pane: "explorer" | "inspector", width: number) => void;
   setInspectorCollapsed: (collapsed: boolean) => void;
@@ -124,6 +161,9 @@ export const useAppStore = create<AppState>()((set, get) => {
         ...(sameRepo
           ? {}
           : {
+              lens: savedLens(bundle.root),
+              statusFilter: null,
+              dismissedBanners: new Set<BannerId>(),
               history: [],
               historyIndex: -1,
               evidence: null,
@@ -172,6 +212,9 @@ export const useAppStore = create<AppState>()((set, get) => {
     historyIndex: -1,
     navigation: null,
     lens: "structure",
+    statusFilter: null,
+    issuesOpen: false,
+    dismissedBanners: new Set(),
     theme: DEFAULT_SETTINGS.theme,
 
     init() {
@@ -301,7 +344,21 @@ export const useAppStore = create<AppState>()((set, get) => {
     },
 
     setLens(lens) {
-      set({ lens });
+      const { bundle } = get();
+      if (bundle) saveLens(bundle.root, lens);
+      set(lens === "structure" ? { lens, statusFilter: null } : { lens });
+    },
+
+    setStatusFilter(status) {
+      set({ statusFilter: status });
+    },
+
+    setIssuesOpen(open) {
+      set({ issuesOpen: open });
+    },
+
+    dismissBanner(id) {
+      set({ dismissedBanners: new Set([...get().dismissedBanners, id]) });
     },
 
     setTheme(theme) {

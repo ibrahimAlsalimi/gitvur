@@ -540,7 +540,70 @@ Two sessions: the first stopped at the usage limit after a WIP checkpoint (`c8b8
   - The browser logs "ResizeObserver loop completed with undelivered notifications" in some inspector tests. It is the benign warning that fires when the inspector's scrollbar appears and the canvas resizes; no test or behaviour is affected.
 - Not done: `pnpm tauri dev` against py-small / ts-small. The native folder dialog can't be driven here (same limit as Phase 07). Please select functions in both fixtures there.
 
+### 2026-10-30 — Phase 09 — Trust and coverage UI
+
+- Done:
+  - **Model** (`buildModel.ts`): `ModelNode.issues` (report issues about the element, errors first); `ModuleStats` gains `stale`, `undocumented`, `errors` (subtree); `Totals` gains `stale`, `undocumented`, `errors`, `warnings`; `Model.issues` sorted by severity, code, id (issues without one last), message.
+  - **Status marks** (`canvas/StatusMark.tsx`) in the 16px slot on file cards and rows:
+    - stale with `selfChanged`: filled stale dot; `childChanged` only: hollow ring;
+    - validation error: red triangle, which takes precedence over the stale mark;
+    - documented and undocumented: no mark.
+  - Module headers: an error-count chip, and a ring split into documented / stale / undocumented arcs.
+  - **Documentation lens** (Toolbar → "Documentation"; the store value stays `coverage`):
+    - CSS tints via `data-lens` / `data-status`: stale at 14%, undocumented dashed with a 10% tint, selection still wins;
+    - documented % beside each module ring;
+    - summary card (top-right, below the toolbar row): stacked bar and counts with %, and the error count, which opens the issues panel. A segment or count filters the explorer (`filteredRows`: matching elements plus ancestors, all expanded, with a "Showing N … · Show all" bar).
+    - The lens is saved per repository in `localStorage` (key `gitvur.lens:<root>`). Storage failures fall back to Structure.
+  - **Inspector trust**:
+    - status line with the prompt's exact wording (`inspector/trust.ts`);
+    - stale descriptions stay visible in secondary text with a "possibly outdated" pill;
+    - provenance line "AI-written · based on version <6 hex>" on every description;
+    - a "Validation issues" section with code + message;
+    - AI edges show their `note` and an "Evidence at file:line" link.
+  - **Issues panel** (`panels/issues/`): bottom drawer, toggled by the status-bar error/warning counts or Ctrl+Shift+M.
+    - Groups by code, errors first, collapsible with counts.
+    - Rows: severity icon (shape differs as well as colour), message, middle-truncated id. Click selects and centres the element; ids not in the map are not clickable and say so on hover.
+    - Empty: "No validation issues." (or "Not validated yet." without a report).
+  - **Top bar** (`topbar/TrustSummary.tsx`): `29 documented · 5 stale · 5 undocumented · 7 errors` with dots; the error count opens the panel.
+  - **Banners** (`topbar/banners.ts`, `Banners.tsx`), stale-tinted, dismissible per session:
+    - report missing → "Not validated yet." [Validate];
+    - `structure-out-of-date` issue → "The code changed since this map was generated." [Re-index];
+    - report older than the map → "Validation results are older than the map." [Validate]. This uses the backend's `report-stale` warning (file mtimes) or report `commitSha` ≠ manifest `commitSha`; the report has no timestamp of its own.
+  - **Mock**: `?state=trust` (`api/mockTrust.ts`): hand-crafted py-small results with every status, both stale kinds and one issue of each of the 12 validator codes; undocumented elements also lose their descriptions. `?state=report-stale` for the third banner.
+- Tests:
+  - Vitest 47 (4 new in `model/trust.test.ts`: totals and per-module counts, stale flags and per-element issues, issue ordering, explorer filtering).
+  - Playwright `e2e/trust.spec.ts`: screenshots `trust-01` … `trust-05c` in light and dark, plus behaviour:
+    - lens persistence across reload; explorer filter and Show all;
+    - exact trust wording for all four cases; stale label; element issues; AI note → evidence;
+    - issues panel: shortcut, grouping order, collapse, row navigation, close, status-bar toggle, empty state;
+    - banner actions and dismissal; top-bar counts.
+  - **70 passing** in total, 2 skipped (perf).
+- **Visual review**:
+  - *Structure lens still calm?* Yes. On a fully documented repository it looks the same as Phase 08: no marks, a green ring. With the trust data, the marks are 8–9px shapes at the right edge of rows and cards; the brightest elements are the red module chips.
+  - *Least-documented module in three seconds in the Documentation lens?* Yes, now. At mid zoom the ring alone was too small to compare, so the lens shows the documented % as text beside the ring (Support 29% stands out). The summary card can cover a module at the top-right, as other floating panels can.
+  - *Stale distinct from error in both themes and greyscale?* Yes: stale is a circle (filled or hollow), error a triangle. Panels and status bar use a triangle for errors and a circled `!` for warnings. In colour they are orange and red.
+  - *Could an AI description be mistaken for verified fact?* The inspector always carries "AI-written · based on version …" and a status line. Map module headers show the description text without a marker; that's the one place. I made the hover title read "AI-written: …" and left the header text unmarked to keep the map calm. Revisit in Phase 11 if testers read headers as fact.
+  - Fixed during review: the summary card collided with the toolbar on narrower canvases (it now sits below the toolbar row). The stale trust line was coloured `--gv-status-stale`, which is marginal for small text (now primary text; the dot carries the colour).
+- Acceptance:
+  - [x] Status marks, documentation lens, summary card with filtering
+  - [x] Inspector trust section with exact wording and provenance line
+  - [x] Issues panel with navigation
+  - [x] Trust summary and three banner conditions
+  - [x] Screenshots reviewed
+  - `pnpm typecheck && lint && test && check:contrast && e2e` pass. No Rust changes; Rust fmt, clippy and 127 tests passed earlier in this session.
+- Dependencies added: none.
+- Deviations / notes:
+  - Lens persistence uses `localStorage`, not `Settings`: per-repository settings would change the Rust `Settings` type, and this phase doesn't touch Rust.
+  - Error triangles replace the stale mark when both apply. The slot is 16px, and the tooltip names both.
+  - `components/SeverityIcon.tsx` is shared by the inspector, the issues panel and the status bar.
+  - The issues panel is labelled "Issues panel" (the inspector's section is "Validation issues").
+  - Banners have no error-severity case yet: the three conditions are all warnings. The error tint exists in CSS.
+  - `components/TopBar.tsx`, `StatusBar.tsx`, `Explorer.tsx`, `App.tsx`, `api/mock.ts` and `store/useAppStore.ts` were edited outside the listed scope to mount the new pieces.
+- Not done: the `pnpm tauri dev` check (edit a copy of py-small, Validate, watch the marks). It needs the native folder dialog, as in Phases 07–08. Please run it.
+
 ## Parking lot
+
+- Map module headers show AI descriptions without an on-canvas provenance marker (hover title only); revisit with testers (Phase 09 review).
 
 - Edge routing: lines entering a module to reach a row cross the module header text, and their badges can sit on the header or ring; route around container headers, or move badges off headers (Phase 08 review).
 

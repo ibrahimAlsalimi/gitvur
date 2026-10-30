@@ -8,17 +8,22 @@ import { StatusBar } from "./components/StatusBar";
 import { TopBar } from "./components/TopBar";
 import { Inspector, InspectorRail } from "./inspector/Inspector";
 import { useHistoryKeys } from "./inspector/useHistoryKeys";
+import { IssuesPanel } from "./panels/issues/IssuesPanel";
+import { useIssuesShortcut } from "./panels/issues/useIssuesShortcut";
+import { Banners } from "./topbar/Banners";
 import { PANE_LIMITS, useAppStore } from "./store/useAppStore";
 
 /** The application frame: top bar, explorer | canvas | inspector, status bar. */
 export function App() {
   const settings = useAppStore((s) => s.settings);
+  const issuesOpen = useAppStore((s) => s.issuesOpen);
   const theme = useAppStore((s) => s.theme);
 
   useEffect(() => {
     void useAppStore.getState().init();
   }, []);
   useHistoryKeys();
+  useIssuesShortcut();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -31,6 +36,7 @@ export function App() {
   return (
     <div className="frame">
       <TopBar />
+      <Banners />
       <div
         className="panes"
         data-inspector={collapsed ? "collapsed" : "open"}
@@ -76,6 +82,7 @@ export function App() {
           </>
         )}
       </div>
+      <div className="drawer">{issuesOpen && <IssuesPanel />}</div>
       <StatusBar />
       <HelpDialog />
     </div>
