@@ -746,12 +746,12 @@ Two sessions: the first stopped at the usage limit after a WIP checkpoint (`c8b8
 - Receding (dimmed or unchanged nodes) no longer hides the selection. It also now outranks the Documentation and Changes lens tints and borders: lens cues keep their dashed shape but switch to neutral colours. Glyphs, chips and status dots keep their meaning colour (errors stay red) and only fade.
 - Breadcrumbs: dropped `inline-flex`, so long names show "…" again. Kept the 24px height through `min-height`.
 - Resize handles: the 24px pointer area reaches only into the canvas, no longer onto the explorer's scrollbar or the inspector's content.
-- Summary bar: segments stay 12px tall and get a 24px hit area from `::after`. This replaces the padding and `background-clip` hack that broke outlines and corners.
+- Summary bar: each segment is a 24px-tall transparent button, and `::before` draws the 12px bar with its fill, outline and pressed ring. The bar's −6px margin keeps the card's spacing. This replaces the padding and `background-clip` hack that broke outlines and corners.
 - Hit-target sizes are now set in the original rules. The duplicate overrides at the ends of `canvas.css` and `inspector.css` are removed.
 - New `canvas/motion.ts` (`cameraDuration`) is shared by the map, toolbar and minimap. The minimap now respects reduced motion.
 - Guide: a card beside a small target flips to the target's left when it would not fit on the right.
 - Search perf test: also asserts the slowest single run is < 100 ms.
-- `pnpm typecheck && lint && test` pass. Not checked visually in `pnpm tauri dev`, and `check:contrast`/`e2e` were not run.
+- `pnpm typecheck && lint && test && check:contrast` pass. `e2e` passes except `states › structure only`, which is flaky (about 1 run in 5, before and after these changes) because `getByText('0% documented')` matches two elements. Review screenshots were regenerated. Not checked in `pnpm tauri dev`.
 
 ## Parking lot
 

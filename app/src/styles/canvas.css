@@ -888,10 +888,12 @@
 .gv-summary-bar {
   display: flex;
   gap: var(--gv-space-1);
-  height: 12px;
+  height: 24px;
+  /* The 6px above and below the 12px bar sit in the neighbouring gaps. */
+  margin: -6px 0;
 }
 
-/* 12px tall visually; the ::after extends the hit target to 24px into the margins. */
+/* A 24px-tall hit target; ::before draws the 12px bar, its outline and pressed ring. */
 .gv-summary-segment {
   position: relative;
   flex-basis: 0;
@@ -899,29 +901,31 @@
   padding: 0;
   border: none;
   border-radius: var(--gv-radius-sm);
+  background: transparent;
   cursor: pointer;
 }
 
-.gv-summary-segment::after {
+.gv-summary-segment::before {
   content: "";
   position: absolute;
-  inset: -6px 0;
+  inset: 6px 0;
+  border-radius: var(--gv-radius-sm);
 }
 
-.gv-summary-segment[data-status="documented"] {
+.gv-summary-segment[data-status="documented"]::before {
   background: var(--gv-status-documented);
 }
 
-.gv-summary-segment[data-status="stale"] {
+.gv-summary-segment[data-status="stale"]::before {
   background: var(--gv-status-stale);
 }
 
-.gv-summary-segment[data-status="undocumented"] {
+.gv-summary-segment[data-status="undocumented"]::before {
   background: color-mix(in srgb, var(--gv-status-undocumented) 35%, transparent);
   box-shadow: inset 0 0 0 1.5px var(--gv-status-undocumented);
 }
 
-.gv-summary-segment[aria-pressed="true"] {
+.gv-summary-segment[aria-pressed="true"]::before {
   outline: var(--gv-border-emphasis) solid var(--gv-text-primary);
   outline-offset: 1px;
 }
