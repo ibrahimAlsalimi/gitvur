@@ -34,6 +34,15 @@ is measured in `metrics.md`.
   `agent/codeDOC.md` in initial mode on its own fresh clone at the commit above, and nothing
   else. Its output and run log are in `eval/documenter/initial/`. The incremental run (step 7)
   is a second documenter session.
+
+  **Isolation was weaker than intended.** The documenter turned out to be a bridge session in
+  the evaluator's own checkout (`~/Projects/gitvur/v2`), not a separate container. It switched
+  that checkout to its branch, and it listed the evaluator's uncommitted `eval/` files
+  (`find eval`), which included this protocol, `metrics.md` and `comprehension-key.md`. Its
+  Black clone (`/tmp/black`) was its own. From then on the evaluator worked in a separate git
+  worktree (`~/Projects/gitvur/v2-eval`). The rater should keep in mind that the documenter may
+  have seen the comprehension questions. That can't change the ratings of descriptions or
+  edges, but it could have influenced which areas it described most carefully.
 - **Human rater**: fills the `rating`, `misleading` and `comment` columns, and runs the
   comprehension test.
 
