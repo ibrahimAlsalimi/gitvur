@@ -22,9 +22,11 @@ pub fn typescript() -> String {
     use gitvur_schema as s;
     let cfg = Config::default();
     let decls = declarations![&cfg;
-        // Contract v0.2 (gitvur-schema)
+        // Contract v0.3 (gitvur-schema)
         s::Manifest, s::ExtractorInfo, s::Language,
         s::Structure, s::Node, s::NodeType, s::UnresolvedCall,
+        s::Trace, s::TraceNode, s::TraceKind,
+        s::EntryPoint, s::EntryKind, s::Flow, s::FlowStep, s::FlowTransition, s::TransitionKind, s::FlowStatus, s::FlowState,
         s::Edge, s::EdgeType, s::Provenance, s::Evidence, s::SourceRange,
         s::Annotations, s::Module, s::Description,
         s::Report, s::Summary, s::ElementStatus, s::Status, s::Issue, s::Severity,

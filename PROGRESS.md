@@ -809,6 +809,86 @@ Two sessions: the first stopped at the usage limit after a WIP checkpoint (`c8b8
   - `modified` crosses the bridge as Unix seconds encoded as a string, formatted locally for display.
   - Safe parent-relative image paths within the repository are allowed; escapes are rejected after normalization/canonicalization. Leading `/` means repository-root-relative, as the prompt specifies.
 
+## Phase 14 — Parts A–B, fixture review checkpoint (2026-10-30)
+
+- Phase 13 pushed and merged: PR #2, https://github.com/ibrahimAlsalimi/gitvur/pull/2,
+  merge commit `86e89d35a992832e0d1ea905e485877b93529d2a`. Both CI runs succeeded.
+- Branch: `phase-14-entry-points`. Added contract v0.3 entry/flow/report types, schemas,
+  and backward compatibility with committed v0.2 bundles. Flow step reading order stays
+  intact. Trace, flow validation, packet updates and agent instructions await Parts C–F.
+- Added deterministic Python main guards/package main/config console scripts and
+  TypeScript package/bin/npm/top-level entries. Configuration is parsed as data, never
+  executed. Configs follow the source walker's ignore/symlink policy and are included
+  in revision indexing. Unindexed paths stay null; ambiguous calls retain candidates.
+- Created py-flows and ts-flows source fixtures and hand-derived expected structures
+  BEFORE implementing extraction. A temporary helper only computed hashes of explicitly
+  chosen source ranges; it did not parse or extract. Initial entry tests failed as
+  expected before implementation; final full-structure comparisons pass without
+  rewriting the goldens. Fixture NOTES.md explains each entry and agent-only wiring.
+- Compatibility plumbing updates Rust constructors, app bundle version acceptance and
+  generated bindings. No app UI features changed. Both existing fixture directories
+  remain untouched; old graph tests compare the v0.2 projection, and the browser diff
+  snapshot retains its v0.2 scenario. Full v0.3 output has separate new fixture goldens.
+- Checks: cargo fmt, workspace Clippy with warnings denied, cargo test --workspace;
+  app generated binding check, typecheck, lint and all 69 Vitest tests. Targeted coverage
+  includes every static entry kind, deterministic output, exact config evidence,
+  ID collisions/source order, nested runtime scope exclusion, malformed/ignored configs,
+  escaping paths, shell text never executed, and v0.2/v0.3 bundle compatibility.
+- Limits: Python console module lookup is config-directory-relative (no src-layout
+  inference). Simple npm runner/path prefixes only; flags before paths, variable
+  expansion and spaces inside paths are not interpreted. Conditional exports string
+  leaves are supported; arrays are not. Ambiguous-only top-level TS statements retain
+  entries so their unresolved sites have stable owners. See schema/index READMEs.
+
+HUMAN REVIEW REQUIRED before Part C: fixtures/py-flows/expected/, fixtures/ts-flows/expected/
+
+The phase prompt explicitly requires stopping here. Review both expected/structure.json
+and expected/NOTES.md pairs before continuing Parts C–F in a new session.
+
+## Repository usage guide (2026-10-30)
+
+- Added `docs/USING_GITVUR.md` and linked it from the root README. Covers supported
+  languages, one-time CLI/desktop setup, indexing any selected repository root, map/docs
+  navigation, optional isolated-copy AI documentation, incremental refresh, structural
+  diffs, output ownership and troubleshooting. Clarifies the Phase 14 checkpoint limits.
+- Verified commands against the CLI parser/help, UI labels against components, local
+  Markdown links and `git diff --check`. Documentation only; no runtime code changed.
+- Phase 14's fixture review gate remains pending; no Parts C–F work was started.
+
+## Phase 14 — Part C: deterministic trace (2026-10-30)
+
+- User explicitly requested Part C after the A–B checkpoint. Implemented Part C only;
+  Parts D–F and the Flows UI remain pending. Existing/new fixture source and goldens
+  remain unchanged.
+- Added `gitvur-flow` with `trace(&Structure, start, &TraceOptions)` and defaults depth
+  6 / 300 occurrences. Function entry targets plus direct calls form roots. Traversal
+  follows syntactic calls, optional semantic calls, never AI edges. BFS allocation
+  ensures shorter paths win. Source locations then IDs determine child order.
+- Shared nodes produce refs; ancestor back-edges produce cycles; unresolved sites produce
+  ambiguous stubs with sorted candidates. Entry-owned ambiguities are retained too.
+  Depth/budget omissions record immediate hidden children, or hidden roots for a root
+  budget. Zero and exact limits are defined and tested. Unknown IDs return an error.
+- Added shared Trace/TraceNode/TraceKind types, `schemas/trace.schema.json` and generated
+  TypeScript bindings. Tree JSON uses an occurrence arena with root/child IDs and first
+  occurrence refs, avoiding recursive serialization for deep traces. No app UI changed.
+- Added read-only CLI `trace` (text/JSON, limits, semantic opt-in) and `flows`. They freshly
+  index current source, safely read optional annotations and merge entry IDs. Neither
+  writes the target repository. Malformed/outside-root annotations and duplicate entry
+  IDs fail explicitly. Agent edges never enter the executable graph.
+- Flow listing status is deliberately `unchecked`: accurate current/stale/broken status
+  requires Part D. No stale saved report is presented as a fresh flow validation result.
+- Verification: seven trace integration tests cover both new fixture chains, recursive
+  and shared paths, ambiguity, provenance, shuffled input determinism, source ordering,
+  duplicate calls, null/file targets, node/depth limits and a 1,000-node trace round-trip.
+  Four CLI integration tests cover text markers, canonical JSON, unknown-ID exit codes,
+  limits, AI/static entry listing, external annotation symlinks and absence of writes.
+  Workspace fmt/Clippy (warnings denied)/tests passed; generated bindings passed;
+  app typecheck/lint and all 69 Vitest tests passed. CLI smoke examples also passed.
+- Added the crate README and schema rules; updated CLAUDE.md and the repository usage
+  guide with the available commands. The usage guide/README link from the prior request
+  is included in this checkpoint. No new third-party dependency version was added;
+  the CLI promotes its existing serde_json dev dependency to runtime to read annotations.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).

@@ -9,6 +9,13 @@
         "$ref": "#/$defs/Edge"
       }
     },
+    "entryPoints": {
+      "description": "Deterministic entry points; omitted when empty to preserve v0.2 canonical bytes.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EntryPoint"
+      }
+    },
     "nodes": {
       "type": "array",
       "items": {
@@ -74,6 +81,79 @@
         "depends_on",
         "imports",
         "references"
+      ]
+    },
+    "EntryKind": {
+      "type": "string",
+      "enum": [
+        "cli-command",
+        "console-script",
+        "event-handler",
+        "http-route",
+        "job",
+        "main-guard",
+        "npm-script",
+        "other",
+        "package-bin",
+        "package-main",
+        "test",
+        "top-level-call"
+      ]
+    },
+    "EntryPoint": {
+      "type": "object",
+      "properties": {
+        "calls": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence": {
+          "description": "Optional at deserialization so validation can diagnose missing AI evidence.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^entry:[a-z-]+:[a-z0-9-]+(?:#[2-9][0-9]*|#1[0-9]+)?$"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntryKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "target": {
+          "description": "A resolved node ID, or null when configuration names code outside the index.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "provenance"
       ]
     },
     "Evidence": {

@@ -9,6 +9,7 @@ use clap::{Parser, Subcommand};
 use gitvur_index::{IndexOptions, index, write_output};
 
 mod diff;
+mod execution;
 mod packet;
 
 #[derive(Debug, Parser)]
@@ -56,6 +57,22 @@ enum Command {
         #[arg(long)]
         out: Option<PathBuf>,
     },
+    /// Print a bounded deterministic call tree without modifying the repository.
+    Trace {
+        repo: PathBuf,
+        /// Entry point ID or source node ID.
+        start: String,
+        #[arg(long, default_value_t = 6)]
+        depth: u32,
+        #[arg(long, default_value_t = 300)]
+        max_nodes: u32,
+        #[arg(long)]
+        include_semantic: bool,
+        #[arg(long)]
+        json: bool,
+    },
+    /// List entry points and curated flows (status is unchecked until flow validation).
+    Flows { repo: PathBuf },
     /// Compare the structure of two revisions (read via Git; the working tree is untouched).
     Diff {
         /// Path to the repository root.
@@ -106,6 +123,24 @@ fn main() -> ExitCode {
                 ExitCode::FAILURE
             }
         },
+        Command::Trace {
+            repo,
+            start,
+            depth,
+            max_nodes,
+            include_semantic,
+            json,
+        } => execution_result(execution::run_trace(
+            &repo,
+            &start,
+            &gitvur_flow::TraceOptions {
+                max_depth: depth,
+                max_nodes,
+                include_semantic,
+            },
+            json,
+        )),
+        Command::Flows { repo } => execution_result(execution::list(&repo)),
         Command::Diff {
             repo,
             commit_a,
@@ -119,6 +154,16 @@ fn main() -> ExitCode {
                 ExitCode::FAILURE
             }
         },
+    }
+}
+
+fn execution_result(result: anyhow::Result<()>) -> ExitCode {
+    match result {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => {
+            eprintln!("error: {error:#}");
+            ExitCode::FAILURE
+        }
     }
 }
 

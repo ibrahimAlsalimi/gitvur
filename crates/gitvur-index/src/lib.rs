@@ -9,6 +9,7 @@ use std::path::{Path, PathBuf};
 
 use gitvur_schema::{ExtractorInfo, Manifest, SCHEMA_VERSION, Structure, UNCOMMITTED};
 
+mod config;
 mod docs;
 pub mod git;
 pub use docs::{DocEntry, discover_docs};
@@ -106,7 +107,8 @@ pub fn index(repo: &Path, opts: &IndexOptions) -> Result<IndexOutput, IndexError
     let project_name = root
         .file_name()
         .map_or_else(|| "root".to_owned(), |n| n.to_string_lossy().into_owned());
-    let structure = resolve::build_structure(&project_name, &files);
+    let config_entries = config::discover(&root, &mut warnings);
+    let structure = resolve::build_structure(&project_name, &files, &config_entries);
     let mut manifest = Manifest {
         schema_version: SCHEMA_VERSION.into(),
         project_name,
@@ -136,6 +138,7 @@ pub fn index_inputs() -> impl Fn(&str) -> bool {
     move |relpath: &str| {
         relpath == ".gitignore"
             || relpath.ends_with("/.gitignore")
+            || config::is_config(relpath)
             || backends.iter().any(|b| b.handles(relpath))
     }
 }

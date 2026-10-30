@@ -50,7 +50,7 @@ impl LanguageBackend for Python {
         relpath.ends_with(".py")
     }
 
-    fn parse(&self, _relpath: &str, source: &str) -> Result<ParsedFile, ParseError> {
+    fn parse(&self, relpath: &str, source: &str) -> Result<ParsedFile, ParseError> {
         let mut parser = Parser::new();
         parser
             .set_language(&self.language)
@@ -122,6 +122,8 @@ impl LanguageBackend for Python {
             });
         }
 
+        collect_entries(&mut parsed, root, &call_nodes, source, relpath);
+
         for node in call_nodes {
             let Some(enclosing) = enclosing_definition(node) else {
                 continue;
@@ -190,6 +192,35 @@ impl LanguageBackend for Python {
             Some(format!("{module}.{name}"))
         }
     }
+}
+
+fn is_main_guard(node: Node<'_>, text: &impl Fn(Node<'_>) -> String) -> bool {
+    let Some(mut condition) = node.child_by_field_name("condition") else {
+        return false;
+    };
+    while condition.kind() == "parenthesized_expression" {
+        let Some(inner) = condition.named_child(0) else {
+            return false;
+        };
+        condition = inner;
+    }
+    if condition.kind() != "comparison_operator"
+        || condition.named_child_count() != 2
+        || condition.child(1).is_none_or(|n| n.kind() != "==")
+    {
+        return false;
+    }
+    let Some(left) = condition.named_child(0) else {
+        return false;
+    };
+    let Some(right) = condition.named_child(1) else {
+        return false;
+    };
+    let is_name = |n: Node<'_>| n.kind() == "identifier" && text(n) == "__name__";
+    let is_main = |n: Node<'_>| {
+        n.kind() == "string" && matches!(text(n).as_str(), "\"__main__\"" | "'__main__'")
+    };
+    (is_name(left) && is_main(right)) || (is_name(right) && is_main(left))
 }
 
 /// Nearest enclosing `class_definition` or `function_definition`.
@@ -288,6 +319,63 @@ fn imports(node: Node, text: &impl Fn(Node) -> String) -> Vec<Import> {
         module,
         bindings,
     }]
+}
+
+fn collect_entries(
+    parsed: &mut ParsedFile,
+    root: Node<'_>,
+    call_nodes: &[Node<'_>],
+    source: &str,
+    relpath: &str,
+) {
+    let text = |n: Node<'_>| {
+        n.utf8_text(source.as_bytes())
+            .unwrap_or_default()
+            .to_owned()
+    };
+    let outside: Vec<_> = call_nodes
+        .iter()
+        .filter(|n| super::outside_runtime_scope(**n))
+        .filter_map(|n| {
+            let function = n.child_by_field_name("function")?;
+            let (callee, line) = callee(function, &text)?;
+            Some((*n, super::EntryCall { line, callee }))
+        })
+        .collect();
+    let mut stack = vec![root];
+    while let Some(node) = stack.pop() {
+        if node.kind() == "if_statement"
+            && super::outside_runtime_scope(node)
+            && is_main_guard(node, &text)
+            && let Some(body) = node.child_by_field_name("consequence")
+        {
+            parsed.entries.push(super::ParsedEntry {
+                kind: gitvur_schema::EntryKind::MainGuard,
+                name: relpath.into(),
+                line: line_of(node),
+                calls: outside
+                    .iter()
+                    .filter(|(call, _)| {
+                        call.start_byte() >= body.start_byte() && call.end_byte() <= body.end_byte()
+                    })
+                    .map(|(_, call)| call.clone())
+                    .collect(),
+            });
+        }
+        let mut cursor = node.walk();
+        stack.extend(node.named_children(&mut cursor));
+    }
+    if relpath == "__main__.py" || relpath.ends_with("/__main__.py") {
+        parsed.entries.push(super::ParsedEntry {
+            kind: gitvur_schema::EntryKind::PackageMain,
+            name: relpath
+                .strip_suffix("/__main__.py")
+                .map_or_else(|| "__main__".into(), |p| p.replace('/', ".")),
+            line: 1,
+            calls: outside.iter().map(|(_, call)| call.clone()).collect(),
+        });
+    }
+    parsed.entries.sort_by_key(|entry| entry.line);
 }
 
 #[cfg(test)]

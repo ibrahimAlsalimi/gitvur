@@ -33,10 +33,11 @@ Repository ──> gitvur index ──> structure.json ──┐
 gitvur/
 ├── Cargo.toml                 # Rust workspace
 ├── crates/
-│   ├── gitvur-schema/         # contract v0.2 types + JSON Schema
+│   ├── gitvur-schema/         # contract v0.3 types + JSON Schema
 │   ├── gitvur-index/          # extractor
 │   ├── gitvur-validate/       # validator + staleness
 │   ├── gitvur-diff/           # structural diff
+│   ├── gitvur-flow/           # deterministic bounded call trace
 │   └── gitvur-cli/            # `gitvur` binary
 ├── app/
 │   ├── src-tauri/             # Tauri 2 backend, depends on the crates
@@ -50,7 +51,7 @@ gitvur/
 └── PROGRESS.md                # session log, updated at the end of every session
 ```
 
-## Data contract v0.2 (summary)
+## Data contract v0.3 (summary)
 
 Files in `<repo>/.gitvur/`, one writer each:
 
@@ -87,6 +88,8 @@ cargo run -p gitvur-cli -- validate <repo>
 cargo run -p gitvur-cli -- stale    <repo>
 cargo run -p gitvur-cli -- packet   <repo> --mode initial|incremental
 cargo run -p gitvur-cli -- diff     <repo> <commitA> <commitB>
+cargo run -p gitvur-cli -- trace    <repo> <entryId|nodeId> [--depth 6] [--max-nodes 300] [--json]
+cargo run -p gitvur-cli -- flows    <repo>
 
 # App (from app/)
 pnpm install
@@ -132,3 +135,11 @@ A session is not done until `cargo fmt`, `clippy`, `cargo test`, and (for app wo
 - Write the test or expected output first, then the implementation.
 - Prefer small, reviewable commits with clear messages: `phase-02: extract python classes and methods`.
 - At the end of every session, append to `PROGRESS.md`: date, phase, what was done, acceptance criteria status, deviations from the prompt, open questions.
+
+## Phase 14 checkpoint
+
+Parts A–B introduce v0.3 entry/flow types and deterministic entry extraction. Readers
+accept v0.2. See the schema/index READMEs for the contract. The user authorized Part C after the fixture checkpoint. Deterministic tracing and
+read-only trace/flows CLI commands are implemented. Flow validation and packet/agent
+workflow remain for Parts D–F; flow listings report unchecked status.
+Existing py-small/ts-small data stays frozen; app UI work remains Phase 15.

@@ -77,6 +77,7 @@ pub(crate) fn finish(
         warnings: issue_count(Severity::Warning),
     };
     let mut report = Report {
+        flows: Vec::new(),
         schema_version: SCHEMA_VERSION.into(),
         commit_sha,
         summary,

@@ -14,6 +14,9 @@ pub struct Report {
     pub summary: Summary,
     pub elements: Vec<ElementStatus>,
     pub issues: Vec<Issue>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[cfg_attr(feature = "ts", ts(optional, as = "Option<Vec<crate::FlowStatus>>"))]
+    pub flows: Vec<crate::FlowStatus>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, JsonSchema)]
@@ -83,6 +86,12 @@ pub enum Severity {
 impl Report {
     /// Sorts elements by `id` and issues by `(severity, code, id, message)`.
     pub fn canonicalize(&mut self) {
+        for flow in &mut self.flows {
+            flow.stale_steps.sort();
+            flow.stale_steps.dedup();
+        }
+        self.flows.sort();
+        self.flows.dedup();
         self.elements.sort_by(|a, b| {
             (&a.id, a.status, a.child_changed, a.self_changed).cmp(&(
                 &b.id,

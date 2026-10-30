@@ -1,0 +1,12 @@
+[project]
+name = "flow-shop"
+version = "0.0.0"
+
+[project.scripts]
+flow-shop = "flowapp.cli:main"
+
+[project.gui-scripts]
+flow-window = "flowapp.api:handle"
+
+[tool.poetry.scripts]
+flow-legacy = "flowapp.cli:main"

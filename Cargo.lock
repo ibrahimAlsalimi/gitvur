@@ -1551,6 +1551,7 @@ dependencies = [
  "anyhow",
  "clap",
  "gitvur-diff",
+ "gitvur-flow",
  "gitvur-index",
  "gitvur-schema",
  "gitvur-validate",
@@ -1572,15 +1573,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "gitvur-flow"
+version = "0.2.0"
+dependencies = [
+ "gitvur-index",
+ "gitvur-schema",
+ "serde_json",
+]
+
+[[package]]
 name = "gitvur-index"
 version = "0.2.0"
 dependencies = [
  "gitvur-schema",
  "gix",
  "ignore",
+ "serde",
+ "serde_json",
  "similar",
  "tempfile",
  "thiserror 2.0.21",
+ "toml 1.1.8+spec-1.1.0",
  "tree-sitter",
  "tree-sitter-python",
  "tree-sitter-typescript",

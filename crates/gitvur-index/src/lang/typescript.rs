@@ -169,6 +169,10 @@ impl LanguageBackend for TypeScript {
             });
         }
 
+        if !declaration_file {
+            collect_entries(&mut parsed, root, &nodes("call"), source, relpath);
+        }
+
         for node in nodes("call") {
             let Some(caller) = enclosing(node, &index_of) else {
                 continue; // module level
@@ -510,6 +514,50 @@ fn default_export(
     }
     let value = node.child_by_field_name("value")?;
     (value.kind() == "identifier").then(|| DefaultExport::Name(text(value)))
+}
+
+fn collect_entries(
+    parsed: &mut ParsedFile,
+    root: Node<'_>,
+    call_nodes: &[Node<'_>],
+    source: &str,
+    relpath: &str,
+) {
+    let text = |n: Node<'_>| {
+        n.utf8_text(source.as_bytes())
+            .unwrap_or_default()
+            .to_owned()
+    };
+    let mut statements: std::collections::BTreeMap<usize, (Node<'_>, Vec<super::EntryCall>)> =
+        std::collections::BTreeMap::new();
+    for &node in call_nodes {
+        if !super::outside_runtime_scope(node) {
+            continue;
+        }
+        let Some((callee, line)) = callee(node, &text) else {
+            continue;
+        };
+        let mut statement = node;
+        while let Some(parent) = statement.parent() {
+            if parent.id() == root.id() {
+                break;
+            }
+            statement = parent;
+        }
+        statements
+            .entry(statement.start_byte())
+            .or_insert_with(|| (statement, Vec::new()))
+            .1
+            .push(super::EntryCall { line, callee });
+    }
+    for (_, (statement, calls)) in statements {
+        parsed.entries.push(super::ParsedEntry {
+            kind: gitvur_schema::EntryKind::TopLevelCall,
+            name: relpath.into(),
+            line: line_of(statement),
+            calls,
+        });
+    }
 }
 
 #[cfg(test)]

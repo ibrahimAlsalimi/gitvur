@@ -1,0 +1,632 @@
+{
+  "nodes": [
+    {
+      "id": "class:src/backends.ts:Cache",
+      "type": "class",
+      "name": "Cache",
+      "parentId": "file:src/backends.ts",
+      "source": {
+        "file": "src/backends.ts",
+        "startLine": 1,
+        "endLine": 3
+      },
+      "contentHash": "sha256:cddd23b18b4d50dafc285539c4e6c6362aa9373ad9a78d441e6c0b25cba3d64d"
+    },
+    {
+      "id": "class:src/backends.ts:Disk",
+      "type": "class",
+      "name": "Disk",
+      "parentId": "file:src/backends.ts",
+      "source": {
+        "file": "src/backends.ts",
+        "startLine": 5,
+        "endLine": 7
+      },
+      "contentHash": "sha256:f49e37b231304c2d897733e3f71396b076d974c4f8fbc26cc9242c07d54496ba"
+    },
+    {
+      "id": "file:src/api.ts",
+      "type": "file",
+      "name": "api.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/api.ts",
+        "startLine": 1,
+        "endLine": 7
+      },
+      "contentHash": "sha256:801849c1c7a00098981b295b4c030bdbf68a9db86ecb530333736d28b937ea6a"
+    },
+    {
+      "id": "file:src/backends.ts",
+      "type": "file",
+      "name": "backends.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/backends.ts",
+        "startLine": 1,
+        "endLine": 19
+      },
+      "contentHash": "sha256:261b1306bb502c13d547c218e113046ba96022cee514f634d1e749600cff17c4"
+    },
+    {
+      "id": "file:src/cli.ts",
+      "type": "file",
+      "name": "cli.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/cli.ts",
+        "startLine": 1,
+        "endLine": 8
+      },
+      "contentHash": "sha256:fea92594cab96dfdc010706f52298f0cdf410b71b8db535a532a8454a6714cc2"
+    },
+    {
+      "id": "file:src/domain/rules.ts",
+      "type": "file",
+      "name": "rules.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/domain/rules.ts",
+        "startLine": 1,
+        "endLine": 5
+      },
+      "contentHash": "sha256:29b9dd8efe70ffd9fff83b0f6d9b2f273ffe53f1ab63cb4981a1510dd2cf11a1"
+    },
+    {
+      "id": "file:src/domain/text.ts",
+      "type": "file",
+      "name": "text.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/domain/text.ts",
+        "startLine": 1,
+        "endLine": 5
+      },
+      "contentHash": "sha256:525faf1745dc214f2653962d3f3a764299a999aeb19a41f677780f6a2b957877"
+    },
+    {
+      "id": "file:src/service/orders.ts",
+      "type": "file",
+      "name": "orders.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/service/orders.ts",
+        "startLine": 1,
+        "endLine": 11
+      },
+      "contentHash": "sha256:cff84e25897d3fd70f83074becbe6eff73a30f42f77e1715a28f8b54dd3ddf8e"
+    },
+    {
+      "id": "file:src/storage/driver.ts",
+      "type": "file",
+      "name": "driver.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/storage/driver.ts",
+        "startLine": 1,
+        "endLine": 3
+      },
+      "contentHash": "sha256:727440a7b9303ba7a12741df3349a185cab2c8235c810656ee009b3add79915c"
+    },
+    {
+      "id": "file:src/storage/events.ts",
+      "type": "file",
+      "name": "events.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/storage/events.ts",
+        "startLine": 1,
+        "endLine": 3
+      },
+      "contentHash": "sha256:cc5127c1d7456b373c98e14a7c1ccc02e5fdb9d90da698280193bee2ccb34a2d"
+    },
+    {
+      "id": "file:src/storage/repository.ts",
+      "type": "file",
+      "name": "repository.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/storage/repository.ts",
+        "startLine": 1,
+        "endLine": 5
+      },
+      "contentHash": "sha256:0415ed163d0c876e0ea2b73dd509940839036cba344126c6727324029fa11b87"
+    },
+    {
+      "id": "file:src/tools/seed.ts",
+      "type": "file",
+      "name": "seed.ts",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/tools/seed.ts",
+        "startLine": 1,
+        "endLine": 7
+      },
+      "contentHash": "sha256:15be14ebdac839210689553c1706f8fd95c75a3648c5dd808f2ebb33aa0e952c"
+    },
+    {
+      "id": "function:src/api.ts:handle",
+      "type": "function",
+      "name": "handle",
+      "parentId": "file:src/api.ts",
+      "source": {
+        "file": "src/api.ts",
+        "startLine": 3,
+        "endLine": 5
+      },
+      "contentHash": "sha256:00745759b3c1aade063fab8b857a30e9c0de9b685715ebfc702b7ece77947396"
+    },
+    {
+      "id": "function:src/backends.ts:Cache.save",
+      "type": "function",
+      "name": "save",
+      "parentId": "class:src/backends.ts:Cache",
+      "source": {
+        "file": "src/backends.ts",
+        "startLine": 2,
+        "endLine": 2
+      },
+      "contentHash": "sha256:6cd1d0125bcde3dce6419d8f6d30b7064cf6140ec915d6f2d268df9bfbdf9c86"
+    },
+    {
+      "id": "function:src/backends.ts:Disk.save",
+      "type": "function",
+      "name": "save",
+      "parentId": "class:src/backends.ts:Disk",
+      "source": {
+        "file": "src/backends.ts",
+        "startLine": 6,
+        "endLine": 6
+      },
+      "contentHash": "sha256:6cd1d0125bcde3dce6419d8f6d30b7064cf6140ec915d6f2d268df9bfbdf9c86"
+    },
+    {
+      "id": "function:src/backends.ts:countdown",
+      "type": "function",
+      "name": "countdown",
+      "parentId": "file:src/backends.ts",
+      "source": {
+        "file": "src/backends.ts",
+        "startLine": 13,
+        "endLine": 16
+      },
+      "contentHash": "sha256:293088df651b2a96ee95be872eba2ea8ff5b1a85e63cf6a0f0253a31ea3c4d09"
+    },
+    {
+      "id": "function:src/backends.ts:persistUnknown",
+      "type": "function",
+      "name": "persistUnknown",
+      "parentId": "file:src/backends.ts",
+      "source": {
+        "file": "src/backends.ts",
+        "startLine": 9,
+        "endLine": 11
+      },
+      "contentHash": "sha256:81a6a625f79d92901488d74b2ae339d0aa0c724688ea199563881625a18d4fe8"
+    },
+    {
+      "id": "function:src/cli.ts:main",
+      "type": "function",
+      "name": "main",
+      "parentId": "file:src/cli.ts",
+      "source": {
+        "file": "src/cli.ts",
+        "startLine": 3,
+        "endLine": 5
+      },
+      "contentHash": "sha256:d2ec8f25ad34d4e1744e68f19484261dde6162962d63223dd03cdb87c96a4d1e"
+    },
+    {
+      "id": "function:src/domain/rules.ts:validate",
+      "type": "function",
+      "name": "validate",
+      "parentId": "file:src/domain/rules.ts",
+      "source": {
+        "file": "src/domain/rules.ts",
+        "startLine": 3,
+        "endLine": 5
+      },
+      "contentHash": "sha256:420b2d5ba78b4c06e87436c04f25c1512f74a0315b47cf8cda8da9433259badf"
+    },
+    {
+      "id": "function:src/domain/text.ts:normalize",
+      "type": "function",
+      "name": "normalize",
+      "parentId": "file:src/domain/text.ts",
+      "source": {
+        "file": "src/domain/text.ts",
+        "startLine": 3,
+        "endLine": 5
+      },
+      "contentHash": "sha256:dd62f6864a36807d2e5c1c40798a43a00c2c53e854210fd019147f2332adf386"
+    },
+    {
+      "id": "function:src/service/orders.ts:submit",
+      "type": "function",
+      "name": "submit",
+      "parentId": "file:src/service/orders.ts",
+      "source": {
+        "file": "src/service/orders.ts",
+        "startLine": 7,
+        "endLine": 11
+      },
+      "contentHash": "sha256:3a00f37dcabe53c1a93ded90873fb5171b1e8670161356731fca8c8c31aa4901"
+    },
+    {
+      "id": "function:src/storage/driver.ts:commit",
+      "type": "function",
+      "name": "commit",
+      "parentId": "file:src/storage/driver.ts",
+      "source": {
+        "file": "src/storage/driver.ts",
+        "startLine": 1,
+        "endLine": 3
+      },
+      "contentHash": "sha256:727440a7b9303ba7a12741df3349a185cab2c8235c810656ee009b3add79915c"
+    },
+    {
+      "id": "function:src/storage/events.ts:onSaved",
+      "type": "function",
+      "name": "onSaved",
+      "parentId": "file:src/storage/events.ts",
+      "source": {
+        "file": "src/storage/events.ts",
+        "startLine": 1,
+        "endLine": 3
+      },
+      "contentHash": "sha256:cc5127c1d7456b373c98e14a7c1ccc02e5fdb9d90da698280193bee2ccb34a2d"
+    },
+    {
+      "id": "function:src/storage/repository.ts:store",
+      "type": "function",
+      "name": "store",
+      "parentId": "file:src/storage/repository.ts",
+      "source": {
+        "file": "src/storage/repository.ts",
+        "startLine": 3,
+        "endLine": 5
+      },
+      "contentHash": "sha256:10b567cf7d5e39feae43fb7ce27225d2f82a5d0dffefe838094b996da645c774"
+    },
+    {
+      "id": "function:src/tools/seed.ts:seed",
+      "type": "function",
+      "name": "seed",
+      "parentId": "file:src/tools/seed.ts",
+      "source": {
+        "file": "src/tools/seed.ts",
+        "startLine": 3,
+        "endLine": 5
+      },
+      "contentHash": "sha256:f0d51c2752cb71888f2ded765a2c730424a7bc6e3a474899fb24f9cfc76e1e86"
+    },
+    {
+      "id": "project:root",
+      "type": "project",
+      "name": "ts-flows"
+    }
+  ],
+  "edges": [
+    {
+      "from": "file:src/api.ts",
+      "to": "file:src/service/orders.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/api.ts",
+        "line": 1
+      }
+    },
+    {
+      "from": "file:src/cli.ts",
+      "to": "file:src/service/orders.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/cli.ts",
+        "line": 1
+      }
+    },
+    {
+      "from": "file:src/domain/rules.ts",
+      "to": "file:src/domain/text.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/domain/rules.ts",
+        "line": 1
+      }
+    },
+    {
+      "from": "file:src/domain/text.ts",
+      "to": "file:src/storage/repository.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/domain/text.ts",
+        "line": 1
+      }
+    },
+    {
+      "from": "file:src/service/orders.ts",
+      "to": "file:src/domain/rules.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/service/orders.ts",
+        "line": 2
+      }
+    },
+    {
+      "from": "file:src/service/orders.ts",
+      "to": "file:src/storage/events.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/service/orders.ts",
+        "line": 3
+      }
+    },
+    {
+      "from": "file:src/storage/repository.ts",
+      "to": "file:src/storage/driver.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/storage/repository.ts",
+        "line": 1
+      }
+    },
+    {
+      "from": "file:src/tools/seed.ts",
+      "to": "file:src/service/orders.ts",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/tools/seed.ts",
+        "line": 1
+      }
+    },
+    {
+      "from": "function:src/api.ts:handle",
+      "to": "function:src/service/orders.ts:submit",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/api.ts",
+        "line": 4
+      }
+    },
+    {
+      "from": "function:src/backends.ts:countdown",
+      "to": "function:src/backends.ts:countdown",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/backends.ts",
+        "line": 15
+      }
+    },
+    {
+      "from": "function:src/cli.ts:main",
+      "to": "function:src/service/orders.ts:submit",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/cli.ts",
+        "line": 4
+      }
+    },
+    {
+      "from": "function:src/domain/rules.ts:validate",
+      "to": "function:src/domain/text.ts:normalize",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/domain/rules.ts",
+        "line": 4
+      }
+    },
+    {
+      "from": "function:src/domain/text.ts:normalize",
+      "to": "function:src/storage/repository.ts:store",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/domain/text.ts",
+        "line": 4
+      }
+    },
+    {
+      "from": "function:src/service/orders.ts:submit",
+      "to": "function:src/domain/rules.ts:validate",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/service/orders.ts",
+        "line": 8
+      }
+    },
+    {
+      "from": "function:src/storage/repository.ts:store",
+      "to": "function:src/storage/driver.ts:commit",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/storage/repository.ts",
+        "line": 4
+      }
+    },
+    {
+      "from": "function:src/tools/seed.ts:seed",
+      "to": "function:src/service/orders.ts:submit",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/tools/seed.ts",
+        "line": 4
+      }
+    }
+  ],
+  "unresolvedCalls": [
+    {
+      "from": "entry:top-level-call:src-backends-ts#2",
+      "name": "save",
+      "evidence": {
+        "file": "src/backends.ts",
+        "line": 19
+      },
+      "candidates": [
+        "function:src/backends.ts:Cache.save",
+        "function:src/backends.ts:Disk.save"
+      ]
+    },
+    {
+      "from": "function:src/backends.ts:persistUnknown",
+      "name": "save",
+      "evidence": {
+        "file": "src/backends.ts",
+        "line": 10
+      },
+      "candidates": [
+        "function:src/backends.ts:Cache.save",
+        "function:src/backends.ts:Disk.save"
+      ]
+    }
+  ],
+  "entryPoints": [
+    {
+      "id": "entry:npm-script:flow-shop-seed",
+      "kind": "npm-script",
+      "name": "flow-shop:seed",
+      "target": "file:src/tools/seed.ts",
+      "raw": "tsx src/tools/seed.ts",
+      "calls": [],
+      "evidence": {
+        "file": "package.json",
+        "line": 8
+      },
+      "provenance": "syntactic"
+    },
+    {
+      "id": "entry:package-bin:flow-shop",
+      "kind": "package-bin",
+      "name": "flow-shop",
+      "target": "file:src/cli.ts",
+      "raw": "src/cli.ts",
+      "calls": [],
+      "evidence": {
+        "file": "package.json",
+        "line": 3
+      },
+      "provenance": "syntactic"
+    },
+    {
+      "id": "entry:package-main:flow-shop-exports",
+      "kind": "package-main",
+      "name": "flow-shop:exports",
+      "target": "file:src/api.ts",
+      "raw": "./src/api.ts",
+      "calls": [],
+      "evidence": {
+        "file": "package.json",
+        "line": 6
+      },
+      "provenance": "syntactic"
+    },
+    {
+      "id": "entry:package-main:flow-shop-main",
+      "kind": "package-main",
+      "name": "flow-shop:main",
+      "target": null,
+      "raw": "dist/index.js",
+      "calls": [],
+      "evidence": {
+        "file": "package.json",
+        "line": 4
+      },
+      "provenance": "syntactic"
+    },
+    {
+      "id": "entry:package-main:flow-shop-module",
+      "kind": "package-main",
+      "name": "flow-shop:module",
+      "target": "file:src/api.ts",
+      "raw": "src/api.ts",
+      "calls": [],
+      "evidence": {
+        "file": "package.json",
+        "line": 5
+      },
+      "provenance": "syntactic"
+    },
+    {
+      "id": "entry:top-level-call:src-backends-ts",
+      "kind": "top-level-call",
+      "name": "src/backends.ts",
+      "target": "file:src/backends.ts",
+      "calls": [
+        "class:src/backends.ts:Cache"
+      ],
+      "evidence": {
+        "file": "src/backends.ts",
+        "line": 18
+      },
+      "provenance": "syntactic"
+    },
+    {
+      "id": "entry:top-level-call:src-backends-ts#2",
+      "kind": "top-level-call",
+      "name": "src/backends.ts",
+      "target": "file:src/backends.ts",
+      "calls": [],
+      "evidence": {
+        "file": "src/backends.ts",
+        "line": 19
+      },
+      "provenance": "syntactic"
+    },
+    {
+      "id": "entry:top-level-call:src-cli-ts",
+      "kind": "top-level-call",
+      "name": "src/cli.ts",
+      "target": "file:src/cli.ts",
+      "calls": [
+        "function:src/cli.ts:main"
+      ],
+      "evidence": {
+        "file": "src/cli.ts",
+        "line": 7
+      },
+      "provenance": "syntactic"
+    },
+    {
+      "id": "entry:top-level-call:src-cli-ts#2",
+      "kind": "top-level-call",
+      "name": "src/cli.ts",
+      "target": "file:src/cli.ts",
+      "calls": [
+        "function:src/cli.ts:main"
+      ],
+      "evidence": {
+        "file": "src/cli.ts",
+        "line": 8
+      },
+      "provenance": "syntactic"
+    },
+    {
+      "id": "entry:top-level-call:src-tools-seed-ts",
+      "kind": "top-level-call",
+      "name": "src/tools/seed.ts",
+      "target": "file:src/tools/seed.ts",
+      "calls": [
+        "function:src/tools/seed.ts:seed"
+      ],
+      "evidence": {
+        "file": "src/tools/seed.ts",
+        "line": 7
+      },
+      "provenance": "syntactic"
+    }
+  ]
+}

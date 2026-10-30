@@ -359,7 +359,18 @@ Also record these numbers without a fixed target, since they guide later decisio
 
 - Languages other than Python and TypeScript
 - Semantic indexers (e.g. `scip-python`, `scip-typescript`)
-- Execution flow and entry points
+- Execution flow UI (Phase 15; data layer introduced in Phase 14)
 - Full Git history timeline (start with a two-revision diff only)
 - Editing, integrated terminal, contributors page
 - Running the agent from inside the app (it stays external)
+
+## Phase 14 contract amendment
+
+The current data contract is v0.3, backward compatible with v0.2. Parts A–B add static
+entry points and curated flow representations; tracing and flow validation follow only
+after the new fixture expectations receive human review. The v0.2 examples above
+remain valid compatibility examples. See crates/gitvur-schema/README.md for additions.
+
+Phase 14 Part C adds the shared bounded trace engine and read-only `trace`/`flows`
+commands. Flow listings remain unchecked until Part D implements validation and
+staleness; the Flows UI remains Phase 15.

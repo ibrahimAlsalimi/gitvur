@@ -42,6 +42,19 @@ fn copy_of(name: &str) -> tempfile::TempDir {
 }
 
 #[test]
+fn opens_v03_manifest_alongside_legacy_v02_bundles() {
+    let dir = copy_of("py-small");
+    let path = dir.path().join(".gitvur/manifest.json");
+    let text = fs::read_to_string(&path)
+        .unwrap()
+        .replace("\"0.2\"", "\"0.3\"");
+    fs::write(path, text).unwrap();
+    let bundle = open_repository(s(dir.path())).unwrap();
+    assert_eq!(bundle.manifest.schema_version, "0.3");
+    assert_eq!(bundle.structure.entry_points.len(), 0);
+}
+
+#[test]
 fn opens_py_small_with_all_four_files() {
     let bundle = open_repository(s(&fixture("py-small"))).unwrap();
     assert_eq!(bundle.manifest.project_name, "py-small");

@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Trace",
+  "type": "object",
+  "properties": {
+    "error": {
+      "description": "Unknown start IDs are explicit failures, not successful empty traces.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "hiddenRoots": {
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0
+    },
+    "nodes": {
+      "description": "Breadth-first allocation order. Children refer to occurrence IDs in this array.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TraceNode"
+      }
+    },
+    "roots": {
+      "description": "Occurrence IDs, not source node IDs.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "start": {
+      "type": "string"
+    },
+    "truncated": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "start",
+    "roots",
+    "nodes",
+    "truncated",
+    "hiddenRoots"
+  ],
+  "$defs": {
+    "Evidence": {
+      "description": "A location that justifies an edge: the line where the relationship is visible.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Path relative to the repository root, `/`-separated.",
+          "type": "string"
+        },
+        "line": {
+          "description": "1-based line number.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "line"
+      ]
+    },
+    "TraceKind": {
+      "type": "string",
+      "enum": [
+        "node",
+        "ref",
+        "cycle",
+        "ambiguous"
+      ]
+    },
+    "TraceNode": {
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "depth": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hiddenChildren": {
+          "description": "Immediate outgoing occurrences omitted here, not transitive descendants.",
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/TraceKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "node": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reference": {
+          "description": "First occurrence ID, for ref/cycle stubs only.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "depth",
+        "children",
+        "candidates",
+        "truncated",
+        "hiddenChildren"
+      ]
+    }
+  }
+}

@@ -13,6 +13,10 @@ pub struct Structure {
     pub edges: Vec<Edge>,
     /// Calls with two or more in-repo candidate targets.
     pub unresolved_calls: Vec<UnresolvedCall>,
+    /// Deterministic entry points; omitted when empty to preserve v0.2 canonical bytes.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[cfg_attr(feature = "ts", ts(optional, as = "Option<Vec<crate::EntryPoint>>"))]
+    pub entry_points: Vec<crate::EntryPoint>,
 }
 
 /// Node kinds the extractor produces. `module` nodes exist only in `annotations.json`.
@@ -68,6 +72,7 @@ impl Structure {
     /// Sorts nodes by `id`, edges by `(from, to, type, evidence.file, evidence.line)`,
     /// unresolved calls by `(from, evidence.line, name)`, and each candidate list.
     pub fn canonicalize(&mut self) {
+        crate::execution::canonicalize_entries(&mut self.entry_points);
         self.nodes.sort_by(|a, b| a.id.cmp(&b.id));
         canonicalize_edges(&mut self.edges);
         for call in &mut self.unresolved_calls {

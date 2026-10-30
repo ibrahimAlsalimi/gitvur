@@ -58,6 +58,7 @@ mod tests {
 
     fn sample_structure() -> Structure {
         Structure {
+            entry_points: Vec::new(),
             nodes: vec![
                 node("function:a.py:run", NodeType::Function),
                 Node {
@@ -195,6 +196,8 @@ mod tests {
     #[test]
     fn annotations_round_trip() {
         let mut a = Annotations {
+            entry_points: Vec::new(),
+            flows: Vec::new(),
             modules: vec![Module {
                 id: "module:auth".into(),
                 name: "Auth".into(),
@@ -232,6 +235,7 @@ mod tests {
             id: None,
         };
         let mut r = Report {
+            flows: Vec::new(),
             schema_version: SCHEMA_VERSION.into(),
             commit_sha: "9f1c2e7".into(),
             summary: Summary::default(),

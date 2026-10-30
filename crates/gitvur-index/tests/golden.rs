@@ -20,7 +20,13 @@ fn opts() -> IndexOptions {
 /// Indexes `repo` into a fresh temp dir and returns the bytes of both output files.
 fn run(repo: &Path) -> (String, String) {
     let out = tempfile::tempdir().unwrap();
-    let output = index(repo, &opts()).unwrap();
+    let mut output = index(repo, &opts()).unwrap();
+    // Preserve the frozen v0.2 graph contract; v0.3 entries have separate goldens.
+    output.structure.entry_points.clear();
+    output
+        .structure
+        .unresolved_calls
+        .retain(|call| !call.from.starts_with("entry:"));
     write_output(out.path(), &output).unwrap();
     (
         fs::read_to_string(out.path().join("structure.json")).unwrap(),

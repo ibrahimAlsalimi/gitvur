@@ -232,6 +232,7 @@ mod tests {
 
     fn fixture() -> (Structure, Report, Annotations) {
         let structure = Structure {
+            entry_points: Vec::new(),
             nodes: vec![
                 node("class:a.py:A", NodeType::Class, "h-class-new"),
                 node("file:a.py", NodeType::File, "h-file-new"),
@@ -244,6 +245,7 @@ mod tests {
             unresolved_calls: vec![],
         };
         let report = Report {
+            flows: Vec::new(),
             schema_version: "0.2".into(),
             commit_sha: "abc1234".into(),
             summary: Summary::default(),
@@ -265,6 +267,8 @@ mod tests {
             based_on_hash: hash.into(),
         };
         let annotations = Annotations {
+            entry_points: Vec::new(),
+            flows: Vec::new(),
             modules: vec![
                 Module {
                     id: "module:core".into(),

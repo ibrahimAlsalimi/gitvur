@@ -13,6 +13,12 @@
         "$ref": "#/$defs/ElementStatus"
       }
     },
+    "flows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/FlowStatus"
+      }
+    },
     "issues": {
       "type": "array",
       "items": {
@@ -57,6 +63,37 @@
         },
         "status": {
           "$ref": "#/$defs/Status"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status"
+      ]
+    },
+    "FlowState": {
+      "type": "string",
+      "enum": [
+        "broken",
+        "current",
+        "stale"
+      ]
+    },
+    "FlowStatus": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "staleSteps": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "$ref": "#/$defs/FlowState"
         }
       },
       "additionalProperties": false,

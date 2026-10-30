@@ -16,6 +16,18 @@
         "$ref": "#/$defs/Edge"
       }
     },
+    "entryPoints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EntryPoint"
+      }
+    },
+    "flows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Flow"
+      }
+    },
     "modules": {
       "type": "array",
       "items": {
@@ -99,6 +111,79 @@
         "references"
       ]
     },
+    "EntryKind": {
+      "type": "string",
+      "enum": [
+        "cli-command",
+        "console-script",
+        "event-handler",
+        "http-route",
+        "job",
+        "main-guard",
+        "npm-script",
+        "other",
+        "package-bin",
+        "package-main",
+        "test",
+        "top-level-call"
+      ]
+    },
+    "EntryPoint": {
+      "type": "object",
+      "properties": {
+        "calls": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence": {
+          "description": "Optional at deserialization so validation can diagnose missing AI evidence.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^entry:[a-z-]+:[a-z0-9-]+(?:#[2-9][0-9]*|#1[0-9]+)?$"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntryKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "target": {
+          "description": "A resolved node ID, or null when configuration names code outside the index.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "provenance"
+      ]
+    },
     "Evidence": {
       "description": "A location that justifies an edge: the line where the relationship is visible.",
       "type": "object",
@@ -118,6 +203,111 @@
       "required": [
         "file",
         "line"
+      ]
+    },
+    "Flow": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "entryPoint": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^flow:[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "steps": {
+          "description": "Reading order: canonicalization must not sort or deduplicate steps.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FlowStep"
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FlowTransition"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "description",
+        "entryPoint",
+        "steps",
+        "transitions"
+      ]
+    },
+    "FlowStep": {
+      "type": "object",
+      "properties": {
+        "basedOnHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "node": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "node",
+        "label",
+        "basedOnHash"
+      ]
+    },
+    "FlowTransition": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "from": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/TransitionKind"
+        },
+        "label": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to",
+        "kind",
+        "provenance"
       ]
     },
     "Module": {
@@ -158,6 +348,16 @@
         "syntactic",
         "semantic",
         "ai"
+      ]
+    },
+    "TransitionKind": {
+      "type": "string",
+      "enum": [
+        "async",
+        "branch",
+        "call",
+        "event",
+        "return"
       ]
     }
   }
