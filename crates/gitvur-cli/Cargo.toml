@@ -11,7 +11,17 @@ name = "gitvur"
 path = "src/main.rs"
 
 [dependencies]
+gitvur-diff.workspace = true
+gitvur-index.workspace = true
+gitvur-schema.workspace = true
+gitvur-validate.workspace = true
+anyhow = "1.0.104"
 clap.workspace = true
+serde = { version = "1.0.229", features = ["derive"] }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+serde_json = "1.0.154"
+tempfile = "3.27.0"

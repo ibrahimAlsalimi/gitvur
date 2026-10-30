@@ -1,0 +1,52 @@
+{
+  "modules": [
+    {
+      "id": "module:authentication",
+      "name": "Authentication",
+      "description": "Checks user credentials and manages sign-in sessions.",
+      "files": [
+        "file:src/auth/index.ts",
+        "file:src/auth/login.ts",
+        "file:src/auth/session.ts"
+      ]
+    },
+    {
+      "id": "module:audit",
+      "name": "Audit log",
+      "description": "Records security-relevant events for later review.",
+      "files": [
+        "file:src/audit/log.ts"
+      ]
+    }
+  ],
+  "descriptions": [
+    {
+      "id": "file:src/auth/login.ts",
+      "text": "Sign-in flow: verifies credentials against the user store and opens a session.",
+      "basedOnHash": "sha256:2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae"
+    },
+    {
+      "id": "function:src/auth/login.ts:login",
+      "text": "Checks a user's password against the stored hash and starts a session; throws if the user is unknown.",
+      "basedOnHash": "sha256:7be01d1f4b3b6e2f8a6d4c2b9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f"
+    },
+    {
+      "id": "function:src/auth/session.ts:createSession",
+      "text": "Creates a session record in the database and emits a 'session.created' event.",
+      "basedOnHash": "sha256:fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9"
+    }
+  ],
+  "edges": [
+    {
+      "from": "function:src/auth/session.ts:createSession",
+      "to": "function:src/audit/log.ts:recordLogin",
+      "type": "references",
+      "provenance": "ai",
+      "evidence": {
+        "file": "src/audit/log.ts",
+        "line": 31
+      },
+      "note": "recordLogin is registered as the handler for 'session.created' on this line."
+    }
+  ]
+}

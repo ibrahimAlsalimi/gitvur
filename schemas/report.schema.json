@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Report",
+  "type": "object",
+  "properties": {
+    "commitSha": {
+      "description": "Copied from `manifest.json`.",
+      "type": "string"
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ElementStatus"
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Issue"
+      }
+    },
+    "schemaVersion": {
+      "type": "string"
+    },
+    "summary": {
+      "$ref": "#/$defs/Summary"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "commitSha",
+    "summary",
+    "elements",
+    "issues"
+  ],
+  "$defs": {
+    "ElementStatus": {
+      "type": "object",
+      "properties": {
+        "childChanged": {
+          "description": "Set only when `status` is `stale`: a direct child of this element is stale.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "selfChanged": {
+          "description": "Set only when `status` is `stale`: the element's own text (outside its direct\nchildren) changed. See the validator README for how this is determined.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status"
+      ]
+    },
+    "Issue": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "Stable kebab-case identifier, e.g. `dangling-ref`.",
+          "type": "string"
+        },
+        "id": {
+          "description": "The element the issue is about, when there is one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "severity",
+        "code",
+        "message"
+      ]
+    },
+    "Severity": {
+      "description": "Declared so that errors sort before warnings.",
+      "type": "string",
+      "enum": [
+        "error",
+        "warning"
+      ]
+    },
+    "Status": {
+      "type": "string",
+      "enum": [
+        "documented",
+        "stale",
+        "undocumented"
+      ]
+    },
+    "Summary": {
+      "type": "object",
+      "properties": {
+        "documented": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "errors": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "stale": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "undocumented": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "warnings": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "documented",
+        "stale",
+        "undocumented",
+        "errors",
+        "warnings"
+      ]
+    }
+  }
+}

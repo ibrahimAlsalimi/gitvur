@@ -1,20 +1,13 @@
 //! Structural diff between the extracted structure of two Git revisions.
 //!
-//! Phase 10 replaces the placeholder below with the real implementation.
+//! - [`diff`]: pure comparison of two `Structure`s (classification rules in `README.md`).
+//! - [`revision`]: reads a commit's tree with `gix` into a temporary directory and indexes
+//!   it. The user's working tree, index and refs are never touched.
+//! - [`carry_annotations`]: rewrites annotation IDs of moved elements.
 
-/// Name of this crate.
-///
-/// Placeholder so the crate has a public item and a test until Phase 10.
-pub fn crate_name() -> &'static str {
-    env!("CARGO_PKG_NAME")
-}
+mod carry;
+mod engine;
+pub mod revision;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn crate_name_matches_package() {
-        assert_eq!(crate_name(), "gitvur-diff");
-    }
-}
+pub use carry::carry_annotations;
+pub use engine::diff;

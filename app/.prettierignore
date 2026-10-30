@@ -2,3 +2,9 @@ dist
 node_modules
 pnpm-lock.yaml
 src-tauri
+src/generated
+e2e/__screenshots__
+test-results
+playwright-report
+.synthetic
+src/api/mockDiff.json

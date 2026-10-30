@@ -1,0 +1,1114 @@
+/* The map. Every value comes from tokens.css. */
+
+.gv-map {
+  position: absolute;
+  inset: 0;
+}
+
+.gv-map .react-flow {
+  --xy-background-color: var(--gv-bg-canvas);
+  background: var(--gv-bg-canvas);
+  font-family: var(--gv-font-ui);
+}
+
+/* Expand/collapse moves nodes; animate after the first fit, never with reduced motion. */
+.gv-map[data-animate="true"] .react-flow__node {
+  transition:
+    transform var(--gv-motion-base) var(--gv-ease-out),
+    width var(--gv-motion-base) var(--gv-ease-out),
+    height var(--gv-motion-base) var(--gv-ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gv-map[data-animate="true"] .react-flow__node {
+    transition: none;
+  }
+}
+
+.gv-map .react-flow__node {
+  cursor: pointer;
+  border-radius: var(--gv-radius-md);
+}
+
+.gv-map .react-flow__node-project {
+  cursor: default;
+}
+
+.gv-map .react-flow__node-module {
+  border-radius: var(--gv-radius-lg);
+}
+
+.gv-map .react-flow__node-row {
+  border-radius: var(--gv-radius-sm);
+}
+
+.gv-map .react-flow__node:focus-visible {
+  outline: var(--gv-focus-width) solid var(--gv-focus-ring);
+  outline-offset: var(--gv-focus-width);
+}
+
+/*
+ * Receded context (outside the selection's neighbourhood, or unchanged in the Changes
+ * lens). Text drops to the tertiary colour, which still meets WCAG AA; borders, bands,
+ * fills, glyphs and chips fade to --gv-opacity-dimmed. Fading text with `opacity` would
+ * put it below AA contrast.
+ *
+ * The selected node never recedes, and receding outranks the lens tints and borders
+ * (`.gv-map[data-lens] … :not()` beats the lens rules' `.gv-map[data-lens=…] … :not()`),
+ * so lens cues keep their shape (dashed) but drop to neutral colours.
+ */
+.gv-map[data-lens]
+  .react-flow__node.gv-dimmed
+  :is(.gv-module, .gv-file, .gv-row):not([data-selected="true"]),
+.gv-map[data-lens="changes"]
+  :is(.gv-module, .gv-file, .gv-row)[data-change="unchanged"]:not([data-selected="true"]) {
+  border-color: var(--gv-border-subtle);
+  box-shadow: none;
+  outline-color: var(--gv-border-subtle);
+  color: var(--gv-text-tertiary);
+}
+
+.gv-map[data-lens] .react-flow__node.gv-dimmed .gv-file:not(.gv-file-tile, [data-selected="true"]) {
+  background: var(--gv-bg-surface-raised);
+}
+
+.gv-map[data-lens] .react-flow__node.gv-dimmed .gv-row:not([data-selected="true"]),
+.gv-map[data-lens="changes"] .gv-row[data-change="unchanged"]:not([data-selected="true"]) {
+  background: transparent;
+}
+
+/* The module band's colour is set inline, so the band itself is greyed. */
+.gv-map .react-flow__node.gv-dimmed .gv-module::before,
+.gv-map[data-lens="changes"] .gv-module[data-change="unchanged"]::before {
+  background: var(--gv-border-default);
+}
+
+/* Glyphs, chips and dots keep their meaning colour (errors stay red) and only fade. */
+.gv-map
+  .react-flow__node.gv-dimmed
+  :is(.gv-module, .gv-file, .gv-row)
+  *:not(svg, svg *, .gv-chip, .gv-chip *, .status-dot),
+.gv-map[data-lens="changes"]
+  :is(.gv-module, .gv-file, .gv-row)[data-change="unchanged"]
+  *:not(svg, svg *, .gv-chip, .gv-chip *, .status-dot) {
+  color: var(--gv-text-tertiary);
+}
+
+.gv-map .react-flow__node.gv-dimmed :is(svg, .gv-chip, .status-dot),
+.gv-map[data-lens="changes"] [data-change="unchanged"] :is(svg, .gv-chip, .status-dot) {
+  opacity: var(--gv-opacity-dimmed);
+}
+
+.gv-handle {
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+}
+
+.gv-connector {
+  fill: none;
+  stroke: var(--gv-border-strong);
+  stroke-width: 1;
+}
+
+.gv-glyph {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+/* ---- Project ---------------------------------------------------------------------- */
+
+.gv-project {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-3);
+  height: 100%;
+  padding: 0 var(--gv-space-6);
+  border-radius: var(--gv-radius-md);
+  background: var(--gv-bg-surface);
+  color: var(--gv-text-primary);
+}
+
+.gv-project-name {
+  font-size: var(--gv-text-xl);
+  font-weight: var(--gv-weight-semibold);
+  white-space: nowrap;
+}
+
+.gv-project-totals {
+  margin-left: auto;
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-sm);
+  white-space: nowrap;
+}
+
+.gv-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 var(--gv-space-2);
+  border-radius: var(--gv-radius-pill);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+  background: var(--gv-bg-sunken);
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-xs);
+  white-space: nowrap;
+}
+
+.gv-chip-code {
+  font-family: var(--gv-font-code);
+}
+
+/* ---- Module ----------------------------------------------------------------------- */
+
+.gv-module {
+  position: relative;
+  height: 100%;
+  padding-left: var(--gv-band-width);
+  border-radius: var(--gv-radius-lg);
+  border: var(--gv-hairline) solid var(--gv-border-subtle);
+  background: var(--gv-bg-surface);
+  overflow: hidden;
+}
+
+/* The identity band, inside the container's left edge. */
+.gv-module::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--gv-band-width);
+  background: var(--gv-module-color);
+}
+
+.gv-module[data-synthetic="true"] {
+  border: var(--gv-hairline) dashed var(--gv-border-strong);
+}
+
+.react-flow__node-module:hover .gv-module {
+  border-color: var(--gv-border-strong);
+}
+
+.gv-module[data-selected="true"] {
+  border: var(--gv-border-emphasis) solid var(--gv-accent);
+}
+
+.gv-module-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--gv-space-1);
+  height: var(--gv-map-module-header);
+  padding: 0 var(--gv-space-4) 0 var(--gv-space-3);
+  cursor: pointer;
+}
+
+.gv-module-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gv-space-2);
+}
+
+.gv-module-name {
+  overflow: hidden;
+  color: var(--gv-text-primary);
+  font-size: var(--gv-text-lg);
+  font-weight: var(--gv-weight-semibold);
+  line-height: var(--gv-line-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gv-module-description {
+  overflow: hidden;
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gv-module-counts {
+  color: var(--gv-text-tertiary);
+  font-size: var(--gv-text-xs);
+  white-space: nowrap;
+}
+
+.gv-ring {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+/* Overview: name at twice the size plus counts. */
+.gv-module[data-lod="0"] .gv-module-header {
+  height: auto;
+  padding: var(--gv-space-4) var(--gv-space-4) 0 var(--gv-space-3);
+}
+
+.gv-module[data-lod="0"] .gv-module-name {
+  font-size: calc(var(--gv-text-lg) * 2);
+}
+
+.gv-module[data-lod="0"] .gv-module-counts {
+  font-size: var(--gv-text-lg);
+}
+
+/* ---- File ------------------------------------------------------------------------- */
+
+.gv-file {
+  height: 100%;
+  border-radius: var(--gv-radius-md);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+  background: var(--gv-bg-surface-raised);
+  box-shadow: 0 1px 0 var(--gv-border-subtle);
+}
+
+.gv-file-tile {
+  background: var(--gv-bg-sunken);
+  box-shadow: none;
+}
+
+.react-flow__node-file:hover .gv-file {
+  border-color: var(--gv-border-strong);
+}
+
+.gv-file[data-selected="true"] {
+  border: var(--gv-border-emphasis) solid var(--gv-accent);
+  background: var(--gv-accent-soft);
+}
+
+.gv-file-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-2);
+  height: var(--gv-map-file-header);
+  padding: 0 var(--gv-space-2) 0 var(--gv-space-3);
+  color: var(--gv-kind-file);
+}
+
+.gv-glyph-language {
+  width: 20px;
+  height: 20px;
+}
+
+.gv-file-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.gv-file-name {
+  overflow: hidden;
+  color: var(--gv-text-primary);
+  font-size: var(--gv-text-md);
+  font-weight: var(--gv-weight-semibold);
+  line-height: var(--gv-line-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gv-file-dir {
+  overflow: hidden;
+  color: var(--gv-text-tertiary);
+  font-size: var(--gv-text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gv-chip-count {
+  height: 18px;
+  padding: 0 var(--gv-space-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.gv-file-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--gv-radius-sm);
+  background: transparent;
+  color: var(--gv-text-tertiary);
+  cursor: pointer;
+}
+
+.gv-file-toggle:hover {
+  background: var(--gv-bg-hover);
+  color: var(--gv-text-primary);
+}
+
+.gv-chevron {
+  transition: transform var(--gv-motion-fast) var(--gv-ease-out);
+}
+
+.gv-chevron[data-expanded="true"] {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gv-chevron {
+    transition: none;
+  }
+}
+
+.gv-status-slot {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.gv-file-header .gv-status-slot {
+  align-self: flex-start;
+  margin-top: var(--gv-space-2);
+}
+
+.gv-file-stub {
+  padding: 0 var(--gv-space-3);
+  color: var(--gv-text-tertiary);
+  font-size: var(--gv-text-sm);
+}
+
+/* ---- Rows ------------------------------------------------------------------------- */
+
+.gv-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-2);
+  height: 100%;
+  padding: 0 var(--gv-space-1) 0 var(--gv-space-2);
+  border-radius: var(--gv-radius-sm);
+  font-size: var(--gv-text-sm);
+  white-space: nowrap;
+}
+
+.gv-row[data-kind="class"] {
+  background: var(--gv-kind-class-tint);
+  color: var(--gv-kind-class);
+}
+
+.gv-row[data-kind="function"] {
+  color: var(--gv-kind-function);
+}
+
+.react-flow__node-row:hover .gv-row {
+  background: var(--gv-bg-hover);
+}
+
+.gv-row[data-selected="true"] {
+  background: var(--gv-accent-soft);
+  box-shadow: inset 0 0 0 var(--gv-border-emphasis) var(--gv-accent);
+}
+
+.gv-row-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--gv-text-primary);
+  text-overflow: ellipsis;
+}
+
+.gv-row[data-kind="class"] .gv-row-name {
+  font-weight: var(--gv-weight-medium);
+}
+
+.gv-row-count {
+  color: var(--gv-text-tertiary);
+  font-size: var(--gv-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Toolbar, minimap, perf ------------------------------------------------------- */
+
+.gv-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-1);
+  padding: var(--gv-space-1);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+  border-radius: var(--gv-radius-md);
+  background: var(--gv-bg-surface-raised);
+  box-shadow: var(--gv-shadow-float);
+}
+
+.gv-tool {
+  height: 28px;
+  padding: 0 var(--gv-space-2);
+  border: 0;
+  border-radius: var(--gv-radius-sm);
+  background: transparent;
+  color: var(--gv-text-primary);
+  font: inherit;
+  font-size: var(--gv-text-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.gv-tool:hover {
+  background: var(--gv-bg-hover);
+}
+
+.gv-tool-icon {
+  width: 28px;
+  padding: 0;
+  font-size: var(--gv-text-lg);
+}
+
+.gv-tool-divider {
+  width: var(--gv-hairline);
+  height: 18px;
+  margin: 0 var(--gv-space-1);
+  background: var(--gv-border-default);
+}
+
+.gv-tool-select select {
+  height: 28px;
+  padding: 0 var(--gv-space-2);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+  border-radius: var(--gv-radius-sm);
+  background: var(--gv-bg-surface);
+  color: var(--gv-text-primary);
+  font: inherit;
+  font-size: var(--gv-text-sm);
+}
+
+.gv-minimap {
+  padding: var(--gv-space-2);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+  border-radius: var(--gv-radius-md);
+  background: var(--gv-bg-surface);
+  box-shadow: var(--gv-shadow-float);
+  line-height: 0;
+}
+
+.gv-minimap svg {
+  cursor: pointer;
+}
+
+.gv-mm-module {
+  fill-opacity: 0.3;
+}
+
+.gv-mm-file {
+  fill: var(--gv-border-strong);
+}
+
+.gv-mm-viewport {
+  fill: var(--gv-accent-soft);
+  fill-opacity: 0.35;
+  stroke: var(--gv-accent);
+  stroke-width: 1.5;
+}
+
+.gv-perf {
+  padding: var(--gv-space-2) var(--gv-space-3);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+  border-radius: var(--gv-radius-md);
+  background: var(--gv-bg-surface-raised);
+  box-shadow: var(--gv-shadow-float);
+  color: var(--gv-text-secondary);
+  font-family: var(--gv-font-code);
+  font-size: var(--gv-text-xs);
+  line-height: var(--gv-line-normal);
+}
+
+/* A notice floating over the map (e.g. structure-only). */
+.canvas-notice {
+  position: absolute;
+  top: var(--gv-space-4);
+  left: 50%;
+  z-index: 5;
+  transform: translateX(-50%);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+  border-radius: var(--gv-radius-lg);
+  background: var(--gv-bg-surface-raised);
+  box-shadow: var(--gv-shadow-float);
+}
+
+.canvas-notice .state-panel {
+  flex-direction: row;
+  max-width: none;
+  padding: var(--gv-space-3) var(--gv-space-4);
+  gap: var(--gv-space-4);
+  text-align: left;
+}
+
+.canvas-notice .state-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.canvas-notice .state-title {
+  font-size: var(--gv-text-lg);
+}
+
+.canvas-notice .state-text {
+  font-size: var(--gv-text-sm);
+}
+
+.canvas-notice .state-actions {
+  margin-top: 0;
+}
+
+/* ---- Relationship edges ----------------------------------------------------------- */
+
+.gv-markers {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.gv-marker-syntactic {
+  fill: var(--gv-prov-syntactic);
+}
+
+.gv-marker-semantic {
+  fill: var(--gv-prov-semantic);
+}
+
+.gv-marker-ai {
+  fill: none;
+  stroke: var(--gv-prov-ai);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gv-edge-line {
+  fill: none;
+  stroke-linecap: round;
+  transition: opacity var(--gv-motion-fast) var(--gv-ease-out);
+}
+
+.gv-edge[data-prov="syntactic"] .gv-edge-line {
+  stroke: var(--gv-prov-syntactic);
+  stroke-width: 1.5;
+}
+
+.gv-edge[data-prov="semantic"] .gv-edge-line {
+  stroke: var(--gv-prov-semantic);
+  stroke-width: 2.5;
+}
+
+.gv-edge[data-prov="ai"] .gv-edge-line {
+  stroke: var(--gv-prov-ai);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+
+.gv-edge[data-prov="candidate"] .gv-edge-line {
+  stroke: var(--gv-text-tertiary);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.gv-edge[data-hop="2"] .gv-edge-line {
+  opacity: 0.5;
+}
+
+.gv-edge[data-preview="true"] .gv-edge-line {
+  opacity: 0.45;
+}
+
+.gv-edge[data-hovered="true"] .gv-edge-line {
+  stroke-width: 2.5;
+}
+
+.gv-edge-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 12;
+  cursor: pointer;
+  pointer-events: stroke;
+}
+
+/* Badges above every edge's hit area, so they stay hoverable where lines cross. Relation
+   edges sit at z 1000, and React Flow adds 1000 to edges touching a selected node. */
+.gv-map .react-flow__edgelabel-renderer {
+  z-index: 3000;
+}
+
+.gv-edge-badge {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gv-space-1);
+  pointer-events: all;
+  z-index: 1001;
+}
+
+.gv-edge-badge[data-hop="2"],
+.gv-edge-badge[data-preview="true"] {
+  opacity: 0.6;
+}
+
+.gv-ai-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 var(--gv-space-1);
+  border-radius: var(--gv-radius-pill);
+  background: var(--gv-prov-ai);
+  color: var(--gv-bg-surface);
+  font-size: var(--gv-text-2xs);
+  font-weight: var(--gv-weight-semibold);
+  letter-spacing: var(--gv-tracking-caps);
+}
+
+.gv-count {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 var(--gv-space-2);
+  border: var(--gv-hairline) solid var(--gv-border-strong);
+  border-radius: var(--gv-radius-pill);
+  background: var(--gv-bg-surface-raised);
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-2xs);
+  font-weight: var(--gv-weight-medium);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.gv-count-pairs {
+  position: absolute;
+  top: calc(100% + var(--gv-space-1));
+  left: 50%;
+  display: none;
+  flex-direction: column;
+  min-width: 220px;
+  padding: var(--gv-space-1);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+  border-radius: var(--gv-radius-md);
+  background: var(--gv-bg-surface-raised);
+  box-shadow: var(--gv-shadow-float);
+  transform: translateX(-50%);
+}
+
+.gv-count:hover .gv-count-pairs,
+.gv-count:focus-within .gv-count-pairs {
+  display: flex;
+}
+
+.gv-count-pair {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--gv-space-2);
+  padding: var(--gv-space-1) var(--gv-space-2);
+  border: 0;
+  border-radius: var(--gv-radius-sm);
+  background: transparent;
+  color: var(--gv-text-primary);
+  font-family: var(--gv-font-code);
+  font-size: var(--gv-text-xs);
+  text-align: left;
+  cursor: pointer;
+}
+
+.gv-count-pair:hover {
+  background: var(--gv-bg-hover);
+}
+
+.gv-count-line {
+  color: var(--gv-text-tertiary);
+}
+
+.gv-edge-type {
+  position: absolute;
+  padding: 0 var(--gv-space-1);
+  border-radius: var(--gv-radius-sm);
+  background: var(--gv-bg-surface-raised);
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-2xs);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 1002;
+}
+
+.gv-segmented {
+  display: inline-flex;
+  gap: var(--gv-space-1);
+}
+
+.gv-tool[aria-pressed="true"] {
+  background: var(--gv-accent-soft);
+  color: var(--gv-accent);
+  font-weight: var(--gv-weight-medium);
+}
+
+/* ---- Legend ----------------------------------------------------------------------- */
+
+.gv-legend {
+  min-width: 180px;
+  padding: var(--gv-space-2) var(--gv-space-3);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+  border-radius: var(--gv-radius-md);
+  background: var(--gv-bg-surface-raised);
+  box-shadow: var(--gv-shadow-float);
+  font-size: var(--gv-text-xs);
+}
+
+.gv-legend-toggle {
+  width: 100%;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--gv-text-secondary);
+  font: inherit;
+  font-weight: var(--gv-weight-semibold);
+  letter-spacing: var(--gv-tracking-caps);
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.gv-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gv-space-1);
+  margin: var(--gv-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gv-legend-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-2);
+  color: var(--gv-text-primary);
+}
+
+.gv-legend-sample {
+  width: 44px;
+  height: 12px;
+  flex: none;
+  overflow: visible;
+}
+
+/* ---- Status marks and the Documentation lens (Phase 09) ---------------------------- */
+
+.gv-status-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gv-mark {
+  width: 16px;
+  height: 16px;
+}
+
+.gv-chip-error {
+  height: 18px;
+  padding: 0 var(--gv-space-1);
+  border-color: var(--gv-status-error);
+  background: var(--gv-status-error-soft);
+  color: var(--gv-status-error);
+  font-weight: var(--gv-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stale: 14% stale tint. Undocumented: dashed border and 10% neutral tint. Documented: none. */
+.gv-map[data-lens="coverage"] .gv-file[data-status="stale"]:not([data-selected="true"]),
+.gv-map[data-lens="coverage"] .gv-row[data-status="stale"]:not([data-selected="true"]) {
+  background: color-mix(in srgb, var(--gv-status-stale) 14%, var(--gv-bg-surface-raised));
+}
+
+.gv-map[data-lens="coverage"] .gv-file[data-status="undocumented"]:not([data-selected="true"]) {
+  border-style: dashed;
+  border-color: var(--gv-status-undocumented);
+  background: color-mix(in srgb, var(--gv-status-undocumented) 10%, var(--gv-bg-surface-raised));
+}
+
+.gv-map[data-lens="coverage"] .gv-row[data-status="undocumented"]:not([data-selected="true"]) {
+  background: color-mix(in srgb, var(--gv-status-undocumented) 10%, var(--gv-bg-surface-raised));
+  box-shadow: inset 0 0 0 var(--gv-hairline) var(--gv-status-undocumented);
+  outline: var(--gv-hairline) dashed var(--gv-status-undocumented);
+  outline-offset: -1px;
+}
+
+.gv-map[data-lens="coverage"] .gv-module[data-status="undocumented"]:not([data-selected="true"]) {
+  border-style: dashed;
+  border-color: var(--gv-status-undocumented);
+}
+
+/* Documented % beside the ring, in the Documentation lens only. */
+.gv-module-pct {
+  display: none;
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-sm);
+  font-weight: var(--gv-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.gv-map[data-lens="coverage"] .gv-module-pct {
+  display: inline;
+}
+
+/* The name takes the free space, so the chip, % and ring sit together on the right. */
+.gv-module-title-row .gv-module-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.gv-module[data-lod="0"] .gv-module-pct {
+  font-size: calc(var(--gv-text-lg) * 2);
+}
+
+/* Summary card: below the toolbar's row so the two never collide. */
+.gv-summary {
+  margin-top: calc(var(--gv-space-4) + var(--gv-layout-control) + var(--gv-space-4));
+  width: 232px;
+  padding: var(--gv-space-3);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+  border-radius: var(--gv-radius-md);
+  background: var(--gv-bg-surface-raised);
+  box-shadow: var(--gv-shadow-float);
+  font-size: var(--gv-text-xs);
+}
+
+.gv-summary-title {
+  margin-bottom: var(--gv-space-2);
+  color: var(--gv-text-secondary);
+  font-weight: var(--gv-weight-semibold);
+  letter-spacing: var(--gv-tracking-caps);
+  text-transform: uppercase;
+}
+
+.gv-summary-bar {
+  display: flex;
+  gap: var(--gv-space-1);
+  height: 24px;
+  /* The 6px above and below the 12px bar sit in the neighbouring gaps. */
+  margin: -6px 0;
+}
+
+/* A 24px-tall hit target; ::before draws the 12px bar, its outline and pressed ring. */
+.gv-summary-segment {
+  position: relative;
+  flex-basis: 0;
+  min-width: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--gv-radius-sm);
+  background: transparent;
+  cursor: pointer;
+}
+
+.gv-summary-segment::before {
+  content: "";
+  position: absolute;
+  inset: 6px 0;
+  border-radius: var(--gv-radius-sm);
+}
+
+.gv-summary-segment[data-status="documented"]::before {
+  background: var(--gv-status-documented);
+}
+
+.gv-summary-segment[data-status="stale"]::before {
+  background: var(--gv-status-stale);
+}
+
+.gv-summary-segment[data-status="undocumented"]::before {
+  background: color-mix(in srgb, var(--gv-status-undocumented) 35%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--gv-status-undocumented);
+}
+
+.gv-summary-segment[aria-pressed="true"]::before {
+  outline: var(--gv-border-emphasis) solid var(--gv-text-primary);
+  outline-offset: 1px;
+}
+
+.gv-summary-counts {
+  display: flex;
+  flex-direction: column;
+  margin: var(--gv-space-2) calc(-1 * var(--gv-space-1)) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gv-summary-count {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-2);
+  width: 100%;
+  height: 24px;
+  padding: 0 var(--gv-space-1);
+  border: none;
+  border-radius: var(--gv-radius-sm);
+  background: transparent;
+  color: var(--gv-text-secondary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gv-summary-count strong {
+  color: var(--gv-text-primary);
+  font-weight: var(--gv-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.gv-summary-count:hover:not(:disabled) {
+  background: var(--gv-bg-hover);
+}
+
+.gv-summary-count:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.gv-summary-count[aria-pressed="true"] {
+  background: var(--gv-bg-hover);
+  color: var(--gv-text-primary);
+}
+
+.gv-summary-pct {
+  margin-left: auto;
+  color: var(--gv-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.gv-error-dot {
+  width: 0;
+  height: 0;
+  flex: none;
+  border-right: 4px solid transparent;
+  border-bottom: 7px solid var(--gv-status-error);
+  border-left: 4px solid transparent;
+}
+
+/* ---- Changes lens (Phase 10) ------------------------------------------------------- */
+
+.gv-marker-added {
+  fill: var(--gv-diff-added);
+}
+
+.gv-marker-removed {
+  fill: var(--gv-diff-removed);
+}
+
+.gv-change-mark {
+  display: none;
+}
+
+.gv-chip-change {
+  display: none;
+  height: 18px;
+  padding: 0 var(--gv-space-1);
+  font-family: var(--gv-font-code);
+  font-variant-numeric: tabular-nums;
+}
+
+.gv-map[data-lens="changes"] .gv-chip-change {
+  display: inline-flex;
+}
+
+.gv-map[data-lens="changes"] .gv-status-slot,
+.gv-map[data-lens="changes"] .gv-chip-error,
+.gv-map[data-lens="changes"] .gv-ring {
+  display: none;
+}
+
+.gv-map[data-lens="changes"] .gv-change-mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--gv-radius-sm);
+  color: var(--gv-bg-surface-raised);
+  font-family: var(--gv-font-code);
+  font-size: var(--gv-text-sm);
+  font-weight: var(--gv-weight-semibold);
+  line-height: 1;
+}
+
+.gv-file-header .gv-change-mark {
+  align-self: flex-start;
+  margin-top: var(--gv-space-2);
+}
+
+.gv-change-mark[data-change="added"] {
+  background: var(--gv-diff-added);
+}
+
+.gv-change-mark[data-change="removed"] {
+  background: var(--gv-diff-removed);
+}
+
+.gv-change-mark[data-change="modified"] {
+  background: var(--gv-diff-modified);
+}
+
+.gv-change-mark[data-change="moved"] {
+  background: var(--gv-diff-moved);
+}
+
+.gv-map[data-lens="changes"] .gv-change-mark[data-change="child"] {
+  background: none;
+}
+
+.gv-map[data-lens="changes"] .gv-file[data-change="added"]:not([data-selected="true"]),
+.gv-map[data-lens="changes"] .gv-row[data-change="added"]:not([data-selected="true"]) {
+  border-color: var(--gv-diff-added);
+  background: color-mix(in srgb, var(--gv-diff-added) 14%, var(--gv-bg-surface-raised));
+  box-shadow: inset 0 0 0 var(--gv-hairline) var(--gv-diff-added);
+}
+
+.gv-map[data-lens="changes"] .gv-file[data-change="modified"]:not([data-selected="true"]),
+.gv-map[data-lens="changes"] .gv-row[data-change="modified"]:not([data-selected="true"]) {
+  background: color-mix(in srgb, var(--gv-diff-modified) 14%, var(--gv-bg-surface-raised));
+}
+
+.gv-map[data-lens="changes"] .gv-file[data-change="moved"]:not([data-selected="true"]),
+.gv-map[data-lens="changes"] .gv-row[data-change="moved"]:not([data-selected="true"]) {
+  border-color: var(--gv-diff-moved);
+  box-shadow: inset 0 0 0 var(--gv-border-emphasis) var(--gv-diff-moved);
+}
+
+/* Removed: dashed, struck through, tertiary text (not faded with opacity, for contrast). */
+.gv-map[data-lens="changes"] .gv-file[data-change="removed"],
+.gv-map[data-lens="changes"] .gv-row[data-change="removed"] {
+  color: var(--gv-text-tertiary);
+  border-style: dashed;
+  border-color: var(--gv-diff-removed);
+  background: none;
+  outline: var(--gv-hairline) dashed var(--gv-diff-removed);
+  outline-offset: -1px;
+}
+
+.gv-map[data-lens="changes"] .gv-row[data-change="removed"] .gv-row-name,
+.gv-map[data-lens="changes"] .gv-file[data-change="removed"] .gv-file-name {
+  color: var(--gv-text-tertiary);
+  text-decoration: line-through;
+}
+
+/* Edges: added in green, removed dashed red, unchanged in their own style at 50%. */
+.gv-map[data-lens="changes"] .gv-edge:not([data-change]) .gv-edge-line {
+  opacity: 0.5;
+}
+
+.gv-map[data-lens="changes"] .gv-edge[data-change="added"] .gv-edge-line {
+  stroke: var(--gv-diff-added);
+  stroke-width: 2;
+  stroke-dasharray: none;
+}
+
+.gv-map[data-lens="changes"] .gv-edge[data-change="removed"] .gv-edge-line {
+  stroke: var(--gv-diff-removed);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}

@@ -1,20 +1,31 @@
 //! Gitvur data contract v0.2: Rust types for `.gitvur/*.json` and their JSON Schema.
 //!
-//! Phase 01 replaces the placeholder below with the real contract types.
+//! The binding rules (IDs, hashing, ordering) are documented in this crate's `README.md`.
+//! Every top-level type has a `canonicalize()` method that applies the ordering rules;
+//! [`to_canonical_json`] then serialises the value in the canonical byte format.
+
+mod annotations;
+mod common;
+mod diff;
+mod hash;
+mod json;
+mod manifest;
+mod report;
+pub mod schema;
+mod structure;
+pub mod tree;
+
+pub use annotations::{Annotations, Description, Module};
+pub use common::{Edge, EdgeType, Evidence, Provenance, SourceRange};
+pub use diff::{ChangeKind, DiffSummary, EdgeChange, ElementChange, StructureDiff};
+pub use hash::{content_hash, extract_lines, line_count};
+pub use json::to_canonical_json;
+pub use manifest::{ExtractorInfo, Language, Manifest};
+pub use report::{ElementStatus, Issue, Report, Severity, Status, Summary};
+pub use structure::{Node, NodeType, Structure, UnresolvedCall};
 
 /// Version of the data contract this crate describes.
-///
-/// Placeholder until Phase 01 adds the contract types.
-pub fn schema_version() -> &'static str {
-    "0.2"
-}
+pub const SCHEMA_VERSION: &str = "0.2";
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn schema_version_is_0_2() {
-        assert_eq!(schema_version(), "0.2");
-    }
-}
+/// `commitSha` value when the repository is not a Git checkout or has no commits.
+pub const UNCOMMITTED: &str = "uncommitted";

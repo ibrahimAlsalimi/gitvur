@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Manifest",
+  "type": "object",
+  "properties": {
+    "commitSha": {
+      "description": "Short (7-character) SHA of `HEAD`, or [`crate::UNCOMMITTED`] when the repository\nis not a Git checkout or has no commits.",
+      "type": "string"
+    },
+    "extractor": {
+      "$ref": "#/$defs/ExtractorInfo"
+    },
+    "generatedAt": {
+      "description": "RFC 3339 UTC timestamp. The only non-deterministic field in the contract.",
+      "type": "string"
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Language"
+      }
+    },
+    "projectName": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "description": "Always [`crate::SCHEMA_VERSION`].",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "projectName",
+    "commitSha",
+    "generatedAt",
+    "extractor",
+    "languages"
+  ],
+  "$defs": {
+    "ExtractorInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ]
+    },
+    "Language": {
+      "type": "string",
+      "enum": [
+        "python",
+        "typescript"
+      ]
+    }
+  }
+}

@@ -1,0 +1,223 @@
+{
+  "modules": [
+    {
+      "id": "module:app",
+      "name": "App",
+      "description": "Program entry point and request handlers.",
+      "files": [
+        "file:src/handlers.ts",
+        "file:src/main.ts"
+      ]
+    },
+    {
+      "id": "module:auth",
+      "name": "Authentication",
+      "description": "Sign-in and user sessions.",
+      "files": [
+        "file:src/auth/index.ts",
+        "file:src/auth/login.ts",
+        "file:src/auth/session.ts"
+      ]
+    },
+    {
+      "id": "module:data",
+      "name": "Data",
+      "description": "User storage and the shared type declarations.",
+      "files": [
+        "file:src/db/repo.ts",
+        "file:src/types.d.ts"
+      ]
+    },
+    {
+      "id": "module:presentation",
+      "name": "Presentation",
+      "description": "Rendering data as text or JSON, and string formatting helpers.",
+      "files": [
+        "file:src/util.ts",
+        "file:src/views.ts"
+      ]
+    }
+  ],
+  "descriptions": [
+    {
+      "id": "class:src/auth/session.ts:Session",
+      "text": "A user session identified by the user's ID.",
+      "basedOnHash": "sha256:f6898f1372bdbdcbe428823e408c4ea28bfa1655629540a547626b8d687819b8"
+    },
+    {
+      "id": "class:src/db/repo.ts:Repo",
+      "text": "In-memory user store keyed by ID, optionally seeded with users.",
+      "basedOnHash": "sha256:5f2bcc553bdb298d48f28fdfc591c5210151220edb7ab2f46db8864c9b7ab680"
+    },
+    {
+      "id": "class:src/views.ts:JsonView",
+      "text": "Renders data as a JSON string.",
+      "basedOnHash": "sha256:b61eed7e2f80619ac827d9b197d4e68325c5544bd283d21e17c513da28acefb1"
+    },
+    {
+      "id": "class:src/views.ts:TextView",
+      "text": "Renders data as formatted plain text.",
+      "basedOnHash": "sha256:28b1091f49505a009739d4b2b6be6aa4b26af27b88d569f6a3fa52e2c85a7ea0"
+    },
+    {
+      "id": "file:src/auth/index.ts",
+      "text": "Entry file of the auth package: re-exports login and Session.",
+      "basedOnHash": "sha256:895c09a5b982e4a9f64879ba584dd2e17b2851abd02e0c9452713c4ec8c9cffb"
+    },
+    {
+      "id": "file:src/auth/login.ts",
+      "text": "Sign-in: looks up a user in the repository and returns a welcome message.",
+      "basedOnHash": "sha256:2a96994cb21392e4cc44b97ee42b5d72e3806f8d614b11f44a1a7c919e6b35d1"
+    },
+    {
+      "id": "file:src/auth/session.ts",
+      "text": "Session type for a signed-in user.",
+      "basedOnHash": "sha256:f6898f1372bdbdcbe428823e408c4ea28bfa1655629540a547626b8d687819b8"
+    },
+    {
+      "id": "file:src/db/repo.ts",
+      "text": "In-memory user repository, exported as the module's default.",
+      "basedOnHash": "sha256:b6bb508e51e29ab2918a841008a4d16dd3ce1f737a49df8fa545df2cab51b1b3"
+    },
+    {
+      "id": "file:src/handlers.ts",
+      "text": "Handlers that render data with a view chosen by its type, and open user sessions.",
+      "basedOnHash": "sha256:df2feaa907a4912d0094c5789b9d44b67b407f90add95159ed857c08c0fcb6c9"
+    },
+    {
+      "id": "file:src/main.ts",
+      "text": "Program entry point: seeds a repository, signs in a user and prints the results.",
+      "basedOnHash": "sha256:294e8b3429ba118dccaf8e30a331e782f16c3ec4867d266ab6b6421e8fc3bf43"
+    },
+    {
+      "id": "file:src/types.d.ts",
+      "text": "Type declarations shared by the app: the User shape, a password hasher and an audit log.",
+      "basedOnHash": "sha256:758ed24b5fbd2453acebfad9c1baa2d5e0d6f93b9aff37b91f2e377f96a93fd9"
+    },
+    {
+      "id": "file:src/util.ts",
+      "text": "String helpers for capitalising and padding.",
+      "basedOnHash": "sha256:93a8c37ffdfdbc6c6947af3cb50da46e2884166ec87231c850b90f04db8b3961"
+    },
+    {
+      "id": "file:src/views.ts",
+      "text": "Views that render data as JSON or plain text, plus a value formatter.",
+      "basedOnHash": "sha256:021db784bd105d8b9290d30817279dcdcc854c366c4b0293a1366fdec62404be"
+    },
+    {
+      "id": "function:src/auth/login.ts:greet",
+      "text": "Builds a 'Welcome, <Name>' message with the name capitalised.",
+      "basedOnHash": "sha256:a99eda764d6f768bc3a41eb15bffee55f5805465699feb904ae3da197123eaf1"
+    },
+    {
+      "id": "function:src/auth/login.ts:login",
+      "text": "Finds the user by ID in the given repository and returns a welcome message; throws if the user is unknown.",
+      "basedOnHash": "sha256:7cbd9cfb231640727efc521c2eb3b8cf8dc5cecd2b27b0f1d3e974f68e1b7fc4"
+    },
+    {
+      "id": "function:src/auth/session.ts:Session.constructor",
+      "text": "Stores the user ID as a read-only property.",
+      "basedOnHash": "sha256:b79d0540481aa061f189b40dec601bd4425a20a89cfc50fa09b1891599a6a887"
+    },
+    {
+      "id": "function:src/auth/session.ts:Session.describe",
+      "text": "Returns a short text naming the session's user.",
+      "basedOnHash": "sha256:e284da9d069f4457ef7af15c3040ea60facf103a968d1f917c4f94b270a6b110"
+    },
+    {
+      "id": "function:src/db/repo.ts:Repo.constructor",
+      "text": "Saves each seed user into the store.",
+      "basedOnHash": "sha256:0e961620bc7ef3647f6b8c86090a3157907d9f199c41157da38e9058c0e65330"
+    },
+    {
+      "id": "function:src/db/repo.ts:Repo.findById",
+      "text": "Returns the user with the given ID, or undefined.",
+      "basedOnHash": "sha256:12815a895290b5c6a72fd1589c2bd95132deab11930c6fb022730b83dbe3d23f"
+    },
+    {
+      "id": "function:src/db/repo.ts:Repo.save",
+      "text": "Stores a user under its ID, replacing any existing entry.",
+      "basedOnHash": "sha256:5637f29f9f5d3d1ced8b60cf176968bd54ada124743f5fde720e464ea4ca8e12"
+    },
+    {
+      "id": "function:src/handlers.ts:handler",
+      "text": "Renders data with the view that fits it: text for strings, JSON for anything else.",
+      "basedOnHash": "sha256:760541c1f94db3052727f331d6ff7ed6a5b52b7a0c6b29cdac5e07cd30b67baa"
+    },
+    {
+      "id": "function:src/handlers.ts:openSession",
+      "text": "Creates a session for the given user ID.",
+      "basedOnHash": "sha256:6e23d8eebdd06547f73b03b1290edcea8e94c15559277871841eb85b02671e56"
+    },
+    {
+      "id": "function:src/handlers.ts:pickView",
+      "text": "Picks a TextView for strings and a JsonView for anything else.",
+      "basedOnHash": "sha256:e46e06e893528cea99b4f3ca1686eb2fb7f5d5b083218e86b43dbc72e09c72f2"
+    },
+    {
+      "id": "function:src/main.ts:main",
+      "text": "Seeds a repository with one user, signs them in, and prints the padded greeting and a rendered sample to the console.",
+      "basedOnHash": "sha256:249f896b7c0e0a5986b818c1d2a2536251006526bc395d41dc2c095cd69eab6c"
+    },
+    {
+      "id": "function:src/util.ts:capitalize",
+      "text": "Returns the text with its first character in upper case.",
+      "basedOnHash": "sha256:5cc7becc893d924b2d60ddee595c0f59dc4949e125f19e2a6b2e1766926f6112"
+    },
+    {
+      "id": "function:src/util.ts:pad",
+      "text": "Left-pads text with spaces to the given width.",
+      "basedOnHash": "sha256:5a73ea9375275fb047eba026b64fa5ef2fe68b9e5961b1b05a20103429bc8388"
+    },
+    {
+      "id": "function:src/views.ts:JsonView.render",
+      "text": "Returns the data serialised as JSON.",
+      "basedOnHash": "sha256:3938ff29c4defa05f752b5cd475db6a8e3c818d0de372f2d12c76904cf28e454"
+    },
+    {
+      "id": "function:src/views.ts:TextView.render",
+      "text": "Converts the data to a string and formats it.",
+      "basedOnHash": "sha256:5c4413ec6621074c52a16efb7fdf43b35429a802c2d3585c51ff72678624b6f2"
+    },
+    {
+      "id": "function:src/views.ts:format",
+      "text": "Formats a number with a fixed count of decimals (2 by default) or trims a string; overloaded for both.",
+      "basedOnHash": "sha256:ac4cdd77e0bf32affcd7b52c92951030fbaca974bbb21b1d9b4eac8430354370"
+    }
+  ],
+  "edges": [
+    {
+      "from": "function:src/auth/login.ts:login",
+      "to": "function:src/db/repo.ts:Repo.findById",
+      "type": "calls",
+      "provenance": "ai",
+      "evidence": {
+        "file": "src/auth/login.ts",
+        "line": 5
+      },
+      "note": "repo is declared as Repo in the signature (line 4), so repo.findById is Repo.findById."
+    },
+    {
+      "from": "function:src/handlers.ts:handler",
+      "to": "function:src/views.ts:JsonView.render",
+      "type": "calls",
+      "provenance": "ai",
+      "evidence": {
+        "file": "src/handlers.ts",
+        "line": 6
+      },
+      "note": "view comes from pickView (line 5), which returns a JsonView for non-string data (line 10)."
+    },
+    {
+      "from": "function:src/handlers.ts:handler",
+      "to": "function:src/views.ts:TextView.render",
+      "type": "calls",
+      "provenance": "ai",
+      "evidence": {
+        "file": "src/handlers.ts",
+        "line": 6
+      },
+      "note": "view comes from pickView (line 5), which returns a TextView for strings (line 10)."
+    }
+  ]
+}

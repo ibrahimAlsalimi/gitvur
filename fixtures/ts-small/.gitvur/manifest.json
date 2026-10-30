@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "0.2",
+  "projectName": "ts-small",
+  "commitSha": "83c8bd6",
+  "generatedAt": "2026-10-29T21:01:07Z",
+  "extractor": {
+    "name": "gitvur-index",
+    "version": "0.2.0"
+  },
+  "languages": [
+    "typescript"
+  ]
+}

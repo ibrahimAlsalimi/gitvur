@@ -7,17 +7,26 @@
   "packageManager": "pnpm@12.16.1",
   "scripts": {
     "dev": "vite",
+    "dev:mock": "vite --mode mock",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "test": "vitest run",
+    "check:contrast": "node scripts/check-contrast.ts",
+    "e2e": "node scripts/gen-synthetic.ts --quiet && playwright test",
+    "e2e:perf": "node scripts/gen-synthetic.ts --quiet && GITVUR_PERF=1 playwright test -g budgets --project light --workers 1",
+    "gen:synthetic": "node scripts/gen-synthetic.ts",
+    "gen:types": "cd .. && GITVUR_WRITE_BINDINGS=1 cargo test -q -p gitvur-app --lib bindings",
     "tauri": "tauri"
   },
   "dependencies": {
     "@dagrejs/dagre": "3.1.3",
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
     "@tauri-apps/api": "2.12.4",
+    "@tauri-apps/plugin-dialog": "2.8.4",
     "@xyflow/react": "12.12.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
@@ -25,7 +34,9 @@
     "zustand": "5.0.16"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.11.1",
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
     "@tauri-apps/cli": "2.12.4",
     "@types/node": "^24.19.2",
     "@types/react": "19.3.0",

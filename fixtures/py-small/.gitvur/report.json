@@ -1,0 +1,170 @@
+{
+  "schemaVersion": "0.2",
+  "commitSha": "83c8bd6",
+  "summary": {
+    "documented": 39,
+    "stale": 0,
+    "undocumented": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  "elements": [
+    {
+      "id": "class:shop/cache.py:Cache",
+      "status": "documented"
+    },
+    {
+      "id": "class:shop/models.py:Book",
+      "status": "documented"
+    },
+    {
+      "id": "class:shop/models.py:Toy",
+      "status": "documented"
+    },
+    {
+      "id": "class:shop/orders.py:OrderService",
+      "status": "documented"
+    },
+    {
+      "id": "class:shop/store.py:Store",
+      "status": "documented"
+    },
+    {
+      "id": "file:app.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:shop/__init__.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:shop/cache.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:shop/models.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:shop/orders.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:shop/store.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:shop/utils.py",
+      "status": "documented"
+    },
+    {
+      "id": "function:app.py:main",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/cache.py:Cache.__init__",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/cache.py:Cache.create",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/cache.py:Cache.lookup",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/cache.py:Cache.save",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/models.py:Book.__init__",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/models.py:Book.describe",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/models.py:Toy.__init__",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/models.py:Toy.describe",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/models.py:Toy.label",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/orders.py:OrderService.__init__",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/orders.py:OrderService.place",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/orders.py:OrderService.receipt",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/orders.py:OrderService.remember",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/store.py:Store.__init__",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/store.py:Store.save",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/store.py:Store.save.encode",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/utils.py:format_price",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/utils.py:format_price.with_symbol",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/utils.py:slugify",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/utils.py:to_amount",
+      "status": "documented"
+    },
+    {
+      "id": "function:shop/utils.py:to_amount#2",
+      "status": "documented"
+    },
+    {
+      "id": "module:catalogue",
+      "status": "documented"
+    },
+    {
+      "id": "module:entry-point",
+      "status": "documented"
+    },
+    {
+      "id": "module:orders",
+      "status": "documented"
+    },
+    {
+      "id": "module:storage",
+      "status": "documented"
+    },
+    {
+      "id": "module:support",
+      "status": "documented"
+    }
+  ],
+  "issues": []
+}

@@ -31,6 +31,13 @@ Read CLAUDE.md, PROTOTYPE_V2_PLAN.md and prompts/02-extractor-python.md, then ca
 | 10 | `10-structural-diff.md` | Diff + **Graphics** | Diff crate + diff view on the map |
 | 11 | `11-ux-polish.md` | **UX** | Search, keyboard, states, themes, accessibility |
 | 12 | `12-evaluation.md` | Evaluation | Results recorded against the four tests |
+| 13 | `13-docs-tab.md` | Feature: Docs tab | Tabs + safe Markdown reader linked to the map |
+| 14 | `14-entry-points-and-flows-data.md` | Feature: Flows (data) | Contract v0.3, entry points, trace, flow validation, **human review** of new fixtures |
+| 15 | `15-flows-tab.md` | Feature: Flows (**graphics**) | Swimlane flow diagrams, playback, trace, export |
+
+| 16 | `16-git-timeline.md` | Feature: Timeline (**graphics**) | History chart, module heatmap, branch graph, element history |
+
+Phase 13 is independent of 14–15 and can run first or in parallel. Phase 15 needs Phase 14. Phase 16 needs Phase 10 and the tab bar from Phase 13.
 
 Phase 06 may start once Phase 02 passes (it can use fixture data), but it is simpler to go in order.
 
