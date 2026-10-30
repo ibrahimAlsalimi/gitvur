@@ -2,6 +2,7 @@ import { Panel, type ReactFlowState, useReactFlow, useStore } from "@xyflow/reac
 import { type MouseEvent, memo } from "react";
 
 import type { MinimapRect } from "./minimapRects";
+import { cameraDuration } from "./motion";
 
 const MAX_WIDTH = 200;
 const MAX_HEIGHT = 140;
@@ -25,7 +26,7 @@ export function Minimap({ rects, width, height }: MinimapProps) {
     const box = e.currentTarget.getBoundingClientRect();
     void rf.setCenter((e.clientX - box.left) / scale, (e.clientY - box.top) / scale, {
       zoom: rf.getZoom(),
-      duration: 180,
+      duration: cameraDuration(180),
     });
   };
   return (

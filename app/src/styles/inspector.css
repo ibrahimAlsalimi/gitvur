@@ -73,6 +73,7 @@
 
 .gv-crumb {
   max-width: 160px;
+  min-height: 24px;
   padding: 0 var(--gv-space-1);
   border: none;
   border-radius: var(--gv-radius-sm);
@@ -307,7 +308,7 @@
 .gv-insp-evidence {
   flex: none;
   min-width: 28px;
-  height: 20px;
+  height: 24px;
   padding: 0 var(--gv-space-1);
   border: var(--gv-hairline) solid var(--gv-border-default);
   border-radius: var(--gv-radius-sm);
@@ -341,6 +342,7 @@
   display: flex;
   align-items: center;
   gap: var(--gv-space-2);
+  min-height: 24px;
   margin: 0 calc(-1 * var(--gv-space-2));
   padding: var(--gv-space-1) var(--gv-space-2);
   border: none;
@@ -679,12 +681,4 @@
 
 .gv-diff-split .gv-code-text + .gv-code-number {
   border-left: var(--gv-hairline) solid var(--gv-border-default);
-}
-
-.gv-insp-evidence {
-  height: 24px;
-}
-
-.gv-insp-disclosure {
-  min-height: 24px;
 }

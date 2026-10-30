@@ -79,9 +79,11 @@ describe("search", () => {
     const index = searchIndex(big);
     expect(index.entries.length).toBeGreaterThanOrEqual(5250); // + the annotations' modules
     // Warm up once (JIT), then the median of five runs per query: the budget is about
-    // search cost, not about other test workers competing for the CPU.
+    // search cost, not about other test workers competing for the CPU. The slowest single
+    // run gets a looser bound so a query that is slow every other time still fails.
     search(index, "warm");
     const times: number[] = [];
+    let worst = 0;
     for (const q of ["hr", "handle", "req 12", "file10", "zz", "h_r_1_1"]) {
       const runs: number[] = [];
       for (let i = 0; i < 5; i += 1) {
@@ -91,8 +93,10 @@ describe("search", () => {
       }
       runs.sort((a, b) => a - b);
       times.push(runs[2] ?? 0);
+      worst = Math.max(worst, runs[4] ?? 0);
     }
     times.sort((a, b) => a - b);
     expect(times[times.length - 1]).toBeLessThan(30);
+    expect(worst).toBeLessThan(100);
   });
 });

@@ -1,9 +1,7 @@
 import { Panel, useReactFlow } from "@xyflow/react";
 
 import { type Lens, useAppStore } from "../store/useAppStore";
-
-/** Camera animation length; none with reduced motion. */
-const motion = () => (window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 120);
+import { cameraDuration } from "./motion";
 
 /** Floating canvas controls (top-left). */
 export function Toolbar() {
@@ -28,7 +26,7 @@ export function Toolbar() {
         className="gv-tool gv-tool-icon"
         aria-label="Zoom in"
         title="Zoom in (+)"
-        onClick={() => void rf.zoomIn({ duration: motion() })}
+        onClick={() => void rf.zoomIn({ duration: cameraDuration(120) })}
       >
         +
       </button>
@@ -37,7 +35,7 @@ export function Toolbar() {
         className="gv-tool gv-tool-icon"
         aria-label="Zoom out"
         title="Zoom out (−)"
-        onClick={() => void rf.zoomOut({ duration: motion() })}
+        onClick={() => void rf.zoomOut({ duration: cameraDuration(120) })}
       >
         −
       </button>

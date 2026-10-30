@@ -676,7 +676,7 @@ Two sessions: the first stopped at the usage limit after a WIP checkpoint (`c8b8
     - fuzzy search over names, qualified names and paths, plus description words; results grouped by kind with glyph, name (matches highlighted), qualified name, path and status dot;
     - Enter selects and centres, Ctrl+Enter selects only;
     - `>` commands: open, index, validate, the three lenses, expand/collapse all, toggle theme, show issues, shortcuts, reset view, show guide, about.
-    - The index is built once per model when it loads. Timing on 5,250 elements: 0.8–12 ms per query (unit test: median of 5 runs per query < 30 ms).
+    - The index is built once per model when it loads. Timing on 5,250 elements: 0.8–12 ms per query (unit test, after one warm-up: median of 5 runs per query < 30 ms; slowest single run < 100 ms).
   - **Keyboard map**, matching the table exactly (the sheet renders `SHORTCUTS` from `copy.ts`):
     - Ctrl/Cmd+O; arrows on the canvas move focus to parent / first child / siblings among nodes on the map, bringing the target into view (Tab focus does too);
     - Enter expands or collapses a file, or folds a class (new map-only `collapsedIds`, threaded through layout, flow and edge lifting);
@@ -740,6 +740,18 @@ Two sessions: the first stopped at the usage limit after a WIP checkpoint (`c8b8
   - The 24px check excludes map content, which scales with zoom (24px at 100%).
   - Backend changes (allowed for persistence): `ViewState`/`Viewport` types and commands, `Settings.guideSeen`, `forget_recent`, the set-title capability. TS bindings regenerated.
 - Not done: the keyboard-only session in `pnpm tauri dev` (native dialog limit, as before). Please run one, including Ctrl+O, which opens the native picker.
+
+### 2026-10-30 — Review of Phase 11 (`/code-review`, fixes)
+
+- Receding (dimmed or unchanged nodes) no longer hides the selection. It also now outranks the Documentation and Changes lens tints and borders: lens cues keep their dashed shape but switch to neutral colours. Glyphs, chips and status dots keep their meaning colour (errors stay red) and only fade.
+- Breadcrumbs: dropped `inline-flex`, so long names show "…" again. Kept the 24px height through `min-height`.
+- Resize handles: the 24px pointer area reaches only into the canvas, no longer onto the explorer's scrollbar or the inspector's content.
+- Summary bar: segments stay 12px tall and get a 24px hit area from `::after`. This replaces the padding and `background-clip` hack that broke outlines and corners.
+- Hit-target sizes are now set in the original rules. The duplicate overrides at the ends of `canvas.css` and `inspector.css` are removed.
+- New `canvas/motion.ts` (`cameraDuration`) is shared by the map, toolbar and minimap. The minimap now respects reduced motion.
+- Guide: a card beside a small target flips to the target's left when it would not fit on the right.
+- Search perf test: also asserts the slowest single run is < 100 ms.
+- `pnpm typecheck && lint && test` pass. Not checked visually in `pnpm tauri dev`, and `check:contrast`/`e2e` were not run.
 
 ## Parking lot
 

@@ -37,12 +37,11 @@ import { nodeTypes } from "./nodeTypes";
 import { PerfOverlay } from "./PerfOverlay";
 import { usePerf } from "./perf";
 import { SummaryCard } from "./SummaryCard";
+import { cameraDuration } from "./motion";
 import { Toolbar } from "./Toolbar";
 import type { MapEdge, MapNode } from "./types";
 
 const edgeTypes = { connector: ConnectorEdge, relation: RelationEdge };
-const reducedMotion = () =>
-  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const proOptions = { hideAttribution: true };
 const FIT_PADDING = "48px";
 
@@ -238,21 +237,21 @@ function MapInner() {
     const width = node.measured.width ?? node.width ?? 0;
     const height = node.measured.height ?? node.height ?? 0;
     const zoom = rf.getZoom() < 0.6 ? 0.9 : rf.getZoom();
-    void rf.setCenter(x + width / 2, y + height / 2, { zoom, duration: reducedMotion() ? 0 : 180 });
+    void rf.setCenter(x + width / 2, y + height / 2, { zoom, duration: cameraDuration(180) });
   }, [navigation, flow, rf]);
 
   // Fit on request (toolbar, F, Reset view).
   const fitSeq = useAppStore((s) => s.fitSeq);
   useEffect(() => {
     if (fitSeq === 0) return;
-    void rf.fitView({ padding: FIT_PADDING, duration: reducedMotion() ? 0 : 180 });
+    void rf.fitView({ padding: FIT_PADDING, duration: cameraDuration(180) });
   }, [fitSeq, rf]);
 
   // F fit · 0 reset zoom · + / - zoom (outside text fields and dialogs).
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || typingIn(e.target)) return;
-      const duration = reducedMotion() ? 0 : 120;
+      const duration = cameraDuration(120);
       if (e.key === "f" || e.key === "F") useAppStore.getState().requestFit();
       else if (e.key === "0") void rf.zoomTo(1, { duration });
       else if (e.key === "+" || e.key === "=") void rf.zoomIn({ duration });
@@ -293,7 +292,7 @@ function MapInner() {
       void rf
         .setCenter(x + width / 2, y + Math.min(height, 200) / 2, {
           zoom,
-          duration: reducedMotion() ? 0 : 180,
+          duration: cameraDuration(180),
         })
         .then(() => requestAnimationFrame(focus));
     },

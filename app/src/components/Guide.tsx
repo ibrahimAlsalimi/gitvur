@@ -9,14 +9,18 @@ const TARGETS = {
   lens: ".gv-tool-select, .canvas",
 } as const;
 
-/** Where to put the card: inside a large target (the map), beside a small one; on screen. */
+/**
+ * Where to put the card: inside a large target (the map); beside a small one, on its
+ * right or, when that would run off screen, on its left; clamped to the window.
+ */
 function place(target: string): CSSProperties {
   const el = document.querySelector(target);
   const r = el?.getBoundingClientRect();
   const width = 300;
   if (!r) return { top: 96, left: 96, width };
   const inside = r.width > 2 * width;
-  const left = inside ? r.left + 24 : r.right + 12;
+  const fitsRight = r.right + 12 + width + 16 <= window.innerWidth;
+  const left = inside ? r.left + 24 : fitsRight ? r.right + 12 : r.left - width - 12;
   const top = inside ? r.top + 72 : r.top + 24;
   return {
     top: Math.min(window.innerHeight - 200, Math.max(56, top)),

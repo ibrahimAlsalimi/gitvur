@@ -1573,16 +1573,29 @@ button {
 
 /* ---- Hit targets: at least 24×24 px (Phase 11) ------------------------------------- */
 
-/* The handle stays 5px wide visually; its pointer area extends to 25px. */
+/*
+ * The handle stays 5px wide visually; its pointer area is 24px, extended only into the
+ * canvas so it never covers the explorer's scrollbar or the inspector's content. Canvas
+ * panels (z-index 5) stay above it.
+ */
 .resize-handle::after {
   content: "";
   position: absolute;
-  inset: 0 -10px;
+  top: 0;
+  bottom: 0;
   z-index: 1;
+  width: 24px;
+}
+
+.resize-handle[data-side="start"]::after {
+  left: 0;
+}
+
+.resize-handle[data-side="end"]::after {
+  right: 0;
 }
 
 .gv-link,
-.gv-crumb,
 .trust-errors {
   display: inline-flex;
   align-items: center;

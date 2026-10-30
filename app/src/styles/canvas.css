@@ -52,16 +52,28 @@
  * lens). Text drops to the tertiary colour, which still meets WCAG AA; borders, bands,
  * fills, glyphs and chips fade to --gv-opacity-dimmed. Fading text with `opacity` would
  * put it below AA contrast.
+ *
+ * The selected node never recedes, and receding outranks the lens tints and borders
+ * (`.gv-map[data-lens] … :not()` beats the lens rules' `.gv-map[data-lens=…] … :not()`),
+ * so lens cues keep their shape (dashed) but drop to neutral colours.
  */
-.gv-map .react-flow__node.gv-dimmed :is(.gv-module, .gv-file, .gv-row),
-.gv-map[data-lens="changes"] :is(.gv-module, .gv-file, .gv-row)[data-change="unchanged"] {
+.gv-map[data-lens]
+  .react-flow__node.gv-dimmed
+  :is(.gv-module, .gv-file, .gv-row):not([data-selected="true"]),
+.gv-map[data-lens="changes"]
+  :is(.gv-module, .gv-file, .gv-row)[data-change="unchanged"]:not([data-selected="true"]) {
   border-color: var(--gv-border-subtle);
   box-shadow: none;
+  outline-color: var(--gv-border-subtle);
   color: var(--gv-text-tertiary);
 }
 
-.gv-map .react-flow__node.gv-dimmed .gv-row,
-.gv-map[data-lens="changes"] .gv-row[data-change="unchanged"] {
+.gv-map[data-lens] .react-flow__node.gv-dimmed .gv-file:not(.gv-file-tile, [data-selected="true"]) {
+  background: var(--gv-bg-surface-raised);
+}
+
+.gv-map[data-lens] .react-flow__node.gv-dimmed .gv-row:not([data-selected="true"]),
+.gv-map[data-lens="changes"] .gv-row[data-change="unchanged"]:not([data-selected="true"]) {
   background: transparent;
 }
 
@@ -71,8 +83,14 @@
   background: var(--gv-border-default);
 }
 
-.gv-map .react-flow__node.gv-dimmed :is(.gv-module, .gv-file, .gv-row) *,
-.gv-map[data-lens="changes"] :is(.gv-module, .gv-file, .gv-row)[data-change="unchanged"] * {
+/* Glyphs, chips and dots keep their meaning colour (errors stay red) and only fade. */
+.gv-map
+  .react-flow__node.gv-dimmed
+  :is(.gv-module, .gv-file, .gv-row)
+  *:not(svg, svg *, .gv-chip, .gv-chip *, .status-dot),
+.gv-map[data-lens="changes"]
+  :is(.gv-module, .gv-file, .gv-row)[data-change="unchanged"]
+  *:not(svg, svg *, .gv-chip, .gv-chip *, .status-dot) {
   color: var(--gv-text-tertiary);
 }
 
@@ -741,6 +759,7 @@
 
 .gv-legend-toggle {
   width: 100%;
+  min-height: 24px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -872,13 +891,21 @@
   height: 12px;
 }
 
+/* 12px tall visually; the ::after extends the hit target to 24px into the margins. */
 .gv-summary-segment {
+  position: relative;
   flex-basis: 0;
-  min-width: 6px;
+  min-width: 24px;
   padding: 0;
   border: none;
   border-radius: var(--gv-radius-sm);
   cursor: pointer;
+}
+
+.gv-summary-segment::after {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
 }
 
 .gv-summary-segment[data-status="documented"] {
@@ -1080,19 +1107,4 @@
   stroke: var(--gv-diff-removed);
   stroke-width: 2;
   stroke-dasharray: 5 4;
-}
-
-/* Hit targets ≥ 24px; the summary bar stays 12px tall visually. */
-.gv-legend-toggle {
-  min-height: 24px;
-}
-
-.gv-summary-bar {
-  height: 24px;
-}
-
-.gv-summary-segment {
-  min-width: 24px;
-  padding: 6px 0;
-  background-clip: content-box !important;
 }

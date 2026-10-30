@@ -55,6 +55,7 @@ export function ResizeHandle({ label, value, min, max, direction, onChange }: Re
       aria-valuemin={min}
       aria-valuemax={max}
       tabIndex={0}
+      data-side={direction === 1 ? "start" : "end"}
       data-dragging={dragging}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
