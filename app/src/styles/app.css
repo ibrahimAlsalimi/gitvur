@@ -1570,3 +1570,21 @@ button {
   justify-content: space-between;
   margin-top: var(--gv-space-2);
 }
+
+/* ---- Hit targets: at least 24×24 px (Phase 11) ------------------------------------- */
+
+/* The handle stays 5px wide visually; its pointer area extends to 25px. */
+.resize-handle::after {
+  content: "";
+  position: absolute;
+  inset: 0 -10px;
+  z-index: 1;
+}
+
+.gv-link,
+.gv-crumb,
+.trust-errors {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}

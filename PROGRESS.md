@@ -662,15 +662,95 @@ Two sessions: the first stopped at the usage limit after a WIP checkpoint (`c8b8
   - The status bar's node/edge counts include ghosts while the lens is on.
 - Not done: the `pnpm tauri dev` check against a real repository with history (native dialog, as before). Please open a repo there, choose Changes, and step through with N.
 
+### 2026-10-30 — Phase 11 — UX polish: search, keyboard, states, accessibility
+
+- Open items from Phases 06–10, first:
+  - Fixed: the help dialog now renders `codeDOC.md` as Markdown. A small parser (`components/markdown.ts`) produces React elements, never HTML strings; 3 tests.
+  - Still parked, with reasons:
+    - edge routing around module headers (a layout change);
+    - an on-canvas AI marker for module descriptions (waiting on testers);
+    - the 15-edge focal-point check on the synthetic repo was **not done** this session.
+- Done:
+  - **Palette** (`search/`):
+    - Ctrl/Cmd+K, 640px, near the top, `--gv-shadow-float`;
+    - fuzzy search over names, qualified names and paths, plus description words; results grouped by kind with glyph, name (matches highlighted), qualified name, path and status dot;
+    - Enter selects and centres, Ctrl+Enter selects only;
+    - `>` commands: open, index, validate, the three lenses, expand/collapse all, toggle theme, show issues, shortcuts, reset view, show guide, about.
+    - The index is built once per model when it loads. Timing on 5,250 elements: 0.8–12 ms per query (unit test: median of 5 runs per query < 30 ms).
+  - **Keyboard map**, matching the table exactly (the sheet renders `SHORTCUTS` from `copy.ts`):
+    - Ctrl/Cmd+O; arrows on the canvas move focus to parent / first child / siblings among nodes on the map, bringing the target into view (Tab focus does too);
+    - Enter expands or collapses a file, or folds a class (new map-only `collapsedIds`, threaded through layout, flow and edge lifting);
+    - Space selects; Esc closes the guide, then the drawer, then clears the selection (dialogs close natively);
+    - F / 0 / + / −; 1 2 3 lenses; ? for the sheet.
+    - Toolbar tooltips name their shortcuts.
+  - **Persistence**, per repository, in the app data folder (`views/<hash of canonical root>.json`, Tauri commands `get/set/clear_view_state`), never in the repository:
+    - saves expanded IDs, folded classes, selection, viewport, lens, diff range and pane widths, debounced on change;
+    - restores on open, silently dropping IDs that no longer exist; the Changes lens restores with its saved range when both revisions still exist;
+    - ⋯ → Reset view clears the file and returns to the default view.
+    - This replaces Phase 09's localStorage lens.
+  - **States** (`copy.ts` holds all messages, state texts, banners, trust lines, guide, palette and shortcut texts):
+    - every `AppError.code` maps to a title, sentence and action, with the backend text behind a Details disclosure;
+    - a lost folder is removed from recents (`forget_recent`) and says so;
+    - "No Python or TypeScript files found.";
+    - empty search: "No matches for …" with a hint about descriptions;
+    - a banner above 20,000 elements suggests the Changes lens;
+    - busy states use an indeterminate bar.
+  - **First-run guide**: three non-modal coach marks (explorer, map, lens), Skip/Next/Done, no transitions. It shows once (`Settings.guideSeen`, stored in the global settings file) and again from ⋯ → Show guide.
+  - **About**: version, Gitvur's build commit (injected by Vite from `git rev-parse` at build time), source URL with Copy link, and the MIT text.
+  - **Window title**: `Gitvur — <project>` via the Tauri window API (capability `core:window:allow-set-title`).
+  - **Accessibility**:
+    - map nodes have `aria-label`s ("function receipt, documented"; "method …" for methods);
+    - every control outside the map is at least 24×24 (permanent e2e check);
+    - reduced motion removes camera and coach-mark animation, including the toolbar zoom buttons.
+    - axe (`@axe-core/playwright`, WCAG 2.1 A/AA tags) reports **zero serious or critical violations** on 7 views in both themes: no repository, map, inspector with selection, trust + issues drawer, Documentation lens, Changes lens, palette.
+- Fixed for axe (deviations from earlier phases' specs, for WCAG AA):
+  - Receded map context no longer fades text with `opacity`. The selection dimming (Phase 08's 0.28), unchanged nodes in the Changes lens (Phase 10's 40%) and removed ghosts (55%) now share one style: tertiary text (AA), subtle borders, a grey module band, and glyphs and chips at `--gv-opacity-dimmed`.
+  - Light `--gv-diff-added` and `--gv-diff-modified` were darkened (#1f8a3d → #1b7f37, #a86a00 → #9c6200): as text on white they were 4.41 and 4.44:1.
+- Tests:
+  - Rust 134 (view state round trip and reset; forget recent).
+  - Vitest 61 (search 4, markdown 3).
+  - Playwright `e2e/polish.spec.ts`: palette, keyboard, persistence and reset, error details, lost folder, window title, guide, hit targets, axe × 7 views. **108 passing** in both themes, 2 skipped (perf).
+- **Final visual pass** (all screenshot sets from Phases 06–10 re-captured, plus `polish-01` palette, `polish-02` shortcuts, `polish-03` error details, `polish-04` guide step 2, light and dark):
+  - *Exactly one accent for interaction?* Yes. `--gv-accent` covers selection, focus rings, primary buttons, the active palette row and match highlight, the guide border and the progress bar. Status, provenance and diff hues carry meaning only.
+  - *Type sizes on the token scale?* Yes: no raw `font-size` values in the CSS. SVG glyph text uses viewBox units.
+  - *Spacing on the 4px grid?* Now yes. Nine off-grid paddings and gaps (2, 5, 6, 1 px in chips, pills and bars) moved to `--gv-space-1`. The one exception is the 6px padding that gives the 12px summary bar a 24px hit area (commented).
+  - *One product or five phases?* Inconsistencies found and fixed:
+    1. three different "receded" treatments (now one);
+    2. a spinner in busy states but bars elsewhere (now one indeterminate bar);
+    3. raw Markdown in help;
+    4. coloured counts below AA;
+    5. off-grid chip paddings;
+    6. the toolbar Fit/zoom ignoring reduced motion while navigation respected it;
+    7. the guide card covering the inspector.
+  - Remaining, by choice: drawers and banners close with an icon button, dialogs with a text "Close". The compact surfaces use icons; modals use text.
+- Acceptance:
+  - [x] Palette with search and commands, under 30 ms on synthetic
+  - [x] Full keyboard map implemented; shortcuts sheet matches it
+  - [x] Per-repo persistence with safe restore
+  - [x] Every state in Part D designed; copy centralised
+  - [x] First-run guide
+  - [x] axe: zero serious/critical violations in both themes
+  - [x] Final visual pass recorded and inconsistencies fixed
+  - `cargo fmt`, clippy, `cargo test`, `pnpm typecheck && lint && test && check:contrast && e2e` pass.
+- Dependencies added: `@axe-core/playwright` 4.11.1 (dev; named in the prompt).
+- Deviations / notes:
+  - **Indexing progress has no file count**: the extractor reports none, and Rust crates are out of scope this phase. The bar is indeterminate, as the prompt allows when no count is known.
+  - `copy.ts` holds every message and sentence. One- or two-word control labels (Fit, Index, Close) stay beside their controls, as the file's header says.
+  - The repo link in About is shown and copyable, not opened: opening URLs would need the Tauri opener plugin, and the viewer never navigates its own window.
+  - The 24px check excludes map content, which scales with zoom (24px at 100%).
+  - Backend changes (allowed for persistence): `ViewState`/`Viewport` types and commands, `Settings.guideSeen`, `forget_recent`, the set-title capability. TS bindings regenerated.
+- Not done: the keyboard-only session in `pnpm tauri dev` (native dialog limit, as before). Please run one, including Ctrl+O, which opens the native picker.
+
 ## Parking lot
+
+- Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).
+- Check the selection focal point with ~15 edges on the synthetic repo (Phase 08 review question, not yet done).
 
 - Diff: detect function renames via a body-only hash (needs a `basedOnSelfHash`-style contract addition; see Phase 10 notes).
 
 - Map module headers show AI descriptions without an on-canvas provenance marker (hover title only); revisit with testers (Phase 09 review).
 
 - Edge routing: lines entering a module to reach a row cross the module header text, and their badges can sit on the header or ring; route around container headers, or move badges off headers (Phase 08 review).
-
-- Help dialog: render `codeDOC.md` as formatted Markdown instead of raw text (Phase 11).
 
 - `gitvur-index` `resolve.rs`: precompute a `(file, parent, name) → defs` map instead of scanning all definitions in `children()` per call site (review finding, performance only).
 

@@ -78,11 +78,19 @@ describe("search", () => {
     const big = buildModel(bundle({ nodes, edges: [], unresolvedCalls: [] }));
     const index = searchIndex(big);
     expect(index.entries.length).toBeGreaterThanOrEqual(5250); // + the annotations' modules
+    // Warm up once (JIT), then the median of five runs per query: the budget is about
+    // search cost, not about other test workers competing for the CPU.
+    search(index, "warm");
     const times: number[] = [];
     for (const q of ["hr", "handle", "req 12", "file10", "zz", "h_r_1_1"]) {
-      const start = performance.now();
-      search(index, q);
-      times.push(performance.now() - start);
+      const runs: number[] = [];
+      for (let i = 0; i < 5; i += 1) {
+        const start = performance.now();
+        search(index, q);
+        runs.push(performance.now() - start);
+      }
+      runs.sort((a, b) => a - b);
+      times.push(runs[2] ?? 0);
     }
     times.sort((a, b) => a - b);
     expect(times[times.length - 1]).toBeLessThan(30);
