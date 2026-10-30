@@ -19,6 +19,8 @@ export interface RelationData extends Record<string, unknown> {
   offsetCount: number;
   /** Call name, for candidate lines. */
   label?: string;
+  /** Changes lens: added in B or removed (only in A). */
+  change?: "added" | "removed";
 }
 
 export type RelationEdgeType = Edge<RelationData, "relation">;

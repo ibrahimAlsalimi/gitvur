@@ -10,6 +10,7 @@ import type { UnresolvedCall } from "../generated/contract";
 import type { Model, ModelEdge, ModelNode } from "../model/buildModel";
 import { ancestors } from "../model/tree";
 import { useAppStore } from "../store/useAppStore";
+import { ChangeSection } from "./ChangeSection";
 import { CodeViewer } from "./CodeViewer";
 import { trustText } from "./trust";
 import {
@@ -344,6 +345,11 @@ function RelationRow({ model, item }: { model: Model; item: RelationItem }) {
     <li className="gv-insp-relation">
       <div className="gv-insp-row">
         <NodeLink model={model} id={item.otherId} />
+        {edge.change && (
+          <span className="gv-insp-change-tag" data-change={edge.change}>
+            {edge.change}
+          </span>
+        )}
         <ProvenanceMark provenance={edge.provenance} />
         <button
           type="button"
@@ -513,6 +519,8 @@ function FileBody({ model, node }: { model: Model; node: ModelNode }) {
 
 /** Code at an edge's evidence line, with a header naming the relationship and a Back link. */
 function EvidenceView({ model, edge }: { model: Model; edge: ModelEdge }) {
+  // In the Changes lens, a removed edge's evidence is in revision A, the rest in B.
+  const diff = useAppStore((s) => (s.lens === "changes" ? s.diff?.view?.bundle.diff : undefined));
   const name = (id: string) => model.nodes.get(id)?.name ?? id;
   const { file, line } = edge.evidence;
   const fileNode = model.nodes.get(`file:${file}`);
@@ -537,13 +545,14 @@ function EvidenceView({ model, edge }: { model: Model; edge: ModelEdge }) {
         {edge.note !== undefined && <p className="gv-insp-note">{edge.note}</p>}
       </div>
       <CodeViewer
-        key={`${file}:${String(line)}`}
+        key={`${file}:${String(line)}:${edge.change ?? ""}`}
         file={file}
         start={line}
         end={line}
         highlightLine={line}
         context={EVIDENCE_CONTEXT}
         cacheKey={fileNode?.contentHash ?? "evidence"}
+        {...(diff ? { rev: edge.change === "removed" ? diff.fromCommit : diff.toCommit } : {})}
       />
     </div>
   );
@@ -551,6 +560,8 @@ function EvidenceView({ model, edge }: { model: Model; edge: ModelEdge }) {
 
 function NodeDetails({ model, node }: { model: Model; node: ModelNode }) {
   const evidence = useAppStore((s) => s.evidence);
+  const view = useAppStore((s) => (s.lens === "changes" ? s.diff?.view : undefined));
+  const changes = view && node.change ? <ChangeSection node={node} view={view} /> : null;
   return (
     <div className="gv-insp">
       <div className="gv-insp-top">
@@ -563,12 +574,18 @@ function NodeDetails({ model, node }: { model: Model; node: ModelNode }) {
       {evidence ? (
         <EvidenceView model={model} edge={evidence} />
       ) : node.kind === "module" ? (
-        <ModuleBody model={model} node={node} />
+        <>
+          {changes}
+          <ModuleBody model={model} node={node} />
+        </>
       ) : node.kind === "file" ? (
-        <FileBody model={model} node={node} />
+        <>
+          {changes}
+          <FileBody model={model} node={node} />
+        </>
       ) : (
         <>
-          <SourceSection node={node} />
+          {changes ?? <SourceSection node={node} />}
           <Relationships model={model} node={node} />
           <Ambiguous model={model} calls={unresolvedIn(model, node.id)} />
         </>

@@ -15,6 +15,8 @@ export interface AggregatedEdge {
   aggregated: boolean;
   /** 1 for edges touching the selection, 2 for the second hop. */
   hop: 1 | 2;
+  /** Changes lens: the lines' edges are new in B, or only in A. */
+  change?: "added" | "removed";
 }
 
 /** Ids in `id`'s subtree (itself and all descendants). */
@@ -47,7 +49,8 @@ function touching(model: Model, ids: ReadonlySet<string>): Set<number> {
  * - Hop 2 (when `hops` is 2): every edge touching the other real endpoints of hop-1 edges.
  * - Each endpoint is mapped by `visibleOf` to its nearest visible ancestor; edges that
  *   become a self-loop (both ends on the same visible node) are dropped.
- * - Lines are grouped by (source, target, type, provenance); `pairs` keeps the originals.
+ * - Lines are grouped by (source, target, type, provenance, change); `pairs` keeps the
+ *   originals.
  */
 export function aggregateEdges(
   model: Model,
@@ -74,7 +77,7 @@ export function aggregateEdges(
     const source = visibleOf(edge.from);
     const target = visibleOf(edge.to);
     if (source === undefined || target === undefined || source === target) continue;
-    const id = `${source}|${target}|${edge.type}|${edge.provenance}`;
+    const id = `${source}|${target}|${edge.type}|${edge.provenance}${edge.change ? `|${edge.change}` : ""}`;
     const hop = hopOf.get(i) as 1 | 2;
     const group = groups.get(id);
     if (group) {
@@ -91,6 +94,7 @@ export function aggregateEdges(
         pairs: [edge],
         aggregated: source !== edge.from || target !== edge.to,
         hop,
+        ...(edge.change ? { change: edge.change } : {}),
       });
     }
   }

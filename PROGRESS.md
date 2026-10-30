@@ -601,7 +601,70 @@ Two sessions: the first stopped at the usage limit after a WIP checkpoint (`c8b8
   - `components/TopBar.tsx`, `StatusBar.tsx`, `Explorer.tsx`, `App.tsx`, `api/mock.ts` and `store/useAppStore.ts` were edited outside the listed scope to mount the new pieces.
 - Not done: the `pnpm tauri dev` check (edit a copy of py-small, Validate, watch the marks). It needs the native folder dialog, as in Phases 07–08. Please run it.
 
+### 2026-10-30 — Phase 10 — Structural diff between two revisions
+
+- Done (Rust):
+  - `gitvur-schema`: `StructureDiff`, `ElementChange`, `EdgeChange`, `ChangeKind`, `DiffSummary` (canonical ordering), `schemas/diff.schema.json`.
+  - New `tree` module (`children_by_parent`, `child_changed`), now used by both the validator (behaviour unchanged, its tests pass) and the diff.
+  - `gitvur-index`: `index_inputs()`, a public predicate (backend-handled paths + `.gitignore`) so a revision copy holds only what indexing reads. Extractor behaviour is unchanged.
+  - `gitvur-diff` (README documents the rules):
+    - `diff(a, b)`: classification, greedy ID-sorted move pairing by hash, `childChanged`, edge changes keyed after mapping moves.
+    - `revision::{index_revision, list_commits, resolve, read_file}`: `gix` reads the commit tree into a `tempfile` dir named like the repo, which is deleted on success and on error; `worktree` indexes in place.
+    - `carry_annotations`.
+  - CLI: `gitvur diff <repo> <A> <B> [--json] [--carry-annotations]`. The summary is grouped by module (from annotations) → file with `+ − ~ →`, plus a relationships section.
+    - Real run on this repo, `HEAD~3 → HEAD`: +115 −3 ~24 →1, 0.87 s, `git status` unchanged.
+  - Tauri: `list_commits`, `diff_revisions` (returns `DiffBundle { diff, from, to }`), `read_revision_source`.
+    - Commit structures are cached in the app cache dir at `revisions/<hash of repo path>/<sha>-<version>.json`; the working tree is never cached, and cache failures are ignored.
+    - `bundle::slice` is factored out of `read_source`. TS bindings regenerated.
+- Done (app):
+  - `model/diffModel.ts`: the union model (B, plus ghosts for removed elements under their old parent mapped through moves, plus removed edges), `change` on every node, steps in tree order, auto-expansion of changed elements' ancestors only, per-module counts. Edges are tagged added/removed.
+  - Store: the `changes` lens swaps in the union model and restores the base model and expansion on exit (the selection is kept and revealed if it still exists). `loadDiff` ignores stale results; `stepChange`; `diffMode`. Changes is never restored from the saved lens.
+  - Map, in the Changes lens:
+    - classes use colour plus glyph per the prompt's table: added has a 14% fill and solid border, removed a dashed border at 55% with strikethrough, modified a 14% fill, moved a heavy border with a "moved from …" tooltip, unchanged sits at 40%, and child-only changes show a hollow ring;
+    - module chips like `+1 −1 →2`;
+    - status marks, error chips and rings are hidden;
+    - for the selection, added edges are green, removed edges dashed red, unchanged edges at 50%, with matching arrow markers.
+  - Top bar: `from [commit ▾] → to [commit ▾]` (defaults HEAD~1 → HEAD; `to` offers "Working tree").
+  - Changes panel replaces the explorer: summary bar with relationship counts, changes grouped module → file with glyphs, current change highlighted. N / Shift+N step with wrap-around and centre the camera.
+  - Inspector, in the Changes lens:
+    - modified: an inline or side-by-side diff (LCS in `inspector/lineDiff.ts`, Shiki on both sides, line numbers from each revision, diff-token tints);
+    - moved: From/To locations; removed: the old source from A; added: the source from B;
+    - relationship rows tagged added/removed; removed-edge evidence read from A.
+  - Mock: `api/mockDiff.json` is **generated from a real Git scenario** by `crates/gitvur-diff/tests/mock_diff.rs`, whose B equals the fixture's committed structure (asserted). The test fails if the JSON is stale.
+- Tests:
+  - Rust 132 total. `gitvur-diff/tests/revisions.rs` covers:
+    - add, remove, modify a body, rename a function, move a function to another file, add an import, and rename a file, each classification asserted;
+    - the scenario repo's files (including `.git`) are byte-identical after all revision reads;
+    - determinism, worktree, list_commits, bad revision, carry-over rules, read_file.
+  - Also: the CLI diff end-to-end (summary, JSON, carry-over, bad-rev exit 1) and the Tauri cache and old-source reads.
+  - Vitest 54 (union model 4, line diff 3).
+  - Playwright `e2e/changes.spec.ts`: screenshots `changes-01` … `changes-05` in light and dark; moved locations; leaving the lens restores the map. **80 passing**, 2 skipped (perf).
+- **Visual review**:
+  - *Count a module's changes without opening it?* Yes: the module chip (`+1 −1 →2`) and the Changes panel's grouping.
+  - *Removed reads as "not there any more", not as an error?* Yes. The ghost is dashed, at 55%, struck through, with a `−` glyph in the diff red. The validation triangle and error chips are hidden in this lens, so red means only "removed" here.
+  - *Unchanged at 40% keeps enough context?* Yes for py-small: names stay legible and module headers keep their bands. Unchanged modules dim as a whole, which makes the changed ones stand out.
+  - *Greyscale?* Yes. Glyphs `+ − ~ →` are drawn in every mark, and the borders differ: solid (added), dashed and struck through (removed), heavy (moved), fill only (modified).
+  - Fixed during review: side-by-side clipped code in the narrow inspector, so it now scrolls horizontally with a divider between the sides.
+- Acceptance:
+  - [x] Revisions read via `gix` into temp dirs; working tree untouched (tested)
+  - [x] Diff classifications tested for every scenario; deterministic output
+  - [x] `--carry-annotations` rewrites only moved IDs with matching hashes
+  - [x] Changes lens, union rendering, auto-expand, edge diff, module chips
+  - [x] Changes panel, stepping, inline and side-by-side source diff
+  - [x] Screenshots reviewed
+  - `cargo fmt`, `clippy -D warnings`, `cargo test`, and `pnpm typecheck && lint && test && check:contrast && e2e` all pass.
+- Dependencies: `gitvur-diff` now depends on `gix` (same version as `gitvur-index`, adding the `revision` feature for rev-parse and rev-walk), `tempfile` (temp revision copies with cleanup on drop; it was already a dev-dependency elsewhere) and `thiserror` (as in the other crates). `serde_json` is a dev-dependency for the mock generator.
+- Deviations / notes:
+  - **Renaming a function is `removed` + `added`, not `moved`**: the hash covers the `def` line, so a rename always changes it. The prompt's rule (identical hash) is followed; renamed or moved *files* keep their text and are detected as moves (tested). Detecting renames would need a body-only hash, which is a contract change.
+  - Tests build throwaway repositories with the `git` CLI (hooks and global config disabled). The code under test reads Git only through `gix`.
+  - `diff()` leaves `fromCommit`/`toCommit` empty; callers fill them (the CLI and Tauri use full SHAs or `worktree`).
+  - Ghost elements sort among their siblings by their line in A. That is their old position, so a removed function can appear between B's functions.
+  - The status bar's node/edge counts include ghosts while the lens is on.
+- Not done: the `pnpm tauri dev` check against a real repository with history (native dialog, as before). Please open a repo there, choose Changes, and step through with N.
+
 ## Parking lot
+
+- Diff: detect function renames via a body-only hash (needs a `basedOnSelfHash`-style contract addition; see Phase 10 notes).
 
 - Map module headers show AI descriptions without an on-canvas provenance marker (hover title only); revisit with testers (Phase 09 review).
 

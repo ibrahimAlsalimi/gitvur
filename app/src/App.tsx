@@ -8,6 +8,8 @@ import { StatusBar } from "./components/StatusBar";
 import { TopBar } from "./components/TopBar";
 import { Inspector, InspectorRail } from "./inspector/Inspector";
 import { useHistoryKeys } from "./inspector/useHistoryKeys";
+import { ChangesPanel } from "./panels/changes/ChangesPanel";
+import { useChangeKeys } from "./panels/changes/useChangeKeys";
 import { IssuesPanel } from "./panels/issues/IssuesPanel";
 import { useIssuesShortcut } from "./panels/issues/useIssuesShortcut";
 import { Banners } from "./topbar/Banners";
@@ -17,6 +19,7 @@ import { PANE_LIMITS, useAppStore } from "./store/useAppStore";
 export function App() {
   const settings = useAppStore((s) => s.settings);
   const issuesOpen = useAppStore((s) => s.issuesOpen);
+  const lens = useAppStore((s) => s.lens);
   const theme = useAppStore((s) => s.theme);
 
   useEffect(() => {
@@ -24,6 +27,7 @@ export function App() {
   }, []);
   useHistoryKeys();
   useIssuesShortcut();
+  useChangeKeys();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -47,12 +51,21 @@ export function App() {
           } as CSSProperties
         }
       >
-        <nav className="pane" aria-label="Explorer">
-          <div className="pane-header">Explorer</div>
-          <div className="pane-body">
-            <Explorer />
-          </div>
-        </nav>
+        {lens === "changes" ? (
+          <nav className="pane" aria-label="Changes">
+            <div className="pane-header">Changes</div>
+            <div className="pane-body">
+              <ChangesPanel />
+            </div>
+          </nav>
+        ) : (
+          <nav className="pane" aria-label="Explorer">
+            <div className="pane-header">Explorer</div>
+            <div className="pane-body">
+              <Explorer />
+            </div>
+          </nav>
+        )}
         <ResizeHandle
           label="Resize explorer"
           value={settings.explorerWidth}

@@ -927,3 +927,132 @@
   border-bottom: 7px solid var(--gv-status-error);
   border-left: 4px solid transparent;
 }
+
+/* ---- Changes lens (Phase 10) ------------------------------------------------------- */
+
+.gv-marker-added {
+  fill: var(--gv-diff-added);
+}
+
+.gv-marker-removed {
+  fill: var(--gv-diff-removed);
+}
+
+.gv-change-mark {
+  display: none;
+}
+
+.gv-chip-change {
+  display: none;
+  height: 18px;
+  padding: 0 6px;
+  font-family: var(--gv-font-code);
+  font-variant-numeric: tabular-nums;
+}
+
+.gv-map[data-lens="changes"] .gv-chip-change {
+  display: inline-flex;
+}
+
+.gv-map[data-lens="changes"] .gv-status-slot,
+.gv-map[data-lens="changes"] .gv-chip-error,
+.gv-map[data-lens="changes"] .gv-ring {
+  display: none;
+}
+
+.gv-map[data-lens="changes"] .gv-change-mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--gv-radius-sm);
+  color: var(--gv-bg-surface-raised);
+  font-family: var(--gv-font-code);
+  font-size: var(--gv-text-sm);
+  font-weight: var(--gv-weight-semibold);
+  line-height: 1;
+}
+
+.gv-file-header .gv-change-mark {
+  align-self: flex-start;
+  margin-top: var(--gv-space-2);
+}
+
+.gv-change-mark[data-change="added"] {
+  background: var(--gv-diff-added);
+}
+
+.gv-change-mark[data-change="removed"] {
+  background: var(--gv-diff-removed);
+}
+
+.gv-change-mark[data-change="modified"] {
+  background: var(--gv-diff-modified);
+}
+
+.gv-change-mark[data-change="moved"] {
+  background: var(--gv-diff-moved);
+}
+
+.gv-map[data-lens="changes"] .gv-change-mark[data-change="child"] {
+  background: none;
+}
+
+/* Unchanged context at 40%; modules and containers with changes stay at full strength. */
+.gv-map[data-lens="changes"] .gv-file[data-change="unchanged"],
+.gv-map[data-lens="changes"] .gv-row[data-change="unchanged"],
+.gv-map[data-lens="changes"] .gv-module[data-change="unchanged"] {
+  opacity: 0.4;
+}
+
+.gv-map[data-lens="changes"] .gv-file[data-change="added"]:not([data-selected="true"]),
+.gv-map[data-lens="changes"] .gv-row[data-change="added"]:not([data-selected="true"]) {
+  border-color: var(--gv-diff-added);
+  background: color-mix(in srgb, var(--gv-diff-added) 14%, var(--gv-bg-surface-raised));
+  box-shadow: inset 0 0 0 var(--gv-hairline) var(--gv-diff-added);
+}
+
+.gv-map[data-lens="changes"] .gv-file[data-change="modified"]:not([data-selected="true"]),
+.gv-map[data-lens="changes"] .gv-row[data-change="modified"]:not([data-selected="true"]) {
+  background: color-mix(in srgb, var(--gv-diff-modified) 14%, var(--gv-bg-surface-raised));
+}
+
+.gv-map[data-lens="changes"] .gv-file[data-change="moved"]:not([data-selected="true"]),
+.gv-map[data-lens="changes"] .gv-row[data-change="moved"]:not([data-selected="true"]) {
+  border-color: var(--gv-diff-moved);
+  box-shadow: inset 0 0 0 var(--gv-border-emphasis) var(--gv-diff-moved);
+}
+
+.gv-map[data-lens="changes"] .gv-file[data-change="removed"],
+.gv-map[data-lens="changes"] .gv-row[data-change="removed"] {
+  opacity: 0.55;
+  border-style: dashed;
+  border-color: var(--gv-diff-removed);
+  background: none;
+  outline: var(--gv-hairline) dashed var(--gv-diff-removed);
+  outline-offset: -1px;
+}
+
+.gv-map[data-lens="changes"] .gv-row[data-change="removed"] .gv-row-name,
+.gv-map[data-lens="changes"] .gv-file[data-change="removed"] .gv-file-name {
+  text-decoration: line-through;
+}
+
+/* Edges: added in green, removed dashed red, unchanged in their own style at 50%. */
+.gv-map[data-lens="changes"] .gv-edge:not([data-change]) .gv-edge-line {
+  opacity: 0.5;
+}
+
+.gv-map[data-lens="changes"] .gv-edge[data-change="added"] .gv-edge-line {
+  stroke: var(--gv-diff-added);
+  stroke-width: 2;
+  stroke-dasharray: none;
+}
+
+.gv-map[data-lens="changes"] .gv-edge[data-change="removed"] .gv-edge-line {
+  stroke: var(--gv-diff-removed);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}

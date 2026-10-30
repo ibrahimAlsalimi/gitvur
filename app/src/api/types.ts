@@ -1,5 +1,7 @@
 import type {
   AppError,
+  CommitInfo,
+  DiffBundle,
   ErrorCode,
   RecentRepo,
   RepoBundle,
@@ -24,6 +26,19 @@ export interface Api {
   recentRepositories(): Promise<RecentRepo[]>;
   getSettings(): Promise<Settings>;
   setSettings(settings: Settings): Promise<void>;
+  /** Up to `limit` commits reachable from HEAD, newest first. */
+  listCommits(path: string, limit?: number): Promise<CommitInfo[]>;
+  /** Structural diff of two revisions (`worktree` = the files on disk), with both structures. */
+  diffRevisions(path: string, from: string, to: string): Promise<DiffBundle>;
+  /** Source of `file` at revision `rev` (a full SHA, or `worktree`). */
+  readRevisionSource(
+    path: string,
+    rev: string,
+    file: string,
+    start: number,
+    end: number,
+    context: number,
+  ): Promise<SourceSlice>;
   /** A repository to open at startup (mock mode's `?fixture=`); `null` in the real app. */
   initialPath(): string | null;
 }

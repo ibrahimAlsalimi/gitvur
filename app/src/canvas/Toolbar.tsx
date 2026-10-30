@@ -82,6 +82,7 @@ export function Toolbar() {
         >
           <option value="structure">Structure</option>
           <option value="coverage">Documentation</option>
+          <option value="changes">Changes</option>
         </select>
       </label>
     </Panel>

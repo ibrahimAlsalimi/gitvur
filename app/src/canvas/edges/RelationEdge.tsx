@@ -50,7 +50,7 @@ export const RelationEdge = memo(function RelationEdge({
     targetPosition: t.position,
   });
   const candidate = data.kind === "candidate";
-  const marker = candidate ? undefined : `url(#gv-arrow-${data.provenance})`;
+  const marker = candidate ? undefined : `url(#gv-arrow-${data.change ?? data.provenance})`;
   const count = data.pairs.length;
   const showBadge = !candidate && (data.aggregated || count > 1);
   const openEvidence = (edge = data.pairs[0]) => {
@@ -68,6 +68,7 @@ export const RelationEdge = memo(function RelationEdge({
       <g
         className="gv-edge"
         data-prov={candidate ? "candidate" : data.provenance}
+        data-change={data.change}
         data-hop={data.hop}
         data-preview={data.preview}
         data-hovered={hovered}

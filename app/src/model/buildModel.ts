@@ -36,11 +36,33 @@ export interface ModelNode {
   synthetic: boolean;
   /** Validation issues about this element (from report.json), errors first. */
   issues: Issue[];
+  /** Set only on the Changes lens's union model (see `diffModel.ts`). */
+  change?: ChangeInfo;
+}
+
+/** How an element changed between two revisions, for the Changes lens. */
+export interface ChangeInfo {
+  change: "added" | "removed" | "modified" | "moved" | "unchanged";
+  /** A direct child changed (for `modified`: the element's own lines may not have). */
+  childChanged: boolean;
+  /** For `moved`: the element's ID in the older revision. */
+  movedFrom?: string;
+  /** Modules only: changed elements inside, by kind. */
+  counts?: ChangeCounts;
+}
+
+export interface ChangeCounts {
+  added: number;
+  removed: number;
+  modified: number;
+  moved: number;
 }
 
 export interface ModelEdge extends Edge {
   /** Which file the edge came from. */
   origin: "structure" | "annotations";
+  /** Changes lens only: the edge is new in B, or exists only in A. */
+  change?: "added" | "removed";
 }
 
 export interface ModuleStats {

@@ -7,3 +7,4 @@ e2e/__screenshots__
 test-results
 playwright-report
 .synthetic
+src/api/mockDiff.json

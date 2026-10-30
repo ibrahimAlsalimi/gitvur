@@ -4,6 +4,8 @@ import { type CSSProperties, type KeyboardEvent, memo, type MouseEvent } from "r
 import { useAppStore } from "../store/useAppStore";
 import { Chevron, ClassGlyph, FunctionGlyph, LanguageGlyph } from "./glyphs";
 import { lodSelector } from "./lod";
+import { changeAttr, countsLabel } from "./change";
+import { ChangeMark } from "./ChangeMark";
 import { StatusMark, StatusRing } from "./StatusMark";
 import { middleTruncate } from "./text";
 import type { FileNode, ModuleNode, ProjectNode, RowNode } from "./types";
@@ -72,6 +74,7 @@ export const ModuleNodeView = memo(function ModuleNodeView({
       data-selected={selected}
       data-synthetic={data.synthetic}
       data-status={data.synthetic ? undefined : node.docStatus}
+      data-change={changeAttr(node)}
       data-lod={lod}
       style={{ "--gv-module-color": data.color } as CSSProperties}
     >
@@ -90,6 +93,11 @@ export const ModuleNodeView = memo(function ModuleNodeView({
             >
               <span className="visually-hidden">Validation errors: </span>
               {stats.errors}
+            </span>
+          )}
+          {node.change?.counts && countsLabel(node.change.counts) !== "" && (
+            <span className="gv-chip gv-chip-change" title="Changed elements in this module">
+              {countsLabel(node.change.counts)}
             </span>
           )}
           {stats && !data.synthetic && (
@@ -130,7 +138,12 @@ export const FileNodeView = memo(function FileNodeView({
   };
   if (lod === 0) {
     return (
-      <div className="gv-file gv-file-tile" data-selected={selected} data-status={node.docStatus} />
+      <div
+        className="gv-file gv-file-tile"
+        data-selected={selected}
+        data-status={node.docStatus}
+        data-change={changeAttr(node)}
+      />
     );
   }
   return (
@@ -138,6 +151,7 @@ export const FileNodeView = memo(function FileNodeView({
       className="gv-file"
       data-selected={selected}
       data-status={node.docStatus}
+      data-change={changeAttr(node)}
       data-expanded={data.expanded}
       onKeyDown={onKeyDown}
     >
@@ -173,6 +187,7 @@ export const FileNodeView = memo(function FileNodeView({
           </button>
         )}
         <StatusMark node={node} />
+        <ChangeMark node={node} />
       </div>
       {data.expanded && lod === 1 && (
         <div className="gv-file-stub">{plural(data.childCount, "item")}</div>
@@ -193,6 +208,7 @@ export const RowNodeView = memo(function RowNodeView({ data, selected }: NodePro
       data-method={data.method}
       data-selected={selected}
       data-status={node.docStatus}
+      data-change={changeAttr(node)}
     >
       <Anchors />
       {isClass ? <ClassGlyph /> : <FunctionGlyph method={data.method} />}
@@ -203,6 +219,7 @@ export const RowNodeView = memo(function RowNodeView({ data, selected }: NodePro
         {isClass ? plural(data.count, "method") : `${String(data.count)} ln`}
       </span>
       <StatusMark node={node} />
+      <ChangeMark node={node} />
     </div>
   );
 });

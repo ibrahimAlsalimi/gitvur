@@ -33,6 +33,7 @@ function toEdges(lines: AggregatedEdge[], preview: boolean): RelationEdgeType[] 
       preview,
       offsetIndex: 0,
       offsetCount: 1,
+      ...(l.change ? { change: l.change } : {}),
     },
   }));
 }

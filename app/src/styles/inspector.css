@@ -586,3 +586,97 @@
   color: var(--gv-text-secondary);
   font-size: var(--gv-text-xs);
 }
+
+/* ---- Changes (Phase 10) ------------------------------------------------------------ */
+
+.gv-insp-change-line {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-2);
+  margin: 0;
+  font-size: var(--gv-text-sm);
+}
+
+.gv-insp-moved {
+  margin-top: var(--gv-space-1);
+}
+
+.gv-insp-change-tag {
+  flex: none;
+  padding: 0 var(--gv-space-1);
+  border-radius: var(--gv-radius-sm);
+  font-size: var(--gv-text-2xs);
+  font-weight: var(--gv-weight-semibold);
+}
+
+.gv-insp-change-tag[data-change="added"] {
+  color: var(--gv-diff-added);
+  box-shadow: inset 0 0 0 var(--gv-hairline) var(--gv-diff-added);
+}
+
+.gv-insp-change-tag[data-change="removed"] {
+  color: var(--gv-diff-removed);
+  box-shadow: inset 0 0 0 var(--gv-hairline) var(--gv-diff-removed);
+  text-decoration: line-through;
+}
+
+.gv-diff-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.gv-diff-toggle .gv-tool {
+  height: 24px;
+  font-size: var(--gv-text-xs);
+}
+
+.gv-diff-stat {
+  font-family: var(--gv-font-code);
+  font-size: var(--gv-text-xs);
+}
+
+.gv-diff-stat [data-kind="add"] {
+  color: var(--gv-diff-added);
+}
+
+.gv-diff-stat [data-kind="del"] {
+  color: var(--gv-diff-removed);
+}
+
+.gv-diff .gv-code-line[data-kind="add"],
+.gv-diff .gv-code-line[data-kind="add"] .gv-code-number,
+.gv-diff-split [data-kind="add"] {
+  background: color-mix(in srgb, var(--gv-diff-added) 16%, var(--gv-bg-sunken));
+}
+
+.gv-diff .gv-code-line[data-kind="del"],
+.gv-diff .gv-code-line[data-kind="del"] .gv-code-number,
+.gv-diff-split [data-kind="del"] {
+  background: color-mix(in srgb, var(--gv-diff-removed) 16%, var(--gv-bg-sunken));
+}
+
+.gv-diff-split [data-kind="empty"] {
+  background: color-mix(in srgb, var(--gv-text-tertiary) 8%, var(--gv-bg-sunken));
+}
+
+.gv-diff-sign {
+  width: 1%;
+  padding: 0 var(--gv-space-1);
+  color: var(--gv-text-tertiary);
+  user-select: none;
+}
+
+.gv-diff-split .gv-code-number {
+  position: static;
+}
+
+/* Each side keeps its full line; the viewer scrolls horizontally when they don't fit. */
+.gv-diff-split .gv-code-text {
+  width: 50%;
+}
+
+.gv-diff-split .gv-code-text + .gv-code-number {
+  border-left: var(--gv-hairline) solid var(--gv-border-default);
+}

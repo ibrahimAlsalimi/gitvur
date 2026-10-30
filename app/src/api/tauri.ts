@@ -1,7 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 
-import type { RecentRepo, RepoBundle, Settings, SourceSlice } from "../generated/contract";
+import type {
+  CommitInfo,
+  DiffBundle,
+  RecentRepo,
+  RepoBundle,
+  Settings,
+  SourceSlice,
+} from "../generated/contract";
 import type { Api } from "./types";
 
 /** The real backend: Tauri commands in app/src-tauri/src/commands.rs. */
@@ -18,5 +25,9 @@ export const tauriApi: Api = {
   recentRepositories: () => invoke<RecentRepo[]>("recent_repositories"),
   getSettings: () => invoke<Settings>("get_settings"),
   setSettings: (settings) => invoke<undefined>("set_settings", { settings }),
+  listCommits: (path, limit) => invoke<CommitInfo[]>("list_commits", { path, limit }),
+  diffRevisions: (path, from, to) => invoke<DiffBundle>("diff_revisions", { path, from, to }),
+  readRevisionSource: (path, rev, file, start, end, context) =>
+    invoke<SourceSlice>("read_revision_source", { path, rev, file, start, end, context }),
   initialPath: () => null,
 };

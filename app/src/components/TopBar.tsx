@@ -2,6 +2,7 @@ import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import type { Theme } from "../generated/contract";
 import { useAppStore } from "../store/useAppStore";
+import { RevisionPicker } from "../topbar/RevisionPicker";
 import { TrustSummary } from "../topbar/TrustSummary";
 import { LogoMark, MoreIcon } from "./Icons";
 
@@ -15,6 +16,7 @@ export function TopBar() {
   const phase = useAppStore((s) => s.phase);
   const path = useAppStore((s) => s.path);
   const bundle = useAppStore((s) => s.bundle);
+  const lens = useAppStore((s) => s.lens);
   const busy = phase === "opening" || phase === "indexing" || phase === "validating";
   const canIndex = path !== null && !busy;
   const canValidate = bundle !== null && !busy;
@@ -36,7 +38,7 @@ export function TopBar() {
             {bundle.manifest.commitSha}
           </span>
           <span className="topbar-divider" aria-hidden="true" />
-          <TrustSummary />
+          {lens === "changes" ? <RevisionPicker /> : <TrustSummary />}
         </>
       )}
       <span className="topbar-spacer" />

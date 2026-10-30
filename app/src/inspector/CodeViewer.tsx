@@ -16,6 +16,8 @@ interface CodeViewerProps {
   /** Line to highlight with the accent (evidence mode). */
   highlightLine?: number;
   context?: number;
+  /** Read from this revision (full SHA or `worktree`) instead of the files on disk. */
+  rev?: string;
 }
 
 type State =
@@ -35,6 +37,7 @@ export function CodeViewer({
   cacheKey,
   highlightLine,
   context = CONTEXT_LINES,
+  rev,
 }: CodeViewerProps) {
   const repo = useAppStore((s) => s.path);
   const [state, setState] = useState<State>({ kind: "loading" });
@@ -44,7 +47,7 @@ export function CodeViewer({
     if (repo === null) return;
     // The parent remounts the viewer (React `key`) for each element, so no reset here.
     let cancelled = false;
-    loadSource(repo, file, start, end, cacheKey, context)
+    loadSource(repo, file, start, end, cacheKey, context, rev)
       .then(async (slice) => {
         const tokens = await tokenize(slice.lines, slice.language);
         if (!cancelled) setState({ kind: "ready", slice, tokens });
@@ -55,7 +58,7 @@ export function CodeViewer({
     return () => {
       cancelled = true;
     };
-  }, [repo, file, start, end, cacheKey, context]);
+  }, [repo, file, start, end, cacheKey, context, rev]);
 
   const where = `${file}:${String(start)}${end !== start ? `–${String(end)}` : ""}`;
   if (state.kind === "loading") {

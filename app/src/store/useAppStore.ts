@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { DEFAULT_SETTINGS, getApi, toAppError } from "../api";
 import type {
   AppError,
+  CommitInfo,
   RecentRepo,
   RepoBundle,
   Settings,
@@ -10,20 +11,36 @@ import type {
   Theme,
 } from "../generated/contract";
 import { type Model, type ModelEdge, buildModel } from "../model/buildModel";
+import { type DiffView, buildDiffView } from "../model/diffModel";
 import { ancestors, defaultExpanded } from "../model/tree";
 
 /** What the app is doing right now. Drives the canvas state panels. */
 export type Phase = "idle" | "opening" | "indexing" | "validating" | "ready" | "error";
 
-/** How the map colours nodes: plain, or tinted by documentation status. */
-export type Lens = "structure" | "coverage";
+/** How the map colours nodes: plain, tinted by documentation status, or by changes. */
+export type Lens = "structure" | "coverage" | "changes";
+
+/** The Changes lens's diff between two revisions (full SHAs, or `worktree`). */
+export interface DiffState {
+  from: string;
+  to: string;
+  status: "loading" | "ready" | "error";
+  view?: DiffView;
+  error?: AppError;
+}
+
+/** Revision name for the files on disk. */
+export const WORKTREE = "worktree";
 
 /** Banners the user can dismiss for the session. */
 export type BannerId = "report-missing" | "structure-out-of-date" | "report-stale";
 
 const LENS_KEY = "gitvur.lens:";
 
-/** The lens last used for a repository (per-viewer convenience; storage may be unavailable). */
+/**
+ * The lens last used for a repository (per-viewer convenience; storage may be unavailable).
+ * Changes is never restored: it reads Git history, so it starts only when chosen.
+ */
 function savedLens(root: string): Lens {
   try {
     const value = window.localStorage.getItem(LENS_KEY + root);
@@ -73,6 +90,13 @@ interface AppState {
   lens: Lens;
   /** Explorer shows only elements with this status (and their ancestors). */
   statusFilter: Status | null;
+  /** Commits for the revision picker, newest first. */
+  commits: CommitInfo[];
+  diff: DiffState | null;
+  /** How the inspector shows a modified element's source diff. */
+  diffMode: "inline" | "split";
+  /** The model and expansion to restore when leaving the Changes lens. */
+  base: { model: Model; expandedIds: Set<string> } | null;
   issuesOpen: boolean;
   dismissedBanners: Set<BannerId>;
   theme: Theme;
@@ -97,6 +121,11 @@ interface AppState {
   collapseAllFiles: () => void;
   setLens: (lens: Lens) => void;
   setStatusFilter: (status: Status | null) => void;
+  /** Diffs two revisions and shows the union on the map (Changes lens). */
+  loadDiff: (from: string, to: string) => Promise<void>;
+  /** Selects the next (1) or previous (-1) change and flies to it. */
+  stepChange: (direction: 1 | -1) => void;
+  setDiffMode: (mode: "inline" | "split") => void;
   setIssuesOpen: (open: boolean) => void;
   dismissBanner: (id: BannerId) => void;
   setTheme: (theme: Theme) => void;
@@ -146,6 +175,9 @@ export const useAppStore = create<AppState>()((set, get) => {
       const model = buildModel(bundle);
       const previous = get();
       const sameRepo = previous.bundle?.root === bundle.root;
+      // A reload replaces the model, so the Changes lens (which swaps it) ends.
+      const leaveChanges =
+        previous.lens === "changes" ? { lens: "structure" as const, diff: null, base: null } : {};
       const selectedId =
         sameRepo && previous.selectedId !== null && model.nodes.has(previous.selectedId)
           ? previous.selectedId
@@ -158,10 +190,14 @@ export const useAppStore = create<AppState>()((set, get) => {
         expandedIds: sameRepo
           ? new Set([...previous.expandedIds].filter((id) => model.nodes.has(id)))
           : defaultExpanded(model),
+        ...leaveChanges,
         ...(sameRepo
           ? {}
           : {
               lens: savedLens(bundle.root),
+              commits: [],
+              diff: null,
+              base: null,
               statusFilter: null,
               dismissedBanners: new Set<BannerId>(),
               history: [],
@@ -213,6 +249,10 @@ export const useAppStore = create<AppState>()((set, get) => {
     navigation: null,
     lens: "structure",
     statusFilter: null,
+    commits: [],
+    diff: null,
+    diffMode: "inline",
+    base: null,
     issuesOpen: false,
     dismissedBanners: new Set(),
     theme: DEFAULT_SETTINGS.theme,
@@ -344,9 +384,93 @@ export const useAppStore = create<AppState>()((set, get) => {
     },
 
     setLens(lens) {
+      const { bundle, base, model, expandedIds, selectedId } = get();
+      if (lens === get().lens) return;
+      if (bundle && lens !== "changes") saveLens(bundle.root, lens);
+      if (base) {
+        // Leaving Changes: back to the repository's own model, keeping the selection (and
+        // revealing it) when it still exists there.
+        const keep = selectedId !== null && base.model.nodes.has(selectedId) ? selectedId : null;
+        const expanded = new Set(base.expandedIds);
+        if (keep !== null) for (const a of ancestors(base.model, keep)) expanded.add(a);
+        set({
+          model: base.model,
+          expandedIds: expanded,
+          base: null,
+          diff: null,
+          evidence: null,
+          selectedId: keep,
+        });
+      }
+      set({ lens, ...(lens === "coverage" ? {} : { statusFilter: null }) });
+      if (lens !== "changes" || !model || !bundle) return;
+      set({ base: { model, expandedIds } });
+      void (async () => {
+        const api = await getApi();
+        try {
+          const commits = await api.listCommits(get().path ?? bundle.root, 50);
+          set({ commits });
+          const to = commits[0]?.sha;
+          if (to === undefined) {
+            set({
+              diff: {
+                from: WORKTREE,
+                to: WORKTREE,
+                status: "error",
+                error: { code: "io", message: "This repository has no commits to compare." },
+              },
+            });
+            return;
+          }
+          await get().loadDiff(commits[1]?.sha ?? to, to);
+        } catch (err) {
+          set({ diff: { from: "", to: "", status: "error", error: toAppError(err) } });
+        }
+      })();
+    },
+
+    async loadDiff(from, to) {
       const { bundle } = get();
-      if (bundle) saveLens(bundle.root, lens);
-      set(lens === "structure" ? { lens, statusFilter: null } : { lens });
+      if (!bundle || get().lens !== "changes") return;
+      set({ diff: { from, to, status: "loading" } });
+      try {
+        const api = await getApi();
+        const result = await api.diffRevisions(get().path ?? bundle.root, from, to);
+        const current = get();
+        // Ignore a result the user has moved on from.
+        if (current.lens !== "changes" || current.diff?.from !== from || current.diff.to !== to)
+          return;
+        const view = buildDiffView(result, bundle);
+        set({
+          model: view.model,
+          expandedIds: view.expanded,
+          selectedId: null,
+          evidence: null,
+          diff: { from, to, status: "ready", view },
+        });
+      } catch (err) {
+        if (get().diff?.from === from && get().diff?.to === to)
+          set({ diff: { from, to, status: "error", error: toAppError(err) } });
+      }
+    },
+
+    stepChange(direction) {
+      const { diff, selectedId } = get();
+      const steps = diff?.view?.steps ?? [];
+      if (steps.length === 0) return;
+      const at = selectedId === null ? -1 : steps.indexOf(selectedId);
+      const next =
+        at < 0
+          ? direction > 0
+            ? 0
+            : steps.length - 1
+          : (at + direction + steps.length) % steps.length;
+      const id = steps[next];
+      if (id !== undefined) get().navigateTo(id);
+    },
+
+    setDiffMode(mode) {
+      set({ diffMode: mode });
     },
 
     setStatusFilter(status) {

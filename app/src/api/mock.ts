@@ -5,6 +5,8 @@
  * - `?fixture=py-small|ts-small` opens that fixture at startup (default: none).
  * - `?state=no-gitvur|schema-invalid|structure-only|indexing` simulates the matching
  *   backend behaviour, for screenshots of each state.
+ * - Diffs (Changes lens) for py-small come from `mockDiff.json`, generated from a real
+ *   Git scenario by `crates/gitvur-diff/tests/mock_diff.rs`.
  * - `?state=trust` serves hand-crafted validation results (every status and issue code,
  *   see `mockTrust.ts`); `?state=report-stale` a report older than the structure.
  * - `?missing=<relpath>` serves that source file as if it had been deleted after indexing,
@@ -12,6 +14,8 @@
  */
 import type {
   AppError,
+  CommitInfo,
+  DiffBundle,
   Annotations,
   Manifest,
   RepoBundle,
@@ -20,6 +24,7 @@ import type {
   SourceSlice,
   Structure,
 } from "../generated/contract";
+import mockDiff from "./mockDiff.json";
 import { trustBundle } from "./mockTrust";
 import { type Api, DEFAULT_SETTINGS } from "./types";
 
@@ -114,6 +119,32 @@ function bundle(path: string): Promise<RepoBundle> {
 
 const never = () => new Promise<never>(() => undefined);
 
+interface MockDiff {
+  commits: CommitInfo[];
+  bundle: DiffBundle;
+  /** Files of revision A whose text differs from the fixture. */
+  fromSources: Record<string, string>;
+}
+const diffData = mockDiff as unknown as MockDiff;
+
+function sliceOf(
+  relpath: string,
+  text: string,
+  start: number,
+  end: number,
+  context: number,
+): SourceSlice {
+  const all = text.replace(/\n$/, "").split("\n");
+  const first = Math.min(Math.max(1, start - context), all.length);
+  const last = Math.min(all.length, end + context, first + 1999);
+  return {
+    file: relpath,
+    startLine: first,
+    lines: all.slice(first - 1, last),
+    language: relpath.endsWith(".py") ? "python" : relpath.endsWith(".ts") ? "typescript" : "text",
+  };
+}
+
 export const mockApi: Api = {
   pickFolder: () => Promise.resolve(`mock://${params.get("fixture") ?? "py-small"}`),
   openRepository: bundle,
@@ -123,19 +154,18 @@ export const mockApi: Api = {
     const text =
       relpath === missing ? undefined : sources[`${PREFIX}${fixtureOf(path)}/${relpath}`];
     if (text === undefined) return fail("io", `cannot open \`${relpath}\``);
-    const all = text.replace(/\n$/, "").split("\n");
-    const first = Math.min(Math.max(1, start - context), all.length);
-    const last = Math.min(all.length, end + context, first + 1999);
-    return Promise.resolve({
-      file: relpath,
-      startLine: first,
-      lines: all.slice(first - 1, last),
-      language: relpath.endsWith(".py")
-        ? "python"
-        : relpath.endsWith(".ts")
-          ? "typescript"
-          : "text",
-    });
+    return Promise.resolve(sliceOf(relpath, text, start, end, context));
+  },
+  listCommits: (path) =>
+    fixtureOf(path) === "py-small" ? Promise.resolve(diffData.commits) : Promise.resolve([]),
+  diffRevisions(path) {
+    if (fixtureOf(path) !== "py-small") return fail("io", "No history in this mock repository");
+    return Promise.resolve(diffData.bundle);
+  },
+  readRevisionSource(path, rev, relpath, start, end, context) {
+    const old = rev === diffData.bundle.diff.fromCommit ? diffData.fromSources[relpath] : undefined;
+    if (old !== undefined) return Promise.resolve(sliceOf(relpath, old, start, end, context));
+    return mockApi.readSource(path, relpath, start, end, context);
   },
   recentRepositories: () =>
     Promise.resolve([

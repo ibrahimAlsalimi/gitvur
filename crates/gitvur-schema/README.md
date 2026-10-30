@@ -10,6 +10,7 @@ deliberate contract change, and update the fixtures' `expected/` files in the sa
 | `structure.json` | extractor | `Structure` | `schemas/structure.schema.json` |
 | `annotations.json` | documenting agent | `Annotations` | `schemas/annotations.schema.json` (copy in `agent/`) |
 | `report.json` | validator | `Report` | `schemas/report.schema.json` |
+| (not stored) `gitvur diff --json` | diff | `StructureDiff` | `schemas/diff.schema.json` |
 
 All types use `deny_unknown_fields`. Regenerate schemas with
 `cargo run -p gitvur-schema --bin gen-schemas`; a test fails if the committed ones drift.

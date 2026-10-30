@@ -1,9 +1,12 @@
-/** Arrow markers for relationship lines, referenced as url(#gv-arrow-<provenance>). */
+/**
+ * Arrow markers for relationship lines, referenced as url(#gv-arrow-<provenance>), or
+ * url(#gv-arrow-added|removed) for changed lines in the Changes lens.
+ */
 export function EdgeMarkers() {
   return (
     <svg className="gv-markers" aria-hidden="true" width="0" height="0">
       <defs>
-        {(["syntactic", "semantic"] as const).map((p) => (
+        {(["syntactic", "semantic", "added", "removed"] as const).map((p) => (
           <marker
             key={p}
             id={`gv-arrow-${p}`}

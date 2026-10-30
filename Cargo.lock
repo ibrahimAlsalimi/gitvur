@@ -1345,6 +1345,7 @@ dependencies = [
  "gitvur-index",
  "gitvur-schema",
  "gix",
+ "serde_json",
  "tempfile",
  "thiserror 2.0.21",
 ]
