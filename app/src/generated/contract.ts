@@ -24,7 +24,11 @@ export type Structure = { nodes: Array<Node>, edges: Array<Edge>,
 /**
  * Calls with two or more in-repo candidate targets.
  */
-unresolvedCalls: Array<UnresolvedCall>, };
+unresolvedCalls: Array<UnresolvedCall>,
+/**
+ * Deterministic entry points; omitted when empty to preserve v0.2 canonical bytes.
+ */
+entryPoints?: Array<EntryPoint>, };
 
 export type Node = { id: string, type: NodeType, name: string,
 /**
@@ -56,6 +60,34 @@ name: string, evidence: Evidence,
  */
 candidates: Array<string>, };
 
+export type EntryPoint = { id: string, kind: EntryKind, name: string,
+/**
+ * A resolved node ID, or null when configuration names code outside the index.
+ */
+target: string | null, raw?: string, calls: Array<string>,
+/**
+ * Optional at deserialization so validation can diagnose missing AI evidence.
+ */
+evidence?: Evidence, provenance: Provenance, };
+
+export type EntryKind = "cli-command" | "console-script" | "event-handler" | "http-route" | "job" | "main-guard" | "npm-script" | "other" | "package-bin" | "package-main" | "test" | "top-level-call";
+
+export type Flow = { id: string, name: string, description: string, entryPoint: string,
+/**
+ * Reading order: canonicalization must not sort or deduplicate steps.
+ */
+steps: Array<FlowStep>, transitions: Array<FlowTransition>, };
+
+export type FlowStep = { id: string, node: string, label: string, basedOnHash: string, };
+
+export type FlowTransition = { from: string, to: string, kind: TransitionKind, label?: string, provenance: Provenance, evidence?: Evidence, };
+
+export type TransitionKind = "async" | "branch" | "call" | "event" | "return";
+
+export type FlowStatus = { id: string, status: FlowState, staleSteps: Array<string>, };
+
+export type FlowState = "broken" | "current" | "stale";
+
 export type Edge = { from: string, to: string, type: EdgeType, provenance: Provenance, evidence: Evidence,
 /**
  * Free-text explanation; written by the agent for `ai` edges.
@@ -86,7 +118,7 @@ export type Annotations = { modules: Array<Module>, descriptions: Array<Descript
 /**
  * Hidden relationships; every one must have `provenance: "ai"` and evidence.
  */
-edges: Array<Edge>, };
+edges: Array<Edge>, entryPoints?: Array<EntryPoint>, flows?: Array<Flow>, };
 
 export type Module = {
 /**
@@ -112,7 +144,7 @@ export type Report = { schemaVersion: string,
 /**
  * Copied from `manifest.json`.
  */
-commitSha: string, summary: Summary, elements: Array<ElementStatus>, issues: Array<Issue>, };
+commitSha: string, summary: Summary, elements: Array<ElementStatus>, issues: Array<Issue>, flows?: Array<FlowStatus>, };
 
 export type Summary = { documented: number, stale: number, undocumented: number, errors: number, warnings: number, };
 

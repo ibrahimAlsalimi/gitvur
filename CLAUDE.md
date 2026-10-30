@@ -33,7 +33,7 @@ Repository ──> gitvur index ──> structure.json ──┐
 gitvur/
 ├── Cargo.toml                 # Rust workspace
 ├── crates/
-│   ├── gitvur-schema/         # contract v0.2 types + JSON Schema
+│   ├── gitvur-schema/         # contract v0.3 types + JSON Schema
 │   ├── gitvur-index/          # extractor
 │   ├── gitvur-validate/       # validator + staleness
 │   ├── gitvur-diff/           # structural diff
@@ -50,7 +50,7 @@ gitvur/
 └── PROGRESS.md                # session log, updated at the end of every session
 ```
 
-## Data contract v0.2 (summary)
+## Data contract v0.3 (summary)
 
 Files in `<repo>/.gitvur/`, one writer each:
 
@@ -132,3 +132,10 @@ A session is not done until `cargo fmt`, `clippy`, `cargo test`, and (for app wo
 - Write the test or expected output first, then the implementation.
 - Prefer small, reviewable commits with clear messages: `phase-02: extract python classes and methods`.
 - At the end of every session, append to `PROGRESS.md`: date, phase, what was done, acceptance criteria status, deviations from the prompt, open questions.
+
+## Phase 14 checkpoint
+
+Parts A–B introduce v0.3 entry/flow types and deterministic entry extraction. Readers
+accept v0.2. See the schema/index READMEs for the contract. Parts C–F (trace, flow
+validation, packet/agent workflow) wait for human review of both new fixture goldens.
+Existing py-small/ts-small data stays frozen; app UI work remains Phase 15.

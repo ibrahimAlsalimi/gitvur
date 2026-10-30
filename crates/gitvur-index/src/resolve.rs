@@ -60,9 +60,14 @@ struct Resolver<'f, 'a> {
     methods: BTreeMap<String, Vec<DefRef>>,
 }
 
-pub(crate) fn build_structure(project_name: &str, files: &[SourceFile<'_>]) -> Structure {
+pub(crate) fn build_structure(
+    project_name: &str,
+    files: &[SourceFile<'_>],
+    config: &[crate::config::ConfigEntry],
+) -> Structure {
     let mut resolver = Resolver::new(files);
     let mut structure = Structure {
+        entry_points: Vec::new(),
         nodes: nodes(project_name, files, &resolver.ids),
         edges: resolver.bind_imports(),
         unresolved_calls: Vec::new(),
@@ -70,6 +75,7 @@ pub(crate) fn build_structure(project_name: &str, files: &[SourceFile<'_>]) -> S
     let (call_edges, unresolved) = resolver.resolve_calls();
     structure.edges.extend(call_edges);
     structure.unresolved_calls = unresolved;
+    resolver.resolve_entries(&mut structure, config);
     structure.canonicalize();
     structure
 }
@@ -323,6 +329,121 @@ impl<'f, 'a> Resolver<'f, 'a> {
         (edges, unresolved)
     }
 
+    fn config_target(&self, entry: &crate::config::ConfigEntry) -> Option<String> {
+        match &entry.target {
+            crate::config::Target::File(path) => crate::config::relative_path(&entry.file, path)
+                .and_then(|p| {
+                    self.files
+                        .iter()
+                        .find(|f| f.relpath == p)
+                        .map(|_| format!("file:{p}"))
+                }),
+            crate::config::Target::Python(specifier) => {
+                specifier.split_once(':').and_then(|(module, symbol)| {
+                    let module_path = module.replace('.', "/");
+                    let path =
+                        crate::config::relative_path(&entry.file, &format!("{module_path}.py"))?;
+                    let package = crate::config::relative_path(
+                        &entry.file,
+                        &format!("{module_path}/__init__.py"),
+                    )?;
+                    let file = self
+                        .files
+                        .iter()
+                        .position(|f| f.relpath == path)
+                        .or_else(|| self.files.iter().position(|f| f.relpath == package))?;
+                    let mut segments = symbol.split('.');
+                    let first = segments.next()?;
+                    let mut found = self.lookup_export(file, first);
+                    for part in segments {
+                        found = found
+                            .into_iter()
+                            .flat_map(|(f, d)| self.children(f, d, part))
+                            .collect();
+                    }
+                    let found: Vec<_> = found
+                        .into_iter()
+                        .filter(|&r| self.def(r).kind == DefKind::Function)
+                        .collect();
+                    (found.len() == 1).then(|| self.ids[found[0].0][found[0].1].clone())
+                })
+            }
+        }
+    }
+
+    fn resolve_entries(&self, structure: &mut Structure, config: &[crate::config::ConfigEntry]) {
+        use gitvur_schema::{EntryKind, EntryPoint};
+        let mut seen = BTreeMap::<String, u32>::new();
+        let mut id_for = |kind, name: &str| entry_id(&mut seen, kind, name);
+        for entry in config {
+            let target = self.config_target(entry);
+            structure.entry_points.push(EntryPoint {
+                id: id_for(entry.kind, &entry.name),
+                kind: entry.kind,
+                name: entry.name.clone(),
+                target,
+                raw: Some(entry.raw.clone()),
+                calls: Vec::new(),
+                evidence: Some(Evidence {
+                    file: entry.file.clone(),
+                    line: entry.line,
+                }),
+                provenance: Provenance::Syntactic,
+            });
+        }
+        for (fi, file) in self.files.iter().enumerate() {
+            let Some(parsed) = &file.parsed else {
+                continue;
+            };
+            for entry in &parsed.entries {
+                let mut calls = BTreeSet::new();
+                let mut ambiguous = Vec::new();
+                for call in &entry.calls {
+                    match self.resolve_callee(fi, None, &call.callee) {
+                        Outcome::Edge((f, d)) => {
+                            calls.insert(self.ids[f][d].clone());
+                        }
+                        Outcome::Ambiguous(targets) => ambiguous.push(UnresolvedCall {
+                            from: String::new(),
+                            name: called_name(&call.callee).into(),
+                            evidence: Evidence {
+                                file: file.relpath.clone(),
+                                line: call.line,
+                            },
+                            candidates: targets
+                                .into_iter()
+                                .map(|(f, d)| self.ids[f][d].clone())
+                                .collect(),
+                        }),
+                        Outcome::Drop => {}
+                    }
+                }
+                if entry.kind == EntryKind::TopLevelCall && calls.is_empty() && ambiguous.is_empty()
+                {
+                    continue;
+                }
+                let id = id_for(entry.kind, &entry.name);
+                for mut call in ambiguous {
+                    call.from.clone_from(&id);
+                    structure.unresolved_calls.push(call);
+                }
+                structure.entry_points.push(EntryPoint {
+                    id,
+                    kind: entry.kind,
+                    name: entry.name.clone(),
+                    target: Some(format!("file:{}", file.relpath)),
+                    raw: None,
+                    calls: calls.into_iter().collect(),
+                    evidence: Some(Evidence {
+                        file: file.relpath.clone(),
+                        line: entry.line,
+                    }),
+                    provenance: Provenance::Syntactic,
+                });
+            }
+        }
+    }
+
     fn def(&self, (f, d): DefRef) -> &crate::lang::Definition {
         &definitions(&self.files[f])[d]
     }
@@ -338,10 +459,14 @@ impl<'f, 'a> Resolver<'f, 'a> {
     }
 
     fn resolve_call(&self, file: usize, call: &CallSite) -> Outcome {
-        match &call.callee {
-            Callee::Name(name) => decide(self.name_candidates(file, call.caller, name)),
+        self.resolve_callee(file, Some(call.caller), &call.callee)
+    }
+
+    fn resolve_callee(&self, file: usize, caller: Option<usize>, callee: &Callee) -> Outcome {
+        match callee {
+            Callee::Name(name) => decide(self.name_candidates(file, caller, name)),
             Callee::SelfMethod(name) => {
-                let mut current = self.def((file, call.caller)).parent;
+                let mut current = caller.and_then(|d| self.def((file, d)).parent);
                 while let Some(d) = current {
                     if self.def((file, d)).kind == DefKind::Class {
                         let methods: Vec<DefRef> = self
@@ -372,7 +497,7 @@ impl<'f, 'a> Resolver<'f, 'a> {
             } => self.unknown_receiver(name),
             Callee::New { receiver, name } => {
                 let candidates = match receiver {
-                    None => self.name_candidates(file, call.caller, name),
+                    None => self.name_candidates(file, caller, name),
                     Some(receiver) => match self.bindings[file].get(receiver) {
                         Some(Bound::Module(Some(module))) => self.lookup_export(*module, name),
                         _ => Vec::new(),
@@ -390,15 +515,15 @@ impl<'f, 'a> Resolver<'f, 'a> {
 
     /// Candidates for a bare name: the scope chain, then module level, then imports. The
     /// first level with any match wins.
-    fn name_candidates(&self, file: usize, caller: usize, name: &str) -> Vec<DefRef> {
-        let mut scope = caller;
-        loop {
+    fn name_candidates(&self, file: usize, caller: Option<usize>, name: &str) -> Vec<DefRef> {
+        let mut current = caller;
+        while let Some(scope) = current {
             let found = self.children(file, scope, name);
             if !found.is_empty() {
                 return found;
             }
             match self.def((file, scope)).parent {
-                Some(p) if self.def((file, p)).kind == DefKind::Function => scope = p,
+                Some(p) if self.def((file, p)).kind == DefKind::Function => current = Some(p),
                 _ => break,
             }
         }
@@ -457,5 +582,30 @@ impl<'f, 'a> Resolver<'f, 'a> {
             Some(candidates) if candidates.len() >= 2 => decide(candidates.clone()),
             _ => Outcome::Drop,
         }
+    }
+}
+
+fn entry_id(
+    seen: &mut BTreeMap<String, u32>,
+    kind: gitvur_schema::EntryKind,
+    name: &str,
+) -> String {
+    let mut slug = String::new();
+    for c in name.chars() {
+        if c.is_ascii_alphanumeric() {
+            slug.push(c.to_ascii_lowercase());
+        } else if !slug.is_empty() && !slug.ends_with('-') {
+            slug.push('-');
+        }
+    }
+    let slug = slug.trim_matches('-');
+    let slug = if slug.is_empty() { "entry" } else { slug };
+    let base = format!("entry:{}:{slug}", kind.as_str());
+    let count = seen.entry(base.clone()).or_default();
+    *count += 1;
+    if *count == 1 {
+        base
+    } else {
+        format!("{base}#{count}")
     }
 }

@@ -216,3 +216,32 @@ reports that checkout's `HEAD`), or `"uncommitted"`. `generatedAt` comes from th
   and only `discover` + `head_id` are needed.
 - `thiserror`: the library error type.
 - Dev: `similar` (readable golden-test diffs), `tempfile`.
+
+## Entry points (v0.3, Phase 14 Parts A–B)
+
+Python main guards compare __name__ to the literal __main__ in either order;
+parentheses are allowed. Each guard produces a file-target entry with direct calls
+from its block. Package __main__.py produces a package-main entry with top-level calls.
+Calls inside nested functions, classes and lambdas are excluded from script entries.
+TypeScript groups calls by their top-level statement, emitting one entry per statement
+with resolved in-repo calls or ambiguous in-repo candidates. Inline callbacks and class
+bodies are excluded. Declaration files produce no entries. Calls use the existing
+resolver; unknown receivers remain ambiguous and external calls remain absent.
+
+Every package.json and pyproject.toml found under the existing walker policy is read
+as data. Config files do not become graph nodes; historical indexing includes them.
+Python reads project.scripts, project.gui-scripts and tool.poetry.scripts string values;
+module:function targets resolve relative to the config directory (no src-layout search).
+TypeScript reads string/map bin, main, module and exports["."] string or conditional
+string leaves. Npm scripts recognize an anchored node, ts-node, tsx, bun or deno run,
+then a path token; shell operators end that token. Flags before the path, variable
+expansion and paths containing spaces are not interpreted. Nothing is executed.
+All config paths resolve lexically relative to their config; escaping the repository,
+ignored files, dependencies, symlinks and unindexed build output cannot become targets.
+Unresolvable declared targets remain null with raw values intact. Invalid config emits
+a warning and indexing continues. Evidence lines refer to each exact parsed value,
+including duplicate values. TOML spans and borrowed JSON values preserve those locations.
+
+New hand-written goldens: fixtures/py-flows/expected and fixtures/ts-flows/expected.
+Their NOTES.md files explain the expected calls and intentionally unresolved cases.
+Dependencies added: toml for data parsing; serde_json raw_value for exact evidence.

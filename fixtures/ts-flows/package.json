@@ -1,0 +1,12 @@
+{
+  "name": "flow-shop",
+  "bin": { "flow-shop": "src/cli.ts" },
+  "main": "dist/index.js",
+  "module": "src/api.ts",
+  "exports": { ".": "./src/api.ts" },
+  "scripts": {
+    "seed": "tsx src/tools/seed.ts",
+    "lint": "eslint .",
+    "build": "echo fixture-data-only"
+  }
+}

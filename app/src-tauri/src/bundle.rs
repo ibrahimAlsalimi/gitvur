@@ -137,7 +137,7 @@ pub fn open_repository(path: &str) -> Result<RepoBundle, AppError> {
     let (structure_text, structure_time) =
         read_gitvur(&root, "structure.json")?.ok_or_else(no_gitvur)?;
     let manifest: Manifest = parse("manifest.json", &manifest_text)?;
-    if manifest.schema_version != SCHEMA_VERSION {
+    if !gitvur_schema::supports_schema_version(&manifest.schema_version) {
         return Err(AppError::new(
             ErrorCode::SchemaInvalid,
             format!(

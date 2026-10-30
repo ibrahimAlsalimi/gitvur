@@ -127,8 +127,15 @@ fn mock_diff_is_up_to_date() {
         ],
     );
 
-    let a = index_revision(&repo, "HEAD~1").unwrap();
-    let b = index_revision(&repo, "HEAD").unwrap();
+    let mut a = index_revision(&repo, "HEAD~1").unwrap();
+    let mut b = index_revision(&repo, "HEAD").unwrap();
+    // This browser snapshot intentionally exercises frozen v0.2 bundles.
+    for structure in [&mut a.structure, &mut b.structure] {
+        structure.entry_points.clear();
+        structure
+            .unresolved_calls
+            .retain(|call| !call.from.starts_with("entry:"));
+    }
     let committed: serde_json::Value =
         serde_json::from_str(&fs::read_to_string(fixture.join(".gitvur/structure.json")).unwrap())
             .unwrap();
@@ -139,6 +146,7 @@ fn mock_diff_is_up_to_date() {
     );
 
     let mut d = diff(&a.structure, &b.structure);
+    d.schema_version = "0.2".into();
     d.from_commit.clone_from(&a.sha);
     d.to_commit.clone_from(&b.sha);
     let mut sources = serde_json::Map::new();

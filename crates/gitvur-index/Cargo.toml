@@ -14,6 +14,9 @@ gitvur-schema.workspace = true
 gix = { version = "0.90.0", default-features = false, features = ["sha1"] }
 ignore = "0.4.34"
 thiserror = "2.0.21"
+toml = "1.1"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["raw_value"] }
 tree-sitter = "0.27.1"
 tree-sitter-python = "0.25.0"
 tree-sitter-typescript = "0.23.2"

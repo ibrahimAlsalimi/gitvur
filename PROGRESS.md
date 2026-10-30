@@ -809,6 +809,42 @@ Two sessions: the first stopped at the usage limit after a WIP checkpoint (`c8b8
   - `modified` crosses the bridge as Unix seconds encoded as a string, formatted locally for display.
   - Safe parent-relative image paths within the repository are allowed; escapes are rejected after normalization/canonicalization. Leading `/` means repository-root-relative, as the prompt specifies.
 
+## Phase 14 — Parts A–B, fixture review checkpoint (2026-10-30)
+
+- Phase 13 pushed and merged: PR #2, https://github.com/ibrahimAlsalimi/gitvur/pull/2,
+  merge commit `86e89d35a992832e0d1ea905e485877b93529d2a`. Both CI runs succeeded.
+- Branch: `phase-14-entry-points`. Added contract v0.3 entry/flow/report types, schemas,
+  and backward compatibility with committed v0.2 bundles. Flow step reading order stays
+  intact. Trace, flow validation, packet updates and agent instructions await Parts C–F.
+- Added deterministic Python main guards/package main/config console scripts and
+  TypeScript package/bin/npm/top-level entries. Configuration is parsed as data, never
+  executed. Configs follow the source walker's ignore/symlink policy and are included
+  in revision indexing. Unindexed paths stay null; ambiguous calls retain candidates.
+- Created py-flows and ts-flows source fixtures and hand-derived expected structures
+  BEFORE implementing extraction. A temporary helper only computed hashes of explicitly
+  chosen source ranges; it did not parse or extract. Initial entry tests failed as
+  expected before implementation; final full-structure comparisons pass without
+  rewriting the goldens. Fixture NOTES.md explains each entry and agent-only wiring.
+- Compatibility plumbing updates Rust constructors, app bundle version acceptance and
+  generated bindings. No app UI features changed. Both existing fixture directories
+  remain untouched; old graph tests compare the v0.2 projection, and the browser diff
+  snapshot retains its v0.2 scenario. Full v0.3 output has separate new fixture goldens.
+- Checks: cargo fmt, workspace Clippy with warnings denied, cargo test --workspace;
+  app generated binding check, typecheck, lint and all 69 Vitest tests. Targeted coverage
+  includes every static entry kind, deterministic output, exact config evidence,
+  ID collisions/source order, nested runtime scope exclusion, malformed/ignored configs,
+  escaping paths, shell text never executed, and v0.2/v0.3 bundle compatibility.
+- Limits: Python console module lookup is config-directory-relative (no src-layout
+  inference). Simple npm runner/path prefixes only; flags before paths, variable
+  expansion and spaces inside paths are not interpreted. Conditional exports string
+  leaves are supported; arrays are not. Ambiguous-only top-level TS statements retain
+  entries so their unresolved sites have stable owners. See schema/index READMEs.
+
+HUMAN REVIEW REQUIRED before Part C: fixtures/py-flows/expected/, fixtures/ts-flows/expected/
+
+The phase prompt explicitly requires stopping here. Review both expected/structure.json
+and expected/NOTES.md pairs before continuing Parts C–F in a new session.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).

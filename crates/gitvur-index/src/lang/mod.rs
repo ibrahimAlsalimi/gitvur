@@ -54,6 +54,8 @@ pub struct ParsedFile {
     pub definitions: Vec<Definition>,
     pub imports: Vec<Import>,
     pub calls: Vec<CallSite>,
+    /// Script-style entry candidates; calls remain separate from function edges.
+    pub entries: Vec<ParsedEntry>,
     /// What `export default` refers to, for languages that have default exports.
     pub default_export: Option<DefaultExport>,
 }
@@ -163,4 +165,48 @@ pub(crate) fn first_error_line(root: Node) -> u32 {
         stack.extend(children.into_iter().rev());
     }
     line_of(root)
+}
+
+/// A candidate entry, resolved against the complete repository after imports are bound.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ParsedEntry {
+    pub kind: gitvur_schema::EntryKind,
+    pub name: String,
+    pub line: u32,
+    pub calls: Vec<EntryCall>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EntryCall {
+    pub line: u32,
+    pub callee: Callee,
+}
+
+/// Calls inside function expressions/callbacks/classes are not direct script calls,
+/// including expressions which do not produce named definition nodes.
+pub(crate) fn outside_runtime_scope(node: Node<'_>) -> bool {
+    let mut current = node.parent();
+    while let Some(parent) = current {
+        if matches!(
+            parent.kind(),
+            "function_definition"
+                | "class_definition"
+                | "lambda"
+                | "decorator"
+                | "function_declaration"
+                | "generator_function_declaration"
+                | "function_expression"
+                | "function"
+                | "generator_function"
+                | "arrow_function"
+                | "method_definition"
+                | "class_declaration"
+                | "abstract_class_declaration"
+                | "class"
+        ) {
+            return false;
+        }
+        current = parent.parent();
+    }
+    true
 }

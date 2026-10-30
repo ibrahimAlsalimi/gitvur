@@ -14,6 +14,12 @@ pub struct Annotations {
     pub descriptions: Vec<Description>,
     /// Hidden relationships; every one must have `provenance: "ai"` and evidence.
     pub edges: Vec<Edge>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[cfg_attr(feature = "ts", ts(optional, as = "Option<Vec<crate::EntryPoint>>"))]
+    pub entry_points: Vec<crate::EntryPoint>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[cfg_attr(feature = "ts", ts(optional, as = "Option<Vec<crate::Flow>>"))]
+    pub flows: Vec<crate::Flow>,
 }
 
 /// A logical grouping of files, chosen by the agent.
@@ -46,6 +52,19 @@ impl Annotations {
     /// Sorts modules (and each module's files) and descriptions by `id`, and edges
     /// by `(from, to, type, evidence.file, evidence.line)`.
     pub fn canonicalize(&mut self) {
+        crate::execution::canonicalize_entries(&mut self.entry_points);
+        for flow in &mut self.flows {
+            flow.transitions.sort();
+            flow.transitions.dedup();
+        }
+        self.flows.sort_by(|a, b| {
+            (&a.id, &a.name, &a.description, &a.entry_point).cmp(&(
+                &b.id,
+                &b.name,
+                &b.description,
+                &b.entry_point,
+            ))
+        });
         for module in &mut self.modules {
             module.files.sort();
             module.files.dedup();

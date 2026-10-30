@@ -1,4 +1,4 @@
-# gitvur-schema — data contract v0.2
+# gitvur-schema — data contract v0.3
 
 Rust types, canonical serialisation and JSON Schema for the files in `<repo>/.gitvur/`.
 **The rules in this file are binding for every later phase.** Change them only with a
@@ -203,3 +203,41 @@ The callee is resolved by its syntactic shape:
    more → `unresolvedCalls`; one or none → dropped (one candidate is not enough evidence
    while the receiver's type is unknown). Module-level functions are not candidates.
 5. `new X()` (TypeScript) is resolved like a bare name or module member, and only to a class.
+
+## 8. Execution metadata (v0.3)
+
+Writers emit schemaVersion `0.3`; readers accept `0.2` and `0.3`. Missing
+`structure.entryPoints`, `annotations.entryPoints`, `annotations.flows` and
+`report.flows` default to empty. Empty new arrays are omitted when serialized, so
+committed v0.2 bundles round-trip unchanged. Unknown fields remain errors.
+
+Entry points contain `id`, `kind`, `name`, nullable `target`, optional original `raw`,
+`calls`, `evidence`, and `provenance`. IDs are `entry:<kind>:<slug>`: ASCII lowercase
+letters/digits, other runs become one dash, trimmed; an empty slug becomes `entry`.
+Collisions receive `#2`, `#3`, etc. Configuration entries are allocated first by
+(file, line, kind, name, raw), then source entries by file and source order.
+Entries sort by ID, then remaining fields; calls sort and deduplicate. Exact duplicate
+entries are removed. Targets are existing node IDs or explicit null; no build-output
+mapping or receiver-type inference is attempted. Script calls are metadata, not
+file-to-function graph edges; ambiguous sites use their entry ID in unresolvedCalls.
+
+Static kinds: main-guard, package-main, console-script, package-bin, npm-script,
+top-level-call. Agent kinds: http-route, cli-command, job, event-handler, test, other.
+Static provenance is syntactic; agent provenance is ai and requires evidence.
+Evidence is optional in Rust so the later validator can diagnose omissions.
+
+Flows contain `id` (`flow:<slug>`), `name`, `description`, `entryPoint`, ordered `steps`
+and `transitions`. A step has a locally unique `id`, node ID `node`, `label`, and
+`basedOnHash` (sha256 of that node when documented). Step reading order is preserved,
+including repeated nodes. Transitions contain step IDs `from`/`to`, `kind`
+(call, return, event, async, branch), optional `label`, provenance and optional evidence.
+Branch transitions require a label (checked by Part D).
+Transitions sort by (from, to, kind, label, provenance, evidence), deduplicating exact
+matches. Flows sort by (id, name, description, entryPoint). Reports may contain
+`flows`: each has `id`, `status` (current, stale, broken), and sorted unique `staleSteps`.
+Report flows sort by (id, status, staleSteps), with exact duplicates removed.
+Flow checking, staleness computation and trace commands belong to Parts C–F;
+Parts A–B define their representation only.
+
+Existing v0.2 golden graph files remain frozen. Legacy extraction tests compare their
+v0.2 projection; new py-flows/ts-flows goldens cover the complete v0.3 structure.
