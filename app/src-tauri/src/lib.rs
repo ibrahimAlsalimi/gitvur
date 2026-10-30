@@ -29,6 +29,10 @@ pub fn run() {
             commands::list_commits,
             commands::diff_revisions,
             commands::read_revision_source,
+            commands::forget_recent,
+            commands::get_view_state,
+            commands::set_view_state,
+            commands::clear_view_state,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the Gitvur app");

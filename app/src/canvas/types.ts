@@ -33,6 +33,8 @@ export interface RowData extends Record<string, unknown> {
   /** Method count for classes; line count for functions. */
   count: number;
   method: boolean;
+  /** Classes: its rows are folded on the map. */
+  collapsed: boolean;
 }
 
 export type ProjectNode = Node<ProjectData, "project">;

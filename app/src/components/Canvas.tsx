@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 
 import { MapCanvas } from "../canvas/MapCanvas";
+import { copy } from "../copy";
+import type { AppError } from "../generated/contract";
 import { useAppStore } from "../store/useAppStore";
 import { AlertIcon, DocIcon, FolderIcon } from "./Icons";
 
@@ -25,7 +27,64 @@ function StatePanel({ icon, title, text, tone = "neutral", children }: StatePane
   );
 }
 
-/** The centre pane. Phase 07 draws the map here; until then it shows the app state. */
+/** The backend's own text, behind a disclosure. */
+function Details({ error }: { error: AppError }) {
+  const detail = [error.message, error.detail].filter(Boolean).join("\n");
+  return (
+    <details className="state-details">
+      <summary>{copy.states.details}</summary>
+      <pre className="state-detail">{detail}</pre>
+    </details>
+  );
+}
+
+function ErrorState({ error }: { error: AppError }) {
+  const store = useAppStore.getState();
+  const lostRemoved = useAppStore((s) => s.lostRemoved);
+  const text = copy.errors[error.code];
+  const action =
+    error.code === "no-gitvur" || error.code === "schema-invalid" || error.code === "path-escape"
+      ? () => void store.index()
+      : error.code === "io" || error.code === "index-failed"
+        ? () => {
+            const { path } = useAppStore.getState();
+            if (path !== null) void store.open(path);
+          }
+        : () => void store.chooseAndOpen();
+  return (
+    <StatePanel
+      tone={error.code === "no-gitvur" ? "neutral" : "danger"}
+      icon={
+        error.code === "no-gitvur" ? (
+          <FolderIcon className="state-icon" />
+        ) : (
+          <AlertIcon className="state-icon" />
+        )
+      }
+      title={text.title}
+      text={
+        <>
+          {text.text}
+          {error.code === "not-a-directory" && lostRemoved && ` ${copy.states.lostRemoved}`}
+        </>
+      }
+    >
+      {error.code !== "no-gitvur" && <Details error={error} />}
+      <div className="state-actions">
+        <button type="button" className="button button-primary" onClick={action}>
+          {text.action}
+        </button>
+        {error.code !== "not-a-directory" && (
+          <button type="button" className="button" onClick={() => void store.chooseAndOpen()}>
+            {copy.errors["not-a-directory"].action}
+          </button>
+        )}
+      </div>
+    </StatePanel>
+  );
+}
+
+/** The centre pane: the map, or the app's state when there is no map to show. */
 export function Canvas() {
   const phase = useAppStore((s) => s.phase);
   const error = useAppStore((s) => s.error);
@@ -36,76 +95,36 @@ export function Canvas() {
 
   let content: ReactNode;
   if (phase === "opening" || phase === "indexing" || phase === "validating") {
-    const verb = { opening: "Opening", indexing: "Indexing", validating: "Validating" }[phase];
+    const title = copy.states.busy[phase];
     const files = model?.totals.files;
     content = (
       <StatePanel
-        icon={<div className="spinner" role="progressbar" aria-label={`${verb}…`} />}
-        title={`${verb}…`}
-        text={
-          files !== undefined
-            ? `${String(files)} files in the last index.`
-            : "This can take a few seconds on a large repository."
+        icon={
+          // No file count is reported while working, so the bar is indeterminate.
+          <div className="progress-bar" role="progressbar" aria-label={title}>
+            <span />
+          </div>
         }
+        title={title}
+        text={files !== undefined ? copy.states.busy.lastIndex(files) : copy.states.busy.noCount}
       />
     );
-  } else if (phase === "error" && error?.code === "no-gitvur") {
+  } else if (phase === "error" && error) {
+    content = <ErrorState error={error} />;
+  } else if (phase === "ready" && model && model.totals.files === 0) {
     content = (
       <StatePanel
         icon={<FolderIcon className="state-icon" />}
-        title="This repository hasn't been indexed yet"
-        text="Indexing reads the code and writes its structure to a .gitvur folder. Nothing is executed."
+        title={copy.states.noFiles.title}
+        text={copy.states.noFiles.text}
       >
-        <div className="state-actions">
-          <button
-            type="button"
-            className="button button-primary"
-            onClick={() => void store.index()}
-          >
-            Index now
-          </button>
-          <button type="button" className="button" onClick={() => void store.chooseAndOpen()}>
-            Open another
-          </button>
-        </div>
-      </StatePanel>
-    );
-  } else if (phase === "error" && error?.code === "schema-invalid") {
-    content = (
-      <StatePanel
-        tone="danger"
-        icon={<AlertIcon className="state-icon" />}
-        title=".gitvur/ files don't match the expected format"
-        text="They may come from another version of Gitvur. Re-indexing rewrites the structure; descriptions are kept."
-      >
-        {error.detail && <pre className="state-detail">{error.detail}</pre>}
-        <div className="state-actions">
-          <button
-            type="button"
-            className="button button-primary"
-            onClick={() => void store.index()}
-          >
-            Re-index
-          </button>
-        </div>
-      </StatePanel>
-    );
-  } else if (phase === "error" && error) {
-    content = (
-      <StatePanel
-        tone="danger"
-        icon={<AlertIcon className="state-icon" />}
-        title="Couldn't open this folder"
-        text={error.message}
-      >
-        {error.detail && <pre className="state-detail">{error.detail}</pre>}
         <div className="state-actions">
           <button
             type="button"
             className="button button-primary"
             onClick={() => void store.chooseAndOpen()}
           >
-            Open another repository
+            {copy.states.noFiles.action}
           </button>
         </div>
       </StatePanel>
@@ -116,8 +135,8 @@ export function Canvas() {
         <div className="canvas-notice">
           <StatePanel
             icon={<DocIcon className="state-icon" />}
-            title="Structure loaded — no descriptions yet"
-            text="A documenting agent adds modules and descriptions."
+            title={copy.states.noDescriptions.title}
+            text={copy.states.noDescriptions.text}
           >
             <div className="state-actions">
               <button
@@ -127,7 +146,7 @@ export function Canvas() {
                   store.setHelpOpen(true);
                 }}
               >
-                Show how to document
+                {copy.states.noDescriptions.action}
               </button>
             </div>
           </StatePanel>
@@ -143,8 +162,8 @@ export function Canvas() {
     content = (
       <StatePanel
         icon={<FolderIcon className="state-icon" />}
-        title="Open a repository to map it"
-        text="Gitvur shows a repository as a map of modules, files, classes and functions. It never changes your code."
+        title={copy.states.empty.title}
+        text={copy.states.empty.text}
       >
         <div className="state-actions">
           <button
@@ -152,13 +171,13 @@ export function Canvas() {
             className="button button-primary"
             onClick={() => void store.chooseAndOpen()}
           >
-            Open repository
+            {copy.states.empty.action}
           </button>
         </div>
         {recent.length > 0 && (
           <nav className="recent" aria-labelledby="recent-title">
             <h2 className="recent-title" id="recent-title">
-              Recent
+              {copy.states.empty.recent}
             </h2>
             <ul className="recent-list">
               {recent.slice(0, 5).map((r) => (

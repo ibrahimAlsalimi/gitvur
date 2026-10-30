@@ -37,7 +37,9 @@ test.describe("states", () => {
     await shot(page, "03-structure-only");
     await page.getByRole("button", { name: "Show how to document" }).click();
     await expect(page.getByRole("dialog", { name: "How to document a repository" })).toBeVisible();
-    await expect(page.getByText("## 1. Role and boundaries")).toBeVisible();
+    // codeDOC.md is rendered, not shown as raw Markdown.
+    await expect(page.getByRole("heading", { name: "1. Role and boundaries" })).toBeVisible();
+    await expect(page.getByText("## 1. Role and boundaries")).toHaveCount(0);
     await shot(page, "03b-how-to-document");
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toBeHidden();

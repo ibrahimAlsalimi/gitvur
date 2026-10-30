@@ -1,12 +1,13 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Permissions for the main window. Kept minimal: the viewer is read-only; the folder picker is the only plugin.",
+  "description": "Permissions for the main window. Kept minimal: the viewer is read-only; the folder picker is the only plugin; the window title follows the open project.",
   "windows": [
     "main"
   ],
   "permissions": [
     "core:default",
-    "dialog:allow-open"
+    "dialog:allow-open",
+    "core:window:allow-set-title"
   ]
 }

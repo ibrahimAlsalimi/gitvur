@@ -1,4 +1,5 @@
 import { bannersFor } from "./banners";
+import { copy } from "../copy";
 import { useAppStore } from "../store/useAppStore";
 
 /** Banners below the top bar; each can be dismissed for the session. */
@@ -6,7 +7,9 @@ export function Banners() {
   const bundle = useAppStore((s) => s.bundle);
   const dismissed = useAppStore((s) => s.dismissedBanners);
   const phase = useAppStore((s) => s.phase);
-  const banners = bundle ? bannersFor(bundle).filter((b) => !dismissed.has(b.id)) : [];
+  // The repository's own size, not the Changes lens's union.
+  const nodes = useAppStore((s) => (s.base?.model ?? s.model)?.totals.nodes ?? 0);
+  const banners = bundle ? bannersFor(bundle, nodes).filter((b) => !dismissed.has(b.id)) : [];
   const busy = phase !== "ready";
   return (
     <div className="banners">
@@ -19,15 +22,16 @@ export function Banners() {
             disabled={busy}
             onClick={() => {
               const store = useAppStore.getState();
-              void (b.action === "Validate" ? store.validate() : store.index());
+              if (b.action === "changes") store.setLens("changes");
+              else void (b.action === "validate" ? store.validate() : store.index());
             }}
           >
-            {b.action}
+            {b.actionLabel}
           </button>
           <button
             type="button"
             className="button button-icon button-ghost banner-dismiss"
-            aria-label={`Dismiss: ${b.text}`}
+            aria-label={copy.banners.dismiss(b.text)}
             onClick={() => {
               useAppStore.getState().dismissBanner(b.id);
             }}

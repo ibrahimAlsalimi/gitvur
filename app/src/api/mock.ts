@@ -7,6 +7,8 @@
  *   backend behaviour, for screenshots of each state.
  * - Diffs (Changes lens) for py-small come from `mockDiff.json`, generated from a real
  *   Git scenario by `crates/gitvur-diff/tests/mock_diff.rs`.
+ * - `?firstrun=1` shows the first-run guide (otherwise the mock starts as if it was seen).
+ * - `?state=lost` makes opening fail as if the folder had been moved or deleted.
  * - `?state=trust` serves hand-crafted validation results (every status and issue code,
  *   see `mockTrust.ts`); `?state=report-stale` a report older than the structure.
  * - `?missing=<relpath>` serves that source file as if it had been deleted after indexing,
@@ -23,6 +25,7 @@ import type {
   Settings,
   SourceSlice,
   Structure,
+  ViewState,
 } from "../generated/contract";
 import mockDiff from "./mockDiff.json";
 import { trustBundle } from "./mockTrust";
@@ -45,6 +48,7 @@ const synthetic = import.meta.glob<RepoBundle>("../../.synthetic/bundle.json", {
 
 const PREFIX = "../../../fixtures/";
 const SETTINGS_KEY = "gitvur.mock.settings";
+const VIEW_KEY = "gitvur.mock.view:";
 const params = new URLSearchParams(window.location.search);
 const state = params.get("state");
 const missing = params.get("missing");
@@ -77,6 +81,13 @@ function bundle(path: string): Promise<RepoBundle> {
   if (fixture === "synthetic") return syntheticBundle();
   const manifest = file(fixture, "manifest.json") as Manifest | undefined;
   const structure = file(fixture, "structure.json") as Structure | undefined;
+  if (state === "lost") {
+    return fail(
+      "not-a-directory",
+      `${path} does not exist`,
+      "No such file or directory (os error 2)",
+    );
+  }
   if (state === "no-gitvur" || !manifest || !structure) {
     return fail("no-gitvur", "This repository hasn't been indexed yet");
   }
@@ -175,10 +186,9 @@ export const mockApi: Api = {
   getSettings() {
     try {
       const saved = window.localStorage.getItem(SETTINGS_KEY);
+      const fresh = { ...DEFAULT_SETTINGS, guideSeen: params.get("firstrun") !== "1" };
       return Promise.resolve(
-        saved
-          ? { ...DEFAULT_SETTINGS, ...(JSON.parse(saved) as Partial<Settings>) }
-          : DEFAULT_SETTINGS,
+        saved ? { ...fresh, ...(JSON.parse(saved) as Partial<Settings>) } : fresh,
       );
     } catch {
       return Promise.resolve(DEFAULT_SETTINGS);
@@ -190,6 +200,35 @@ export const mockApi: Api = {
     } catch {
       // Storage unavailable (private mode): settings just aren't remembered.
     }
+    return Promise.resolve();
+  },
+  forgetRecent: () => Promise.resolve(),
+  getViewState(root) {
+    try {
+      const saved = window.localStorage.getItem(VIEW_KEY + root);
+      return Promise.resolve(saved ? (JSON.parse(saved) as ViewState) : null);
+    } catch {
+      return Promise.resolve(null);
+    }
+  },
+  setViewState(root, view) {
+    try {
+      window.localStorage.setItem(VIEW_KEY + root, JSON.stringify(view));
+    } catch {
+      // Storage unavailable: the view just isn't remembered.
+    }
+    return Promise.resolve();
+  },
+  clearViewState(root) {
+    try {
+      window.localStorage.removeItem(VIEW_KEY + root);
+    } catch {
+      // Nothing to clear.
+    }
+    return Promise.resolve();
+  },
+  setTitle(title) {
+    document.title = title;
     return Promise.resolve();
   },
   initialPath() {

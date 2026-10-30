@@ -2,6 +2,7 @@ import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import type { Theme } from "../generated/contract";
 import { useAppStore } from "../store/useAppStore";
+import { copy } from "../copy";
 import { RevisionPicker } from "../topbar/RevisionPicker";
 import { TrustSummary } from "../topbar/TrustSummary";
 import { LogoMark, MoreIcon } from "./Icons";
@@ -70,6 +71,7 @@ export function TopBar() {
 function MoreMenu() {
   const [open, setOpen] = useState(false);
   const theme = useAppStore((s) => s.theme);
+  const hasRepo = useAppStore((s) => s.bundle !== null);
   const anchor = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
 
@@ -149,6 +151,77 @@ function MoreMenu() {
               }}
             >
               How to document a repository
+            </button>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              className="menu-item"
+              onClick={() => {
+                choose(() => {
+                  useAppStore.getState().setPaletteOpen(true);
+                });
+              }}
+            >
+              Search…<kbd className="menu-kbd">Ctrl+K</kbd>
+            </button>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              className="menu-item"
+              disabled={!hasRepo}
+              onClick={() => {
+                choose(() => void useAppStore.getState().resetView());
+              }}
+            >
+              {copy.commands.resetView}
+            </button>
+          </li>
+          <li role="separator" className="menu-separator" />
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              className="menu-item"
+              onClick={() => {
+                choose(() => {
+                  useAppStore.getState().setShortcutsOpen(true);
+                });
+              }}
+            >
+              {copy.commands.shortcuts}
+              <kbd className="menu-kbd">?</kbd>
+            </button>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              className="menu-item"
+              onClick={() => {
+                choose(() => {
+                  useAppStore.getState().setGuideStep(0);
+                });
+              }}
+            >
+              {copy.commands.showGuide}
+            </button>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              className="menu-item"
+              onClick={() => {
+                choose(() => {
+                  useAppStore.getState().setAboutOpen(true);
+                });
+              }}
+            >
+              {copy.commands.about}
             </button>
           </li>
           <li role="separator" className="menu-separator" />

@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 
 import codeDoc from "../../../agent/codeDOC.md?raw";
 import { useAppStore } from "../store/useAppStore";
+import { Markdown } from "./Markdown";
 
 /** "How to document": the agent instructions, bundled with the app so it works offline. */
 export function HelpDialog() {
@@ -51,7 +52,7 @@ export function HelpDialog() {
             </li>
             <li>Click Validate here to see the result.</li>
           </ol>
-          <pre className="doc-source">{codeDoc}</pre>
+          <Markdown source={codeDoc} />
         </div>
       </div>
     </dialog>

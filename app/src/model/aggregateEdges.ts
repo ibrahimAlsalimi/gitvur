@@ -109,6 +109,7 @@ export function visibleAncestor(
   model: Model,
   expandedIds: ReadonlySet<string>,
   lod: 0 | 1 | 2,
+  collapsed: ReadonlySet<string> = new Set(),
 ): (id: string) => string | undefined {
   const cache = new Map<string, string | undefined>();
   const resolve = (id: string): string | undefined => {
@@ -123,7 +124,12 @@ export function visibleAncestor(
       let file: string | null = node.parentId;
       while (file !== null && model.nodes.get(file)?.kind !== "file")
         file = model.parentById.get(file) ?? null;
-      result = lod === 2 && file !== null && expandedIds.has(file) ? id : resolve(file ?? "");
+      // Inside a folded class: the class row stands in for it.
+      let folded: string | null = null;
+      for (let p = node.parentId; p !== null && p !== file; p = model.parentById.get(p) ?? null)
+        if (collapsed.has(p)) folded = p;
+      result =
+        lod === 2 && file !== null && expandedIds.has(file) ? (folded ?? id) : resolve(file ?? "");
     }
     cache.set(id, result);
     return result;

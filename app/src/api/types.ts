@@ -7,6 +7,7 @@ import type {
   RepoBundle,
   Settings,
   SourceSlice,
+  ViewState,
 } from "../generated/contract";
 
 /** Everything the UI asks of the backend. Implemented by Tauri, or by the browser mock. */
@@ -39,6 +40,14 @@ export interface Api {
     end: number,
     context: number,
   ): Promise<SourceSlice>;
+  /** Removes a repository from the recent list (it moved or was deleted). */
+  forgetRecent(path: string): Promise<void>;
+  /** The saved view of the repository at canonical `root` (app data folder, never the repo). */
+  getViewState(root: string): Promise<ViewState | null>;
+  setViewState(root: string, state: ViewState): Promise<void>;
+  clearViewState(root: string): Promise<void>;
+  /** Sets the window title. */
+  setTitle(title: string): Promise<void>;
   /** A repository to open at startup (mock mode's `?fixture=`); `null` in the real app. */
   initialPath(): string | null;
 }
@@ -48,6 +57,7 @@ export const DEFAULT_SETTINGS: Settings = {
   inspectorWidth: 380,
   inspectorCollapsed: false,
   theme: "system",
+  guideSeen: false,
 };
 
 const CODES: readonly ErrorCode[] = [

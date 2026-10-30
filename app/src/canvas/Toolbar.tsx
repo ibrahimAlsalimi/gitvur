@@ -2,8 +2,6 @@ import { Panel, useReactFlow } from "@xyflow/react";
 
 import { type Lens, useAppStore } from "../store/useAppStore";
 
-const FIT = { padding: "48px", duration: 180 } as const;
-
 /** Floating canvas controls (top-left). */
 export function Toolbar() {
   const rf = useReactFlow();
@@ -15,8 +13,10 @@ export function Toolbar() {
       <button
         type="button"
         className="gv-tool"
-        onClick={() => void rf.fitView(FIT)}
-        title="Fit the map to the window"
+        onClick={() => {
+          useAppStore.getState().requestFit();
+        }}
+        title="Fit the map to the window (F)"
       >
         Fit
       </button>
@@ -24,6 +24,7 @@ export function Toolbar() {
         type="button"
         className="gv-tool gv-tool-icon"
         aria-label="Zoom in"
+        title="Zoom in (+)"
         onClick={() => void rf.zoomIn({ duration: 120 })}
       >
         +
@@ -32,6 +33,7 @@ export function Toolbar() {
         type="button"
         className="gv-tool gv-tool-icon"
         aria-label="Zoom out"
+        title="Zoom out (−)"
         onClick={() => void rf.zoomOut({ duration: 120 })}
       >
         −
@@ -72,7 +74,7 @@ export function Toolbar() {
         ))}
       </div>
       <span className="gv-tool-divider" aria-hidden="true" />
-      <label className="gv-tool-select">
+      <label className="gv-tool-select" title="Lens (1 Structure, 2 Documentation, 3 Changes)">
         <span className="visually-hidden">Lens</span>
         <select
           value={lens}

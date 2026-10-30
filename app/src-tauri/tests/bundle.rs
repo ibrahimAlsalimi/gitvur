@@ -265,6 +265,7 @@ fn settings_and_recent_live_in_the_config_dir() {
         inspector_width: 400,
         inspector_collapsed: true,
         theme: Theme::Dark,
+        guide_seen: true,
     };
     settings::save(config.path(), &custom).unwrap();
     assert_eq!(settings::load(config.path()), custom);

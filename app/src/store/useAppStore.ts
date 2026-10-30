@@ -4,6 +4,8 @@ import { DEFAULT_SETTINGS, getApi, toAppError } from "../api";
 import type {
   AppError,
   CommitInfo,
+  ViewState,
+  Viewport,
   RecentRepo,
   RepoBundle,
   Settings,
@@ -33,30 +35,12 @@ export interface DiffState {
 export const WORKTREE = "worktree";
 
 /** Banners the user can dismiss for the session. */
-export type BannerId = "report-missing" | "structure-out-of-date" | "report-stale";
+export type BannerId = "report-missing" | "structure-out-of-date" | "report-stale" | "large-repo";
 
-const LENS_KEY = "gitvur.lens:";
+const LENSES: readonly Lens[] = ["structure", "coverage", "changes"];
 
-/**
- * The lens last used for a repository (per-viewer convenience; storage may be unavailable).
- * Changes is never restored: it reads Git history, so it starts only when chosen.
- */
-function savedLens(root: string): Lens {
-  try {
-    const value = window.localStorage.getItem(LENS_KEY + root);
-    return value === "coverage" ? "coverage" : "structure";
-  } catch {
-    return "structure";
-  }
-}
-
-function saveLens(root: string, lens: Lens): void {
-  try {
-    window.localStorage.setItem(LENS_KEY + root, lens);
-  } catch {
-    // Storage unavailable: the lens just isn't remembered.
-  }
-}
+/** Debounce for saving the per-repository view. */
+const VIEW_SAVE_MS = 400;
 
 export const PANE_LIMITS = {
   explorer: { min: 200, max: 480 },
@@ -70,12 +54,21 @@ interface AppState {
   bundle: RepoBundle | null;
   model: Model | null;
   error: AppError | null;
+  /** The last open failed because the folder is gone, and it was dropped from recents. */
+  lostRemoved: boolean;
   recent: RecentRepo[];
   settings: Settings;
   helpOpen: boolean;
+  paletteOpen: boolean;
+  shortcutsOpen: boolean;
+  aboutOpen: boolean;
+  /** Current first-run guide step (0-based), or null when the guide is not showing. */
+  guideStep: number | null;
 
   selectedId: string | null;
   expandedIds: Set<string>;
+  /** Classes folded on the map (their method rows hidden). */
+  collapsedIds: Set<string>;
   /** Relationship depth drawn for the selection. */
   hops: 1 | 2;
   /** The edge whose evidence the code viewer shows, if any. */
@@ -95,6 +88,14 @@ interface AppState {
   diff: DiffState | null;
   /** How the inspector shows a modified element's source diff. */
   diffMode: "inline" | "split";
+  /** The camera as last reported by the map (saved with the view; not rendered from). */
+  viewport: Viewport | null;
+  /** A saved camera for the map to apply instead of fitting, once. */
+  restoreViewport: Viewport | null;
+  /** Ask the map to fit; changes on every request. */
+  fitSeq: number;
+  /** A saved diff range to use when the Changes lens starts. */
+  pendingDiff: { from: string; to: string } | null;
   /** The model and expansion to restore when leaving the Changes lens. */
   base: { model: Model; expandedIds: Set<string> } | null;
   issuesOpen: boolean;
@@ -115,6 +116,8 @@ interface AppState {
   showEvidence: (edge: ModelEdge | null) => void;
   toggleAmbiguous: (key: string) => void;
   toggle: (id: string, expanded?: boolean) => void;
+  /** Folds or unfolds a class on the map. */
+  toggleCollapsed: (id: string) => void;
   /** Expands all of `ids` unless they are all expanded already, in which case collapses them. */
   toggleFiles: (ids: string[]) => void;
   expandAllFiles: () => void;
@@ -126,12 +129,22 @@ interface AppState {
   /** Selects the next (1) or previous (-1) change and flies to it. */
   stepChange: (direction: 1 | -1) => void;
   setDiffMode: (mode: "inline" | "split") => void;
+  setViewport: (viewport: Viewport) => void;
+  requestFit: () => void;
+  /** Forgets the saved view of this repository and returns to the default view. */
+  resetView: () => Promise<void>;
   setIssuesOpen: (open: boolean) => void;
   dismissBanner: (id: BannerId) => void;
   setTheme: (theme: Theme) => void;
   setPane: (pane: "explorer" | "inspector", width: number) => void;
   setInspectorCollapsed: (collapsed: boolean) => void;
   setHelpOpen: (open: boolean) => void;
+  setPaletteOpen: (open: boolean) => void;
+  setShortcutsOpen: (open: boolean) => void;
+  setAboutOpen: (open: boolean) => void;
+  /** Shows a guide step; null ends the guide and remembers it was seen. */
+  setGuideStep: (step: number | null) => void;
+  toggleTheme: () => void;
 }
 
 const clamp = (value: number, min: number, max: number) =>
@@ -169,7 +182,7 @@ export const useAppStore = create<AppState>()((set, get) => {
 
   /** Loads a bundle, keeping the selection and expansion when it is the same repository. */
   const load = async (path: string, phase: Phase, run: (path: string) => Promise<RepoBundle>) => {
-    set({ phase, path, error: null });
+    set({ phase, path, error: null, lostRemoved: false });
     try {
       const bundle = await run(path);
       const model = buildModel(bundle);
@@ -194,7 +207,11 @@ export const useAppStore = create<AppState>()((set, get) => {
         ...(sameRepo
           ? {}
           : {
-              lens: savedLens(bundle.root),
+              lens: "structure" as const,
+              collapsedIds: new Set<string>(),
+              viewport: null,
+              restoreViewport: null,
+              pendingDiff: null,
               commits: [],
               diff: null,
               base: null,
@@ -208,10 +225,58 @@ export const useAppStore = create<AppState>()((set, get) => {
             }),
       });
       const api = await getApi();
+      if (!sameRepo) {
+        const view = await api.getViewState(bundle.root).catch(() => null);
+        if (view && get().bundle === bundle) applyView(view, model);
+      }
       set({ recent: await api.recentRepositories().catch(() => get().recent) });
     } catch (err) {
-      set({ phase: "error", error: toAppError(err), bundle: null, model: null, selectedId: null });
+      const error = toAppError(err);
+      set({ phase: "error", error, bundle: null, model: null, selectedId: null });
+      // A recent repository that moved or was deleted leaves the recent list.
+      if (error.code === "not-a-directory" && get().recent.some((r) => r.path === path)) {
+        const api = await getApi();
+        await api.forgetRecent(path).catch(() => undefined);
+        set({ recent: get().recent.filter((r) => r.path !== path), lostRemoved: true });
+      }
     }
+  };
+
+  /** Restores a saved view, silently dropping IDs that no longer exist. */
+  const applyView = (view: ViewState, model: Model) => {
+    const exists = (id: string) => model.nodes.has(id);
+    const selected =
+      view.selectedId !== undefined && exists(view.selectedId) ? view.selectedId : null;
+    set({
+      expandedIds: new Set(view.expandedIds.filter(exists)),
+      collapsedIds: new Set(
+        view.collapsedIds.filter((id) => model.nodes.get(id)?.kind === "class"),
+      ),
+      selectedId: selected,
+      history: selected !== null ? [selected] : [],
+      historyIndex: selected !== null ? 0 : -1,
+      restoreViewport: view.viewport ?? null,
+      pendingDiff:
+        view.diffFrom !== undefined && view.diffTo !== undefined
+          ? { from: view.diffFrom, to: view.diffTo }
+          : null,
+    });
+    const widths: Partial<Settings> = {};
+    if (view.explorerWidth !== undefined)
+      widths.explorerWidth = clamp(
+        view.explorerWidth,
+        PANE_LIMITS.explorer.min,
+        PANE_LIMITS.explorer.max,
+      );
+    if (view.inspectorWidth !== undefined)
+      widths.inspectorWidth = clamp(
+        view.inspectorWidth,
+        PANE_LIMITS.inspector.min,
+        PANE_LIMITS.inspector.max,
+      );
+    if (Object.keys(widths).length > 0) set((s) => ({ settings: { ...s.settings, ...widths } }));
+    const lens = LENSES.find((l) => l === view.lens);
+    if (lens && lens !== "structure") get().setLens(lens);
   };
 
   /** Moves through the selection history without recording a new entry. */
@@ -236,11 +301,17 @@ export const useAppStore = create<AppState>()((set, get) => {
     bundle: null,
     model: null,
     error: null,
+    lostRemoved: false,
     recent: [],
     settings: DEFAULT_SETTINGS,
     helpOpen: false,
+    paletteOpen: false,
+    shortcutsOpen: false,
+    aboutOpen: false,
+    guideStep: null,
     selectedId: null,
     expandedIds: new Set(),
+    collapsedIds: new Set(),
     hops: 1,
     evidence: null,
     ambiguousOpen: new Set(),
@@ -252,6 +323,10 @@ export const useAppStore = create<AppState>()((set, get) => {
     commits: [],
     diff: null,
     diffMode: "inline",
+    viewport: null,
+    restoreViewport: null,
+    fitSeq: 0,
+    pendingDiff: null,
     base: null,
     issuesOpen: false,
     dismissedBanners: new Set(),
@@ -269,6 +344,7 @@ export const useAppStore = create<AppState>()((set, get) => {
         const merged = { ...settings, ...earlyChanges };
         earlyChanges = null;
         set({ settings: merged, theme: merged.theme, recent });
+        if (!merged.guideSeen) set({ guideStep: 0 });
         const initial = api.initialPath();
         if (initial !== null) await get().open(initial);
       })();
@@ -358,6 +434,13 @@ export const useAppStore = create<AppState>()((set, get) => {
       set({ expandedIds: next });
     },
 
+    toggleCollapsed(id) {
+      const next = new Set(get().collapsedIds);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      set({ collapsedIds: next });
+    },
+
     toggleFiles(ids) {
       const next = new Set(get().expandedIds);
       const allOpen = ids.every((id) => next.has(id));
@@ -386,7 +469,6 @@ export const useAppStore = create<AppState>()((set, get) => {
     setLens(lens) {
       const { bundle, base, model, expandedIds, selectedId } = get();
       if (lens === get().lens) return;
-      if (bundle && lens !== "changes") saveLens(bundle.root, lens);
       if (base) {
         // Leaving Changes: back to the repository's own model, keeping the selection (and
         // revealing it) when it still exists there.
@@ -422,7 +504,13 @@ export const useAppStore = create<AppState>()((set, get) => {
             });
             return;
           }
-          await get().loadDiff(commits[1]?.sha ?? to, to);
+          // A saved range is used when its revisions are still there.
+          const known = (rev: string) => rev === WORKTREE || commits.some((c) => c.sha === rev);
+          const saved = get().pendingDiff;
+          set({ pendingDiff: null });
+          if (saved && known(saved.from) && known(saved.to))
+            await get().loadDiff(saved.from, saved.to);
+          else await get().loadDiff(commits[1]?.sha ?? to, to);
         } catch (err) {
           set({ diff: { from: "", to: "", status: "error", error: toAppError(err) } });
         }
@@ -473,6 +561,36 @@ export const useAppStore = create<AppState>()((set, get) => {
       set({ diffMode: mode });
     },
 
+    setViewport(viewport) {
+      set({ viewport });
+    },
+
+    requestFit() {
+      set({ fitSeq: get().fitSeq + 1 });
+    },
+
+    async resetView() {
+      const { bundle } = get();
+      if (!bundle) return;
+      if (get().lens !== "structure") get().setLens("structure");
+      const model = get().model;
+      if (!model) return;
+      set({
+        expandedIds: defaultExpanded(model),
+        collapsedIds: new Set(),
+        selectedId: null,
+        evidence: null,
+        statusFilter: null,
+        restoreViewport: null,
+        pendingDiff: null,
+      });
+      get().requestFit();
+      // The default view is not saved back: the saved file is simply gone.
+      clearTimeout(viewTimer);
+      const api = await getApi();
+      await api.clearViewState(bundle.root).catch(() => undefined);
+    },
+
     setStatusFilter(status) {
       set({ statusFilter: status });
     },
@@ -506,5 +624,76 @@ export const useAppStore = create<AppState>()((set, get) => {
     setHelpOpen(open) {
       set({ helpOpen: open });
     },
+
+    setPaletteOpen(open) {
+      set({ paletteOpen: open });
+    },
+
+    setShortcutsOpen(open) {
+      set({ shortcutsOpen: open });
+    },
+
+    setAboutOpen(open) {
+      set({ aboutOpen: open });
+    },
+
+    setGuideStep(step) {
+      set({ guideStep: step });
+      if (step === null && !get().settings.guideSeen) updateSettings({ guideSeen: true });
+    },
+
+    toggleTheme() {
+      // System → the opposite of what the system shows now; then Light ⇄ Dark.
+      const { theme } = get();
+      const dark =
+        theme === "dark" ||
+        (theme === "system" &&
+          typeof window !== "undefined" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches);
+      get().setTheme(dark ? "light" : "dark");
+    },
   };
+});
+
+let viewTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** The current view of the open repository, as saved per repository. */
+function currentView(s: AppState): ViewState {
+  const view: ViewState = {
+    // In the Changes lens, the repository's own expansion (not the diff's).
+    expandedIds: [...(s.base?.expandedIds ?? s.expandedIds)].sort(),
+    collapsedIds: [...s.collapsedIds].sort(),
+    lens: s.lens,
+    explorerWidth: s.settings.explorerWidth,
+    inspectorWidth: s.settings.inspectorWidth,
+  };
+  if (s.selectedId !== null) view.selectedId = s.selectedId;
+  if (s.viewport) view.viewport = s.viewport;
+  if (s.diff && s.diff.status !== "error") {
+    view.diffFrom = s.diff.from;
+    view.diffTo = s.diff.to;
+  }
+  return view;
+}
+
+useAppStore.subscribe((s, prev) => {
+  if (s.phase !== "ready" || !s.bundle || s.bundle !== prev.bundle) return;
+  const changed =
+    s.expandedIds !== prev.expandedIds ||
+    s.collapsedIds !== prev.collapsedIds ||
+    s.selectedId !== prev.selectedId ||
+    s.lens !== prev.lens ||
+    s.viewport !== prev.viewport ||
+    s.diff?.from !== prev.diff?.from ||
+    s.diff?.to !== prev.diff?.to ||
+    s.settings.explorerWidth !== prev.settings.explorerWidth ||
+    s.settings.inspectorWidth !== prev.settings.inspectorWidth;
+  if (!changed) return;
+  clearTimeout(viewTimer);
+  const root = s.bundle.root;
+  viewTimer = setTimeout(() => {
+    const now = useAppStore.getState();
+    if (now.bundle?.root !== root) return;
+    void getApi().then((api) => api.setViewState(root, currentView(now)).catch(() => undefined));
+  }, VIEW_SAVE_MS);
 });

@@ -222,7 +222,11 @@ export type RecentRepo = { path: string, name: string,
  */
 openedAt: number, };
 
-export type Settings = { explorerWidth: number, inspectorWidth: number, inspectorCollapsed: boolean, theme: Theme, };
+export type Settings = { explorerWidth: number, inspectorWidth: number, inspectorCollapsed: boolean, theme: Theme, 
+/**
+ * The first-run guide was finished or dismissed.
+ */
+guideSeen: boolean, };
 
 export type Theme = "system" | "light" | "dark";
 
@@ -233,3 +237,11 @@ export type CommitInfo = { sha: string, short: string, subject: string, author: 
 date: number, };
 
 export type DiffBundle = { diff: StructureDiff, from: Structure, to: Structure, };
+
+export type ViewState = { expandedIds: Array<string>, 
+/**
+ * Classes whose rows are folded on the map.
+ */
+collapsedIds: Array<string>, selectedId?: string, viewport?: Viewport, lens?: string, diffFrom?: string, diffTo?: string, explorerWidth?: number, inspectorWidth?: number, };
+
+export type Viewport = { x: number, y: number, zoom: number, };

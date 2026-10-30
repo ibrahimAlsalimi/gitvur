@@ -12,14 +12,19 @@ export function moduleOf(model: Model, id: string): string | undefined {
 }
 
 /** A file's classes and functions, depth-first in source order, with nesting depth. */
-export function fileRows(model: Model, fileId: string): LayoutRow[] {
+export function fileRows(
+  model: Model,
+  fileId: string,
+  collapsed: ReadonlySet<string> = new Set(),
+): LayoutRow[] {
   const rows: LayoutRow[] = [];
   const walk = (parent: string, depth: number) => {
     for (const id of model.childrenById.get(parent) ?? []) {
       const node = model.nodes.get(id);
       if (node?.kind !== "class" && node?.kind !== "function") continue;
       rows.push({ id, kind: node.kind, depth });
-      walk(id, depth + 1);
+      // A folded class shows its own row only.
+      if (!collapsed.has(id)) walk(id, depth + 1);
     }
   };
   walk(fileId, 0);
@@ -52,6 +57,7 @@ export function buildLayoutRequest(
   model: Model,
   expandedIds: ReadonlySet<string>,
   edges = moduleEdges(model),
+  collapsed: ReadonlySet<string> = new Set(),
 ): LayoutRequest {
   const modules = (model.childrenById.get(model.rootId) ?? [])
     .filter((id) => model.nodes.get(id)?.kind === "module")
@@ -59,7 +65,7 @@ export function buildLayoutRequest(
       id,
       files: (model.childrenById.get(id) ?? []).map((fileId): LayoutFile => {
         const expanded = expandedIds.has(fileId);
-        return { id: fileId, expanded, rows: expanded ? fileRows(model, fileId) : [] };
+        return { id: fileId, expanded, rows: expanded ? fileRows(model, fileId, collapsed) : [] };
       }),
     }));
   return { modules, moduleEdges: edges };

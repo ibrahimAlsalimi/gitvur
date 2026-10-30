@@ -2,7 +2,15 @@ import { type CSSProperties, useEffect } from "react";
 
 import { Canvas } from "./components/Canvas";
 import { Explorer } from "./components/Explorer";
+import { AboutDialog } from "./components/AboutDialog";
+import { Guide } from "./components/Guide";
 import { HelpDialog } from "./components/HelpDialog";
+import { ShortcutsSheet } from "./components/ShortcutsSheet";
+import { copy } from "./copy";
+import { getApi } from "./api";
+import { useGlobalKeys } from "./keys/useGlobalKeys";
+import { Palette } from "./search/Palette";
+import { searchIndex } from "./search/searchIndex";
 import { ResizeHandle } from "./components/ResizeHandle";
 import { StatusBar } from "./components/StatusBar";
 import { TopBar } from "./components/TopBar";
@@ -28,6 +36,17 @@ export function App() {
   useHistoryKeys();
   useIssuesShortcut();
   useChangeKeys();
+  useGlobalKeys();
+
+  // Window title follows the open project; the search index is built when a model loads.
+  const project = useAppStore((s) => s.bundle?.manifest.projectName);
+  const model = useAppStore((s) => s.model);
+  useEffect(() => {
+    void getApi().then((api) => api.setTitle(copy.app.title(project)).catch(() => undefined));
+  }, [project]);
+  useEffect(() => {
+    if (model) searchIndex(model);
+  }, [model]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -98,6 +117,10 @@ export function App() {
       <div className="drawer">{issuesOpen && <IssuesPanel />}</div>
       <StatusBar />
       <HelpDialog />
+      <Palette />
+      <ShortcutsSheet />
+      <AboutDialog />
+      <Guide />
     </div>
   );
 }

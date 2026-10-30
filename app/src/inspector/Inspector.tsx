@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
 import { unresolvedKey } from "../canvas/edges/relationEdges";
-import { ClassGlyph, FunctionGlyph, LanguageGlyph } from "../canvas/glyphs";
 import { StatusRing } from "../canvas/StatusMark";
 import { SeverityIcon } from "../components/SeverityIcon";
 import { middleTruncate } from "../canvas/text";
 import { PanelIcon } from "../components/Icons";
+import { KindGlyph } from "../components/KindGlyph";
 import type { UnresolvedCall } from "../generated/contract";
 import type { Model, ModelEdge, ModelNode } from "../model/buildModel";
 import { ancestors } from "../model/tree";
@@ -13,6 +13,7 @@ import { useAppStore } from "../store/useAppStore";
 import { ChangeSection } from "./ChangeSection";
 import { CodeViewer } from "./CodeViewer";
 import { trustText } from "./trust";
+import { copy } from "../copy";
 import {
   type RelationItem,
   fileOf,
@@ -40,44 +41,6 @@ const PROVENANCE_LABEL = { syntactic: "syntactic", semantic: "semantic", ai: "AI
 const EVIDENCE_CONTEXT = 4;
 
 const svg = { "aria-hidden": true, focusable: false } as const;
-
-function ModuleGlyph() {
-  return (
-    <svg {...svg} className="gv-glyph" viewBox="0 0 16 16">
-      <rect
-        x="1.75"
-        y="1.75"
-        width="12.5"
-        height="12.5"
-        rx="2.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path d="M1.75 5.5h12.5" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function KindGlyph({ model, node }: { model: Model; node: ModelNode }) {
-  const glyph =
-    node.kind === "class" ? (
-      <ClassGlyph />
-    ) : node.kind === "function" ? (
-      <FunctionGlyph method={isMethod(model, node)} />
-    ) : node.kind === "file" ? (
-      <LanguageGlyph
-        language={node.id.endsWith(".py") ? "py" : node.id.endsWith(".ts") ? "ts" : "file"}
-      />
-    ) : (
-      <ModuleGlyph />
-    );
-  return (
-    <span className="gv-insp-glyph" data-kind={node.kind}>
-      {glyph}
-    </span>
-  );
-}
 
 /** The provenance line style as a tiny sample, so lists match the canvas. */
 function ProvenanceMark({ provenance }: { provenance: ModelEdge["provenance"] }) {
@@ -291,7 +254,7 @@ function DescriptionBlock({ node }: { node: ModelNode }) {
     <div className="gv-insp-description" data-status={node.docStatus}>
       {node.description !== undefined && (
         <p className="gv-insp-description-text">
-          {stale && <span className="gv-insp-outdated">possibly outdated</span>}
+          {stale && <span className="gv-insp-outdated">{copy.trust.possiblyOutdated}</span>}
           {node.description}
         </p>
       )}
@@ -300,7 +263,7 @@ function DescriptionBlock({ node }: { node: ModelNode }) {
         <span>{trustText(node)}</span>
       </p>
       {node.description === undefined ? (
-        <p className="gv-insp-hint">Run the documentation agent to add one.</p>
+        <p className="gv-insp-hint">{copy.trust.hint}</p>
       ) : (
         <p className="gv-insp-hint">
           AI-written

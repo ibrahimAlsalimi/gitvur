@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
 
 import type {
@@ -8,6 +9,7 @@ import type {
   RepoBundle,
   Settings,
   SourceSlice,
+  ViewState,
 } from "../generated/contract";
 import type { Api } from "./types";
 
@@ -29,5 +31,10 @@ export const tauriApi: Api = {
   diffRevisions: (path, from, to) => invoke<DiffBundle>("diff_revisions", { path, from, to }),
   readRevisionSource: (path, rev, file, start, end, context) =>
     invoke<SourceSlice>("read_revision_source", { path, rev, file, start, end, context }),
+  forgetRecent: (path) => invoke<undefined>("forget_recent", { path }),
+  getViewState: (root) => invoke<ViewState | null>("get_view_state", { root }),
+  setViewState: (root, state) => invoke<undefined>("set_view_state", { root, state }),
+  clearViewState: (root) => invoke<undefined>("clear_view_state", { root }),
+  setTitle: (title) => getCurrentWindow().setTitle(title),
   initialPath: () => null,
 };

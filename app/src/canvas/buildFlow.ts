@@ -1,4 +1,4 @@
-import type { Model } from "../model/buildModel";
+import type { Model, ModelNode } from "../model/buildModel";
 import { UNASSIGNED_MODULE_ID } from "../model/buildModel";
 import { fileRows } from "../layout/fromModel";
 import type { LayoutResult } from "../layout/types";
@@ -15,6 +15,20 @@ export function moduleColors(model: Model): Map<string, string> {
   );
   colors.set(UNASSIGNED_MODULE_ID, "var(--gv-module-neutral)");
   return colors;
+}
+
+const STATUS_WORD = {
+  documented: "documented",
+  stale: "stale",
+  undocumented: "undocumented",
+} as const;
+
+/** What a screen reader says for a map node, e.g. "function login, stale". */
+export function nodeLabel(node: ModelNode, method = false): string {
+  const kind = method ? "method" : node.kind;
+  return node.synthetic
+    ? `${kind} ${node.name}`
+    : `${kind} ${node.name}, ${STATUS_WORD[node.docStatus]}`;
 }
 
 function languageOf(path: string): "py" | "ts" | "file" {
@@ -40,6 +54,7 @@ export function buildFlow(
   layout: LayoutResult,
   expandedIds: ReadonlySet<string>,
   meta: { commitSha: string; languages: string[] },
+  collapsed: ReadonlySet<string> = new Set(),
 ): { nodes: MapNode[]; edges: MapEdge[] } {
   const colors = moduleColors(model);
   const nodes: MapNode[] = [];
@@ -80,6 +95,7 @@ export function buildFlow(
         synthetic: node.synthetic,
         fileIds,
       },
+      ariaLabel: nodeLabel(node),
       draggable: false,
     };
     nodes.push(moduleNode);
@@ -115,11 +131,12 @@ export function buildFlow(
           childCount: countDescendants(model, fileId),
           expanded,
         },
+        ariaLabel: nodeLabel(file),
         draggable: false,
       };
       nodes.push(fileNode);
       if (!expanded) continue;
-      for (const row of fileRows(model, fileId)) {
+      for (const row of fileRows(model, fileId, collapsed)) {
         const rowBox = layout.rows[row.id];
         const rowNode = model.nodes.get(row.id);
         if (!rowBox || !rowNode) continue;
@@ -140,7 +157,14 @@ export function buildFlow(
           position: { x: rowBox.x, y: rowBox.y },
           width: rowBox.width,
           height: rowBox.height,
-          data: { node: rowNode, depth: row.depth, count, method: parentKind === "class" },
+          data: {
+            node: rowNode,
+            depth: row.depth,
+            count,
+            method: parentKind === "class",
+            collapsed: collapsed.has(row.id),
+          },
+          ariaLabel: nodeLabel(rowNode, parentKind === "class"),
           draggable: false,
         };
         nodes.push(node);

@@ -8,11 +8,17 @@ use tauri::{AppHandle, Manager};
 use crate::bundle::{self, RepoBundle, SourceSlice};
 use crate::diffs::{self, CommitInfo, DiffBundle};
 use crate::error::{AppError, ErrorCode};
-use crate::settings::{self, RecentRepo, Settings};
+use crate::settings::{self, RecentRepo, Settings, ViewState};
 
 fn config_dir(app: &AppHandle) -> Result<PathBuf, AppError> {
     app.path().app_config_dir().map_err(|e| {
         AppError::new(ErrorCode::Io, "cannot find the app config folder").with_detail(e.to_string())
+    })
+}
+
+fn data_dir(app: &AppHandle) -> Result<PathBuf, AppError> {
+    app.path().app_data_dir().map_err(|e| {
+        AppError::new(ErrorCode::Io, "cannot find the app data folder").with_detail(e.to_string())
     })
 }
 
@@ -139,4 +145,33 @@ pub async fn read_revision_source(
     context: u32,
 ) -> Result<SourceSlice, AppError> {
     blocking(move || diffs::read_revision_source(&path, &rev, &file, start, end, context)).await
+}
+
+#[tauri::command]
+pub async fn forget_recent(app: AppHandle, path: String) -> Result<(), AppError> {
+    let dir = config_dir(&app)?;
+    blocking(move || settings::forget(&dir, &path)).await
+}
+
+/// `root` is the bundle's canonical root, so the key does not depend on how it was typed.
+#[tauri::command]
+pub async fn get_view_state(app: AppHandle, root: String) -> Result<Option<ViewState>, AppError> {
+    let dir = data_dir(&app)?;
+    blocking(move || Ok(settings::view_state(&dir, &root))).await
+}
+
+#[tauri::command]
+pub async fn set_view_state(
+    app: AppHandle,
+    root: String,
+    state: ViewState,
+) -> Result<(), AppError> {
+    let dir = data_dir(&app)?;
+    blocking(move || settings::save_view_state(&dir, &root, &state)).await
+}
+
+#[tauri::command]
+pub async fn clear_view_state(app: AppHandle, root: String) -> Result<(), AppError> {
+    let dir = data_dir(&app)?;
+    blocking(move || settings::clear_view_state(&dir, &root)).await
 }
