@@ -1,3 +1,4 @@
+import { MentionedInDocs } from "../docs/DocsTab";
 import { useEffect, useState } from "react";
 
 import { unresolvedKey } from "../canvas/edges/relationEdges";
@@ -534,6 +535,7 @@ function NodeDetails({ model, node }: { model: Model; node: ModelNode }) {
       <Header model={model} node={node} />
       <DescriptionBlock node={node} />
       <IssueList node={node} />
+      {(node.kind === "file" || node.kind === "module") && <MentionedInDocs id={node.id} />}
       {evidence ? (
         <EvidenceView model={model} edge={evidence} />
       ) : node.kind === "module" ? (

@@ -9,7 +9,9 @@ use std::path::{Path, PathBuf};
 
 use gitvur_schema::{ExtractorInfo, Manifest, SCHEMA_VERSION, Structure, UNCOMMITTED};
 
+mod docs;
 pub mod git;
+pub use docs::{DocEntry, discover_docs};
 pub mod lang;
 mod output;
 mod resolve;

@@ -6,6 +6,7 @@ import { useAppStore } from "../../store/useAppStore";
 export function useChangeKeys() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (useAppStore.getState().activeTab !== "map") return;
       if (e.key.toLowerCase() !== "n" || e.ctrlKey || e.altKey || e.metaKey) return;
       const target = e.target as HTMLElement | null;
       if (target?.closest("input, textarea, select, [contenteditable='true']")) return;

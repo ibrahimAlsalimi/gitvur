@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -25,6 +26,15 @@ const pkg = JSON.parse(readFileSync(new URL("package.json", import.meta.url), "u
 // Tauri expects a fixed port and fails if it is taken.
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    // The package's browser entry uses document.createElement, which cannot run in workers.
+    // Its default entry decodes the same HTML entities with a static lookup table.
+    alias: {
+      "decode-named-character-reference": createRequire(import.meta.url).resolve(
+        "decode-named-character-reference",
+      ),
+    },
+  },
   define: {
     __GITVUR_VERSION__: JSON.stringify(pkg.version),
     __GITVUR_COMMIT__: JSON.stringify(buildCommit()),

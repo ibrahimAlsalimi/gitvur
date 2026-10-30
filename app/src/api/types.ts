@@ -1,4 +1,7 @@
 import type {
+  AssetData,
+  DocContent,
+  DocEntry,
   AppError,
   CommitInfo,
   DiffBundle,
@@ -12,6 +15,10 @@ import type {
 
 /** Everything the UI asks of the backend. Implemented by Tauri, or by the browser mock. */
 export interface Api {
+  listDocs(path: string): Promise<DocEntry[]>;
+  readDoc(path: string, docPath: string): Promise<DocContent>;
+  readDocAsset(path: string, docPath: string, href: string): Promise<AssetData>;
+  openExternal(url: string): Promise<void>;
   /** Shows a folder picker; `null` if cancelled. */
   pickFolder(): Promise<string | null>;
   openRepository(path: string): Promise<RepoBundle>;

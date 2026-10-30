@@ -1,5 +1,7 @@
 import { type KeyboardEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
+import { useDocsStore } from "../docs/useDocsStore";
+import { showOnMap } from "../docs/navigation";
 import { copy } from "../copy";
 import { KindGlyph } from "../components/KindGlyph";
 import type { NodeKind } from "../model/buildModel";
@@ -18,6 +20,22 @@ function commands(): Command[] {
   const hasModel = s.model !== null;
   const c = copy.commands;
   return [
+    {
+      id: "tab-map",
+      label: copy.docs.map,
+      run: () => {
+        s.setActiveTab("map");
+      },
+      enabled: hasModel,
+    },
+    {
+      id: "tab-docs",
+      label: copy.docs.tab,
+      run: () => {
+        s.setActiveTab("docs");
+      },
+      enabled: hasModel,
+    },
     { id: "open", label: c.open, run: () => void s.chooseAndOpen(), enabled: true },
     { id: "index", label: c.index, run: () => void s.index(), enabled: s.path !== null },
     { id: "validate", label: c.validate, run: () => void s.validate(), enabled: s.bundle !== null },
@@ -132,7 +150,9 @@ function highlight(name: string, positions: readonly number[]): ReactNode {
 }
 
 type Row =
-  { kind: "hit"; hit: SearchHit } | { kind: "command"; command: Command; positions: number[] };
+  | { kind: "doc"; path: string; label: string; anchor: string }
+  | { kind: "hit"; hit: SearchHit }
+  | { kind: "command"; command: Command; positions: number[] };
 
 /**
  * Ctrl/Cmd+K: fuzzy search over names, qualified names, paths and descriptions, or
@@ -140,6 +160,7 @@ type Row =
  */
 export function Palette() {
   const open = useAppStore((s) => s.paletteOpen);
+  const docsIndex = useDocsStore((s) => s.index);
   const model = useAppStore((s) => s.model);
   const dialog = useRef<HTMLDialogElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -181,10 +202,26 @@ export function Palette() {
     if (!model) return [];
     const hits = search(searchIndex(model), query);
     // Grouped by kind, best first within each group.
-    return GROUPS.flatMap((g) =>
+    const codeRows: Row[] = GROUPS.flatMap((g) =>
       hits.filter((h) => h.entry.node.kind === g).map((hit) => ({ kind: "hit" as const, hit })),
     );
-  }, [open, query, isCommand, model]);
+    const q = query.trim().toLowerCase();
+    const docRows: Row[] = q
+      ? docsIndex.docs
+          .flatMap((doc) => [
+            { kind: "doc" as const, path: doc.path, label: doc.title, anchor: "" },
+            ...doc.headings.map((h) => ({
+              kind: "doc" as const,
+              path: doc.path,
+              label: h.text,
+              anchor: h.id,
+            })),
+          ])
+          .filter((row) => `${row.label} ${row.path}`.toLowerCase().includes(q))
+          .slice(0, 30)
+      : [];
+    return [...codeRows, ...docRows];
+  }, [open, query, isCommand, model, docsIndex]);
 
   const close = () => {
     useAppStore.getState().setPaletteOpen(false);
@@ -197,7 +234,12 @@ export function Palette() {
       return;
     }
     const store = useAppStore.getState();
-    if (moveCamera) store.navigateTo(row.hit.entry.node.id);
+    if (row.kind === "doc") {
+      store.openDoc(row.path, row.anchor);
+      return;
+    }
+    store.setActiveTab("map");
+    if (moveCamera) showOnMap(row.hit.entry.node.id);
     else store.select(row.hit.entry.node.id);
   };
   const onKeyDown = (e: KeyboardEvent) => {
@@ -266,41 +308,67 @@ export function Palette() {
       </div>
     );
   } else {
-    body = GROUPS.map((g) => {
-      const groupRows = rows.filter((r) => r.kind === "hit" && r.hit.entry.node.kind === g);
-      if (groupRows.length === 0) return null;
-      return (
-        <div key={g} role="group" aria-label={copy.search.groups[g]}>
-          <div className="palette-group">{copy.search.groups[g]}</div>
-          {groupRows.map((row) => {
-            if (row.kind !== "hit" || !model) return null;
-            const { entry, field, positions } = row.hit;
-            const node = entry.node;
-            return option(
-              row,
-              <>
-                <KindGlyph model={model} node={node} />
-                <span className="palette-name">
-                  {highlight(node.name, field === "name" ? positions : [])}
-                </span>
-                {node.kind !== "module" &&
-                  node.kind !== "file" &&
-                  entry.qualified !== node.name && (
-                    <span className="palette-qualified">{entry.qualified}</span>
-                  )}
-                <span className="palette-path">
-                  {field === "description" ? (node.description ?? "") : entry.path}
-                </span>
-                {!node.synthetic && (
-                  <span className="status-dot" data-status={node.docStatus} aria-hidden="true" />
-                )}
-              </>,
-              node.id,
-            );
-          })}
-        </div>
-      );
-    });
+    body = (
+      <>
+        {GROUPS.map((g) => {
+          const groupRows = rows.filter((r) => r.kind === "hit" && r.hit.entry.node.kind === g);
+          if (groupRows.length === 0) return null;
+          return (
+            <div key={g} role="group" aria-label={copy.search.groups[g]}>
+              <div className="palette-group">{copy.search.groups[g]}</div>
+              {groupRows.map((row) => {
+                if (row.kind !== "hit" || !model) return null;
+                const { entry, field, positions } = row.hit;
+                const node = entry.node;
+                return option(
+                  row,
+                  <>
+                    <KindGlyph model={model} node={node} />
+                    <span className="palette-name">
+                      {highlight(node.name, field === "name" ? positions : [])}
+                    </span>
+                    {node.kind !== "module" &&
+                      node.kind !== "file" &&
+                      entry.qualified !== node.name && (
+                        <span className="palette-qualified">{entry.qualified}</span>
+                      )}
+                    <span className="palette-path">
+                      {field === "description" ? (node.description ?? "") : entry.path}
+                    </span>
+                    {!node.synthetic && (
+                      <span
+                        className="status-dot"
+                        data-status={node.docStatus}
+                        aria-hidden="true"
+                      />
+                    )}
+                  </>,
+                  node.id,
+                );
+              })}
+            </div>
+          );
+        })}
+        {rows.some((r) => r.kind === "doc") && (
+          <div role="group" aria-label="Docs">
+            <div className="palette-group">Docs</div>
+            {rows.map((row) =>
+              row.kind === "doc"
+                ? option(
+                    row,
+                    <>
+                      <span aria-hidden="true">▤</span>
+                      <span className="palette-name">{row.label}</span>
+                      <span className="palette-path">{row.path}</span>
+                    </>,
+                    `${row.path}#${row.anchor}`,
+                  )
+                : null,
+            )}
+          </div>
+        )}
+      </>
+    );
   }
 
   return (
@@ -308,7 +376,13 @@ export function Palette() {
       ref={dialog}
       className="palette"
       aria-label={copy.search.label}
-      onClose={close}
+      onCancel={(event) => {
+        event.preventDefault();
+        close();
+      }}
+      onClose={() => {
+        if (!dialog.current?.open) close();
+      }}
       onClick={(e) => {
         if (e.target === dialog.current) close(); // backdrop
       }}

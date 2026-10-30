@@ -16,6 +16,11 @@ export function useGlobalKeys() {
       const store = useAppStore.getState();
       const mod = e.ctrlKey || e.metaKey;
       const key = e.key.toLowerCase();
+      if (mod && !e.shiftKey && !e.altKey && (key === "1" || key === "2") && store.bundle) {
+        e.preventDefault();
+        store.setActiveTab(key === "1" ? "map" : "docs");
+        return;
+      }
       if (mod && !e.shiftKey && !e.altKey && key === "k") {
         e.preventDefault();
         store.setPaletteOpen(!store.paletteOpen);
@@ -30,7 +35,7 @@ export function useGlobalKeys() {
       if (e.key === "?") {
         e.preventDefault();
         store.setShortcutsOpen(true);
-      } else if (e.key in LENS_KEYS && store.model) {
+      } else if (e.key in LENS_KEYS && store.model && store.activeTab === "map") {
         e.preventDefault();
         store.setLens(LENS_KEYS[e.key as keyof typeof LENS_KEYS]);
       } else if (e.key === "Escape") {

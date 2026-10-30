@@ -27,6 +27,8 @@ import type {
   Structure,
   ViewState,
 } from "../generated/contract";
+import { localPath } from "../docs/resolveLink";
+import unsafeDoc from "../../e2e/fixtures/unsafe.md?raw";
 import mockDiff from "./mockDiff.json";
 import { trustBundle } from "./mockTrust";
 import { type Api, DEFAULT_SETTINGS } from "./types";
@@ -35,6 +37,15 @@ const gitvurFiles = import.meta.glob<unknown>("../../../fixtures/*/.gitvur/*.jso
   eager: true,
   import: "default",
 });
+const markdownFiles = import.meta.glob<string>("../../../fixtures/*/**/*.{md,markdown}", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
+const imageFiles = import.meta.glob<string>(
+  "../../../fixtures/*/**/*.{png,jpg,jpeg,gif,webp,svg}",
+  { eager: true, query: "?url", import: "default" },
+);
 const sources = import.meta.glob<string>("../../../fixtures/*/**/*.{py,ts}", {
   eager: true,
   query: "?raw",
@@ -157,6 +168,54 @@ function sliceOf(
 }
 
 export const mockApi: Api = {
+  listDocs(path) {
+    const fixture = path.split("/").at(-1) ?? fixtureOf(path);
+    const prefix = `${PREFIX}${fixture}/`;
+    const docs = Object.entries(markdownFiles)
+      .filter(([p]) => p.startsWith(prefix))
+      .map(([p, text]) => ({
+        path: p.slice(prefix.length),
+        title: /^# (.+)$/m.exec(text)?.[1] ?? p.split("/").at(-1) ?? p,
+        sizeBytes: new TextEncoder().encode(text).length,
+        modified: "1793350800",
+      }));
+    if (params.get("docs") === "unsafe")
+      docs.unshift({
+        path: "unsafe.md",
+        title: "Untrusted document",
+        sizeBytes: unsafeDoc.length,
+        modified: "1793350800",
+      });
+    const rank = (p: string) => (p === "README.md" ? 0 : /^(docs|doc)\//.test(p) ? 1 : 2);
+    return Promise.resolve(
+      docs.sort((a, b) => rank(a.path) - rank(b.path) || a.path.localeCompare(b.path)),
+    );
+  },
+  readDoc(path, docPath) {
+    const fixture = path.split("/").at(-1) ?? fixtureOf(path);
+    const text =
+      params.get("docs") === "unsafe" && docPath === "unsafe.md"
+        ? unsafeDoc
+        : markdownFiles[`${PREFIX}${fixture}/${docPath}`];
+    if (text === undefined || params.get("docMissing") === docPath)
+      return fail("io", "document no longer exists");
+    return Promise.resolve({
+      path: docPath,
+      text: text.slice(0, 2 * 1024 * 1024),
+      truncated: text.length > 2 * 1024 * 1024,
+    });
+  },
+  readDocAsset(path, docPath, href) {
+    const fixture = path.split("/").at(-1) ?? fixtureOf(path);
+    const target = localPath(docPath, href);
+    const dataUrl = target === null ? undefined : imageFiles[`${PREFIX}${fixture}/${target}`];
+    if (!dataUrl) return fail("path-escape", "Image outside the repository was not loaded");
+    return Promise.resolve({ mime: "image/svg+xml", dataUrl });
+  },
+  openExternal(url) {
+    document.documentElement.dataset.openedExternal = url;
+    return Promise.resolve();
+  },
   pickFolder: () => Promise.resolve(`mock://${params.get("fixture") ?? "py-small"}`),
   openRepository: bundle,
   indexRepository: (path) => (state === "indexing" ? never() : bundle(path)),

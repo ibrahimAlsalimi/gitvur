@@ -159,6 +159,7 @@ function MapInner() {
 
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
+      if (useAppStore.getState().activeTab !== "map") return;
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "p") {
         e.preventDefault();
         setPerfOpen((open) => !open);
@@ -250,6 +251,7 @@ function MapInner() {
   // F fit · 0 reset zoom · + / - zoom (outside text fields and dialogs).
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
+      if (useAppStore.getState().activeTab !== "map") return;
       if (e.ctrlKey || e.metaKey || e.altKey || typingIn(e.target)) return;
       const duration = cameraDuration(120);
       if (e.key === "f" || e.key === "F") useAppStore.getState().requestFit();

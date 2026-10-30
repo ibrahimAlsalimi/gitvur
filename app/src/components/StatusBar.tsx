@@ -1,3 +1,5 @@
+import { useDocsStore } from "../docs/useDocsStore";
+import { copy } from "../copy";
 import { useAppStore } from "../store/useAppStore";
 import { SeverityIcon } from "./SeverityIcon";
 
@@ -9,6 +11,7 @@ function formatIndexedAt(iso: string): string {
 }
 
 export function StatusBar() {
+  const indexingDocs = useDocsStore((s) => s.indexing);
   const model = useAppStore((s) => s.model);
   const bundle = useAppStore((s) => s.bundle);
   const issuesOpen = useAppStore((s) => s.issuesOpen);
@@ -23,6 +26,11 @@ export function StatusBar() {
       <span className="statusbar-item">{t.nodes} nodes</span>
       <span className="statusbar-item">{t.edges} edges</span>
       <span className="statusbar-item">{t.documentedPct}% documented</span>
+      {indexingDocs && (
+        <span className="statusbar-item" role="status">
+          {copy.docs.indexing}
+        </span>
+      )}
       <span className="statusbar-spacer" />
       <button
         type="button"

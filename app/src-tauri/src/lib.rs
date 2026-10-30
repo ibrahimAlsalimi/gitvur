@@ -7,6 +7,7 @@ pub mod bindings;
 pub mod bundle;
 mod commands;
 pub mod diffs;
+pub mod docs;
 pub mod error;
 pub mod settings;
 
@@ -18,11 +19,15 @@ pub mod settings;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             commands::open_repository,
             commands::index_repository,
             commands::validate_repository,
             commands::read_source,
+            commands::list_docs,
+            commands::read_doc,
+            commands::read_doc_asset,
             commands::recent_repositories,
             commands::get_settings,
             commands::set_settings,
