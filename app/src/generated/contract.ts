@@ -60,6 +60,32 @@ name: string, evidence: Evidence,
  */
 candidates: Array<string>, };
 
+export type Trace = { start: string,
+/**
+ * Occurrence IDs, not source node IDs.
+ */
+roots: Array<string>,
+/**
+ * Breadth-first allocation order. Children refer to occurrence IDs in this array.
+ */
+nodes: Array<TraceNode>, truncated: boolean, hiddenRoots: number,
+/**
+ * Unknown start IDs are explicit failures, not successful empty traces.
+ */
+error: string | null, };
+
+export type TraceNode = { id: string, kind: TraceKind, node: string | null, name: string, depth: number, children: Array<string>,
+/**
+ * First occurrence ID, for ref/cycle stubs only.
+ */
+reference: string | null, candidates: Array<string>, evidence: Evidence | null, truncated: boolean,
+/**
+ * Immediate outgoing occurrences omitted here, not transitive descendants.
+ */
+hiddenChildren: number, };
+
+export type TraceKind = "node" | "ref" | "cycle" | "ambiguous";
+
 export type EntryPoint = { id: string, kind: EntryKind, name: string,
 /**
  * A resolved node ID, or null when configuration names code outside the index.

@@ -14,6 +14,7 @@ mod manifest;
 mod report;
 pub mod schema;
 mod structure;
+mod trace;
 pub mod tree;
 
 pub use annotations::{Annotations, Description, Module};
@@ -27,6 +28,7 @@ pub use json::to_canonical_json;
 pub use manifest::{ExtractorInfo, Language, Manifest};
 pub use report::{ElementStatus, Issue, Report, Severity, Status, Summary};
 pub use structure::{Node, NodeType, Structure, UnresolvedCall};
+pub use trace::{Trace, TraceKind, TraceNode};
 
 /// Version of the data contract this crate describes.
 pub const SCHEMA_VERSION: &str = "0.3";

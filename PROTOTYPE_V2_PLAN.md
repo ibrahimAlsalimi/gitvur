@@ -370,3 +370,7 @@ The current data contract is v0.3, backward compatible with v0.2. Parts A–B ad
 entry points and curated flow representations; tracing and flow validation follow only
 after the new fixture expectations receive human review. The v0.2 examples above
 remain valid compatibility examples. See crates/gitvur-schema/README.md for additions.
+
+Phase 14 Part C adds the shared bounded trace engine and read-only `trace`/`flows`
+commands. Flow listings remain unchecked until Part D implements validation and
+staleness; the Flows UI remains Phase 15.

@@ -6,6 +6,7 @@ members = [
     "crates/gitvur-validate",
     "crates/gitvur-diff",
     "crates/gitvur-cli",
+    "crates/gitvur-flow",
     "app/src-tauri",
 ]
 
@@ -20,6 +21,7 @@ gitvur-schema = { path = "crates/gitvur-schema" }
 gitvur-index = { path = "crates/gitvur-index" }
 gitvur-validate = { path = "crates/gitvur-validate" }
 gitvur-diff = { path = "crates/gitvur-diff" }
+gitvur-flow = { path = "crates/gitvur-flow" }
 clap = { version = "4.6", features = ["derive"] }
 
 [workspace.lints.rust]

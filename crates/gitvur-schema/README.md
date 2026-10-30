@@ -11,6 +11,7 @@ deliberate contract change, and update the fixtures' `expected/` files in the sa
 | `annotations.json` | documenting agent | `Annotations` | `schemas/annotations.schema.json` (copy in `agent/`) |
 | `report.json` | validator | `Report` | `schemas/report.schema.json` |
 | (not stored) `gitvur diff --json` | diff | `StructureDiff` | `schemas/diff.schema.json` |
+| (not stored) `gitvur trace --json` | flow | `Trace` | `schemas/trace.schema.json` |
 
 All types use `deny_unknown_fields`. Regenerate schemas with
 `cargo run -p gitvur-schema --bin gen-schemas`; a test fails if the committed ones drift.
@@ -236,8 +237,29 @@ Transitions sort by (from, to, kind, label, provenance, evidence), deduplicating
 matches. Flows sort by (id, name, description, entryPoint). Reports may contain
 `flows`: each has `id`, `status` (current, stale, broken), and sorted unique `staleSteps`.
 Report flows sort by (id, status, staleSteps), with exact duplicates removed.
-Flow checking, staleness computation and trace commands belong to Parts C–F;
-Parts A–B define their representation only.
+Flow checking and staleness computation belong to Parts D–F;
+Parts A–B define their representation; Part C adds deterministic tracing.
 
 Existing v0.2 golden graph files remain frozen. Legacy extraction tests compare their
 v0.2 projection; new py-flows/ts-flows goldens cover the complete v0.3 structure.
+
+## 9. Trace output (Phase 14 Part C)
+
+`Trace` contains `start`, occurrence-ID `roots`, breadth-first `nodes`, aggregate
+`truncated`, `hiddenRoots`, and nullable `error`. Unknown start IDs set error;
+known entries without resolvable execution roots yield an empty successful tree.
+
+`TraceNode` contains occurrence `id` (`trace:<1-based allocation number>`), `kind`
+(node/ref/cycle/ambiguous), nullable source `node`, display `name`, `depth`, occurrence-ID
+`children`, nullable first-occurrence `reference`, `candidates`, nullable `evidence`,
+`truncated` and `hiddenChildren`. Ref/cycle/ambiguous stubs have no children; ambiguous
+stubs have null node/reference and sorted unique candidate IDs. Evidence identifies
+ambiguous call sites. Every child belongs to one parent; reference links are not children.
+This arena represents a tree without recursive JSON, including when limits are large.
+
+Roots have depth zero. Depth/node limits omit immediate child occurrences, recorded
+on their parent. Omitted roots are counted separately. All stubs count toward the node
+budget. No omission means no truncation even at an exact limit. Missing source locations
+sort as empty file/line zero; IDs break source-position ties. See the
+[flow crate rules](../gitvur-flow/README.md) for traversal and deterministic ordering.
+The output is canonical as constructed; sorting the occurrence array would break IDs.
