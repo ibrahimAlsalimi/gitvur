@@ -49,5 +49,9 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.test.{ts,tsx}"],
+    // Mermaid is inlined so its DOM-only DOMPurify import resolves to a pass-through stub,
+    // letting `src/flows/mermaid.test.ts` run the real flowchart parser.
+    server: { deps: { inline: ["mermaid"] } },
+    alias: { dompurify: fileURLToPath(new URL("./src/test/dompurifyStub.ts", import.meta.url)) },
   },
 });

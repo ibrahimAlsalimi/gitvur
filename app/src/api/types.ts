@@ -32,6 +32,11 @@ export interface Api {
     end: number,
     context: number,
   ): Promise<SourceSlice>;
+  /**
+   * Asks where to save an exported diagram (`data` is base64) and writes it there; never
+   * inside the repository at `repo`. Resolves false when the user cancels.
+   */
+  saveExport(repo: string, name: string, kind: "png" | "svg", data: string): Promise<boolean>;
   /** The deterministic call tree of an entry point or node; an unknown ID sets `error`. */
   getTrace(path: string, start: string, depth: number, maxNodes: number): Promise<Trace>;
   recentRepositories(): Promise<RecentRepo[]>;

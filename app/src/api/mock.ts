@@ -244,6 +244,14 @@ export const mockApi: Api = {
     if (old !== undefined) return Promise.resolve(sliceOf(relpath, old, start, end, context));
     return mockApi.readSource(path, relpath, start, end, context);
   },
+  saveExport(_repo, name, kind, data) {
+    // Browser mock: a download stands in for the save dialog.
+    const a = document.createElement("a");
+    a.href = `data:${kind === "png" ? "image/png" : "image/svg+xml"};base64,${data}`;
+    a.download = name;
+    a.click();
+    return Promise.resolve(true);
+  },
   getTrace(path, start) {
     const trace = traces[`${fixtureOf(path)}|${start}`];
     return Promise.resolve(

@@ -1,13 +1,14 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Main window permissions: repository picker, window title, and confirmed HTTP(S)/mail links.",
+  "description": "Main window permissions: repository picker, export save dialog, window title, and confirmed HTTP(S)/mail links.",
   "windows": [
     "main"
   ],
   "permissions": [
     "core:default",
     "dialog:allow-open",
+    "dialog:allow-save",
     "core:window:allow-set-title",
     {
       "identifier": "opener:allow-open-url",

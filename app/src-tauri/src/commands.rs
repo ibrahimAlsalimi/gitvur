@@ -187,6 +187,12 @@ pub async fn get_trace(
     blocking(move || crate::trace::get_trace(&path, &start, depth, max_nodes)).await
 }
 
+/// Saves an exported diagram (base64) to a path from the save dialog, outside the repository.
+#[tauri::command]
+pub async fn write_export(repo: String, target: String, data: String) -> Result<(), AppError> {
+    blocking(move || crate::export::write_export(&repo, &target, &data)).await
+}
+
 #[tauri::command]
 pub async fn list_docs(path: String) -> Result<Vec<crate::docs::DocEntry>, AppError> {
     blocking(move || crate::docs::list_docs(&path)).await

@@ -9,6 +9,7 @@ mod commands;
 pub mod diffs;
 pub mod docs;
 pub mod error;
+pub mod export;
 pub mod settings;
 pub mod trace;
 
@@ -40,6 +41,7 @@ pub fn run() {
             commands::set_view_state,
             commands::clear_view_state,
             commands::get_trace,
+            commands::write_export,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the Gitvur app");
