@@ -392,3 +392,31 @@ The current data contract is v0.3, backward compatible with v0.2: readers accept
 files, whose new arrays default to empty. The v0.2 examples above remain valid compatibility
 examples. See `crates/gitvur-schema/README.md` for the additions and
 `crates/gitvur-validate/README.md` for the entry point and flow checks.
+
+## Phase 16 — Agent-Generated Architecture Diagrams (revised design, planned)
+
+This roadmap amendment adds an independent architecture visualization to Map, Docs and Flows:
+`Map | Docs | Flows | Diagram`. It does not replace the full repository map, execution flows,
+indexing or documentation. Earlier phase descriptions and compatibility examples above retain
+their historical scope; their one-file agent writer rule remains active until implementation.
+
+Pipeline: **Indexer → Documentation Agent → Architecture Artifact → Validator → Diagram UI**.
+The indexer remains the deterministic source of structural facts and code identities. The
+Documentation Agent interprets high-level architecture during its normal workflow and will
+produce proposed `.gitvur/architecture.json` alongside normal documentation. The validator
+checks schema, references, evidence and freshness; it cannot prove every semantic interpretation.
+Interactions without deterministic proof remain unresolved. The UI reads saved validated data
+without a new AI invocation, and absent architecture leaves existing functionality usable.
+
+The artifact models overview, major components/responsibilities, subsystem groups, typed labeled
+relationships, indexed references, evidence, provenance and version/snapshot metadata. Layout
+coordinates stay separate. Incremental documentation updates affected architecture and preserves
+unaffected components/relationships. Local-first safety and the ban on executing analyzed code
+continue to apply.
+
+The existing directory-based Diagram with optional annotation enrichment predates this decision.
+Its historical implementation does not complete the revised artifact pipeline. See
+[the dedicated implementation plan](PHASE_16_ARCHITECTURE_DIAGRAM.md) for nine workstreams,
+explicit acceptance criteria, dependency ordering and compatibility decisions. The revised Phase
+16 is planned, not implemented by this documentation-only task. Timeline uses Phase 17 in the
+prompt sequence; no historical completed phase is being credited with the new design.

@@ -32,6 +32,13 @@ Filter components, zoom, fit or reset the layout; copy grouped Mermaid or export
 the save dialog. Exports are refused inside the analyzed repository.
 
 The diagram works without AI. The existing documentation agent can optionally enrich it using
-version-1 `architecture` annotations (`agent/codeDOC.md`, section 12). Invalid or outdated
+the legacy version-1 `architecture` annotations (`agent/codeDOC.md`, section 12). Invalid or outdated
 annotations revert to structural groups. Evidence establishes traceability; semantic descriptions
 still need review. Existing repositories require no migration.
+
+The [revised Phase 16 design](PHASE_16_ARCHITECTURE_DIAGRAM.md) is planned separately:
+the Documentation Agent will produce proposed `.gitvur/architecture.json` during documentation,
+and Diagram will read that saved validated artifact without invoking AI. This additional
+visualization preserves Map, Docs and Flows; missing architecture leaves them usable. The
+standalone artifact and its compatibility/migration policy are not implemented by this
+documentation update. The current directory-based view described above predates this decision.

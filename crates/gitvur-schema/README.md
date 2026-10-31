@@ -271,7 +271,7 @@ sort as empty file/line zero; IDs break source-position ties. See the
 [flow crate rules](../gitvur-flow/README.md) for traversal and deterministic ordering.
 The output is canonical as constructed; sorting the occurrence array would break IDs.
 
-## Architecture extension (Phase 16)
+## Legacy architecture extension (currently supported)
 
 Annotations v0.3 optionally carries `architecture` with independent `version: 1`, summary,
 components and relationships. Absent architecture is omitted on serialization: old v0.2/v0.3
@@ -285,3 +285,26 @@ imports/calls. Status is computed, never an authored confidence score. Findings 
 `architecture-*` report issues; packets include `architectureIssues`. The read-only viewer
 rechecks evidence at open time, independently of cached reports. It writes no architecture data.
 Membership and evidence rules: `agent/codeDOC.md` section 12.
+
+## Proposed Phase 16 standalone architecture artifact (not supported yet)
+
+The revised design proposes `<repo>/.gitvur/architecture.json`, separate from the supported
+annotation extension above. No standalone schema, CLI input support or validator capability for
+this proposed artifact is claimed here. Existing schema files remain unchanged.
+
+The Documentation Agent will author a repository overview (summary and optional design
+characteristics), components (stable ID, name, category, responsibility, indexed code references,
+optional parent/group, evidence and provenance), and relationships (stable ID, source/target
+components, typed interaction, label, evidence and provenance). Metadata will include schema
+version and relevant index/repository snapshot information, with generation metadata only if
+consistent with current conventions. Exact fields and version negotiation remain proposed.
+
+Reuse authoritative indexed IDs, copied source hashes, repository-relative paths, 1-based
+inclusive evidence locations, provenance distinctions and canonical deterministic serialization.
+Validation computes status and checks references/evidence/freshness; valid citations do not
+prove AI interpretations. Unsupported relationships remain unresolved without deterministic
+proof. Rendering coordinates are separate from semantics; Mermaid/SVG/PNG are derived exports.
+
+See [the dedicated plan](../../PHASE_16_ARCHITECTURE_DIAGRAM.md) for acceptance criteria and
+open compatibility decisions, including legacy migration and precedence. Missing architecture
+must preserve existing repository functionality; current agent writes and commands stay valid.

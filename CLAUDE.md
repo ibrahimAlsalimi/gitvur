@@ -153,15 +153,17 @@ A session is not done until `cargo fmt`, `clippy`, `cargo test`, and (for app wo
 - `gitvur packet` carries `entryPoints`, a trace per entry, and (incremental) `staleFlows`/`brokenFlows`. Agent rules: `agent/codeDOC.md` section 11.
 - `fixtures/py-flows` and `fixtures/ts-flows` have reviewed goldens and committed, zero-issue `.gitvur/`. Existing py-small/ts-small data stays frozen; the Flows UI is Phase 15.
 
-## Architecture diagram (Phase 16)
+## Architecture diagram (Phase 16 — revised design, planned)
 
-- `app/src/diagram/` projects indexed files into neutral directory groups, aggregates verified
-  imports/calls, and overlays current AI components. Large directory trees support drill-down.
-  Dagre runs in the existing layout worker; Mermaid preserves groups. SVG/PNG reuse safe exports.
-- Optional `annotations.architecture` has independent version 1; old annotations remain valid.
-  `gitvur-validate::architecture` checks references, hashes, hierarchy, membership and bounded
-  evidence. Components own disjoint files (prefer file source references); parent components
-  require their own source. Fresh `RepoBundle.architectureIssues` gates enrichment at open time.
-  Stale or broken enrichment falls back to indexed groups. Cached reports are never sufficient.
-- Agent workflow: `agent/codeDOC.md` section 12 and packet `architectureIssues`. Evidence checks
-  establish source traceability; semantic claims require source review. No AI service was added.
+- The agreed target pipeline is Indexer → Documentation Agent → Architecture Artifact →
+  Validator → Diagram UI. The agent interprets architecture during normal documentation;
+  the indexer supplies deterministic facts and indexed identities, not semantic architecture.
+- Proposed `.gitvur/architecture.json` is separate from annotations and rendering layout.
+  The Diagram tab reads the saved, validated artifact without invoking AI. Missing architecture
+  leaves Map, Docs and Flows usable. Architecture remains optional, local-first and read-only.
+- Reference/evidence validation does not prove semantic correctness; unsupported interactions
+  remain unresolved. See [the implementation plan](PHASE_16_ARCHITECTURE_DIAGRAM.md).
+- Existing code has an earlier directory-based Diagram with optional `annotations.architecture`.
+  That is legacy behavior, not implementation of the revised contract. No runtime migration is
+  part of this documentation update. Agent section 12 describes the legacy optional contract;
+  section 13 is future-only. Do not activate the proposed artifact until implementation lands.

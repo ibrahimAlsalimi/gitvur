@@ -1186,6 +1186,34 @@ Open questions:
   and browser exports pass. Follow up with native export review and large real-repository UX
   before adding richer grouping heuristics or persisted diagram camera state.
 
+## 2026-10-31 — Phase 16 revised architecture decision — documentation/planning only
+
+- Agreed pipeline: Indexer → Documentation Agent → Architecture Artifact → Validator →
+  Diagram UI. The agent interprets architecture during normal documentation; deterministic
+  indexing supplies facts and identities. Proposed `.gitvur/architecture.json` is separate
+  semantic data, with rendering layout and Mermaid/SVG/PNG exports kept separate.
+- Added `PHASE_16_ARCHITECTURE_DIAGRAM.md` with nine workstreams, acceptance criteria,
+  dependencies and open decisions. Superseded the old implementation prompt/plan, corrected
+  the prompt index and Timeline heading to Phase 17, and aligned guide, roadmap, schema,
+  validator and README documentation.
+- Preserved the historical Phase 16 session above: it records the earlier directory-based
+  implementation with optional annotation enrichment. It does not establish implementation
+  of this newly agreed standalone artifact pipeline. Runtime and actual schemas are untouched.
+- Agent section 12 remains the supported optional legacy contract; new section 13 is explicitly
+  future-only. Current runs still write only annotations and use existing commands/gates.
+- Optional Diagram reads saved validated architecture without invoking AI on open. Missing data
+  preserves Map/Docs/Flows. Validation checks traceability and freshness, not semantic truth;
+  unsupported relationships remain unresolved. Incremental updates preserve unaffected data.
+- Open decisions: schema/version/metadata details, stable architecture ID rules, interaction
+  vocabulary, grouping/membership, snapshot scope, status/partial rendering, and legacy
+  coexistence/migration/precedence. These are gates for later implementation, not current support.
+- Acceptance: documentation and planning complete; revised Phase 16 implementation **not started
+  in this task**. No application code, generated artifacts, actual schemas, dependencies or
+  runtime behavior changed. Existing untracked `fixtures/c-small/src/.gitvur/` left untouched.
+- Verification: documentation diff and local Markdown links reviewed; `git diff --check` passed.
+  No root documentation-check script is defined; runtime tests are not needed for Markdown-only
+  changes. Documentation checks do not assert that the proposed schema or CLI support exists.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).

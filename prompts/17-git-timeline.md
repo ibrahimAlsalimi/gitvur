@@ -1,4 +1,4 @@
-# Phase 16 — Timeline tab: the repository's Git history, structurally
+# Phase 17 — Timeline tab: the repository's Git history, structurally
 
 ## Context
 
