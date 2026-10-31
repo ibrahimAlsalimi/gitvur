@@ -1308,6 +1308,21 @@ Open questions:
   layout and Mermaid export accept all 11 components without raw directory fallback. Browser
   evaluation against this real repository was not performed in this documentation session.
 
+## 2026-10-31 — Flows inspector resizing
+
+- Added the shared Map resize divider to the Flows inspector. Pointer drag and keyboard
+  arrows/Home/End now update the existing persisted inspector width, with the same limits and
+  narrow-window cap as Map. The default width and other pane sizes are unchanged; collapse
+  hides the divider and expansion restores the saved width. Removed the redundant border
+  because the shared resize handle already draws it.
+- Added browser coverage for pointer resizing, shared Map/Flows widths, keyboard resizing,
+  collapse/expand and reload persistence. All 18 Flows browser checks pass in light/dark; 110
+  frontend unit tests, typecheck, lint and production build pass. Reviewed two resized-inspector
+  screenshots. Browser regressions ran in a clean temporary checkout to preserve the user's
+  locally regenerated py-small entry points; temporary Vite settings allowed existing dependency
+  fonts without changing the app config. Unrelated Python/C fixture artifacts remain untouched.
+- Scope: frontend only; no Rust, dependencies or repository documentation artifacts changed.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).

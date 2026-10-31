@@ -4,19 +4,17 @@
  */
 
 .gv-flows-panel {
+  --inspector-actual: min(var(--inspector-width), 34vw);
+
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr) min(var(--inspector-width), 34vw);
+  grid-template-columns: 280px minmax(0, 1fr) var(--gv-layout-handle) var(--inspector-actual);
   background: var(--gv-bg-surface);
 }
 
 .gv-flows-panel[data-inspector="collapsed"] {
   grid-template-columns: 280px minmax(0, 1fr) var(--gv-layout-rail);
-}
-
-.gv-flows-panel > .pane {
-  border-left: var(--gv-hairline) solid var(--gv-border-subtle);
 }
 
 /* ---- List ---------------------------------------------------------------------------- */

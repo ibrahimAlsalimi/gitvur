@@ -1,9 +1,10 @@
 import { type CSSProperties, useEffect } from "react";
 
 import { copy } from "../copy";
+import { ResizeHandle } from "../components/ResizeHandle";
 import { Inspector, InspectorRail } from "../inspector/Inspector";
 import { StepContext } from "../inspector/FlowSections";
-import { useAppStore } from "../store/useAppStore";
+import { PANE_LIMITS, useAppStore } from "../store/useAppStore";
 import { FlowCanvas } from "./FlowCanvas";
 import { filterEntries } from "./filterEntries";
 import { FlowList } from "./FlowList";
@@ -82,7 +83,19 @@ export function FlowsTab() {
       {collapsed ? (
         <InspectorRail />
       ) : (
-        <Inspector top={model ? <StepContext model={model} /> : null} />
+        <>
+          <ResizeHandle
+            label="Resize inspector"
+            value={inspectorWidth}
+            min={PANE_LIMITS.inspector.min}
+            max={PANE_LIMITS.inspector.max}
+            direction={-1}
+            onChange={(width) => {
+              useAppStore.getState().setPane("inspector", width);
+            }}
+          />
+          <Inspector top={model ? <StepContext model={model} /> : null} />
+        </>
       )}
     </section>
   );
