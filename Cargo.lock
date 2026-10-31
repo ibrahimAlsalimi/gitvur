@@ -1614,6 +1614,7 @@ dependencies = [
 name = "gitvur-validate"
 version = "0.2.0"
 dependencies = [
+ "gitvur-flow",
  "gitvur-index",
  "gitvur-schema",
  "serde_json",

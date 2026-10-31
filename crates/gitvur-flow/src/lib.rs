@@ -1,4 +1,8 @@
-//! Deterministic breadth-first traces. No I/O and no inferred relationships.
+//! Deterministic breadth-first traces and flow checks. No I/O and no inferred relationships.
+mod check;
+pub mod codes;
+
+pub use check::{EvidenceSource, FlowCheck, check_flows};
 use gitvur_schema::{
     EdgeType, Node, NodeType, Provenance, Structure, Trace, TraceKind, TraceNode, UnresolvedCall,
 };

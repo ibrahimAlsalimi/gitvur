@@ -156,7 +156,10 @@ pub fn validate_repo_with_inputs(repo: &Path) -> Result<(Report, ValidateInput),
     };
     let report = validate(&input);
     issues.extend(report.issues);
-    Ok((finish(report.commit_sha, report.elements, issues), input))
+    Ok((
+        finish(report.commit_sha, report.elements, issues, report.flows),
+        input,
+    ))
 }
 
 /// `<repo>/.gitvur` for writing. Refuses a `.gitvur` that is a symlink, so output can never

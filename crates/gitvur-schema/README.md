@@ -225,20 +225,22 @@ file-to-function graph edges; ambiguous sites use their entry ID in unresolvedCa
 Static kinds: main-guard, package-main, console-script, package-bin, npm-script,
 top-level-call. Agent kinds: http-route, cli-command, job, event-handler, test, other.
 Static provenance is syntactic; agent provenance is ai and requires evidence.
-Evidence is optional in Rust so the later validator can diagnose omissions.
+Agents normally use agent kinds; a static kind is allowed for an entry the extractor
+cannot read (e.g. a `setup.cfg` console script) and is warned about when it duplicates
+an extractor entry. Evidence is optional in Rust so the validator can diagnose omissions.
 
 Flows contain `id` (`flow:<slug>`), `name`, `description`, `entryPoint`, ordered `steps`
 and `transitions`. A step has a locally unique `id`, node ID `node`, `label`, and
 `basedOnHash` (sha256 of that node when documented). Step reading order is preserved,
 including repeated nodes. Transitions contain step IDs `from`/`to`, `kind`
 (call, return, event, async, branch), optional `label`, provenance and optional evidence.
-Branch transitions require a label (checked by Part D).
+Branch transitions require a label (checked by the validator).
 Transitions sort by (from, to, kind, label, provenance, evidence), deduplicating exact
 matches. Flows sort by (id, name, description, entryPoint). Reports may contain
 `flows`: each has `id`, `status` (current, stale, broken), and sorted unique `staleSteps`.
 Report flows sort by (id, status, staleSteps), with exact duplicates removed.
-Flow checking and staleness computation belong to Parts D–F;
-Parts A–B define their representation; Part C adds deterministic tracing.
+Flow checks and statuses are computed by `gitvur-flow::check_flows` through the
+validator; see `crates/gitvur-validate/README.md` for every rule.
 
 Existing v0.2 golden graph files remain frozen. Legacy extraction tests compare their
 v0.2 projection; new py-flows/ts-flows goldens cover the complete v0.3 structure.

@@ -1,0 +1,199 @@
+{
+  "schemaVersion": "0.3",
+  "commitSha": "37f6222",
+  "summary": {
+    "documented": 30,
+    "stale": 0,
+    "undocumented": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  "elements": [
+    {
+      "id": "class:src/backends.ts:Cache",
+      "status": "documented"
+    },
+    {
+      "id": "class:src/backends.ts:Disk",
+      "status": "documented"
+    },
+    {
+      "id": "entry:http-route:post-orders",
+      "status": "documented"
+    },
+    {
+      "id": "entry:npm-script:flow-shop-seed",
+      "status": "undocumented"
+    },
+    {
+      "id": "entry:other:countdown",
+      "status": "documented"
+    },
+    {
+      "id": "entry:package-bin:flow-shop",
+      "status": "documented"
+    },
+    {
+      "id": "entry:package-main:flow-shop-exports",
+      "status": "undocumented"
+    },
+    {
+      "id": "entry:package-main:flow-shop-main",
+      "status": "undocumented"
+    },
+    {
+      "id": "entry:package-main:flow-shop-module",
+      "status": "undocumented"
+    },
+    {
+      "id": "entry:top-level-call:src-backends-ts",
+      "status": "undocumented"
+    },
+    {
+      "id": "entry:top-level-call:src-backends-ts#2",
+      "status": "undocumented"
+    },
+    {
+      "id": "entry:top-level-call:src-cli-ts",
+      "status": "undocumented"
+    },
+    {
+      "id": "entry:top-level-call:src-cli-ts#2",
+      "status": "undocumented"
+    },
+    {
+      "id": "entry:top-level-call:src-tools-seed-ts",
+      "status": "undocumented"
+    },
+    {
+      "id": "file:src/api.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/backends.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/cli.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/domain/rules.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/domain/text.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/service/orders.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/storage/driver.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/storage/events.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/storage/repository.ts",
+      "status": "documented"
+    },
+    {
+      "id": "file:src/tools/seed.ts",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/api.ts:handle",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/backends.ts:Cache.save",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/backends.ts:Disk.save",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/backends.ts:countdown",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/backends.ts:persistUnknown",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/cli.ts:main",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/domain/rules.ts:validate",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/domain/text.ts:normalize",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/service/orders.ts:submit",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/storage/driver.ts:commit",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/storage/events.ts:onSaved",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/storage/repository.ts:store",
+      "status": "documented"
+    },
+    {
+      "id": "function:src/tools/seed.ts:seed",
+      "status": "documented"
+    },
+    {
+      "id": "module:backends",
+      "status": "documented"
+    },
+    {
+      "id": "module:domain",
+      "status": "documented"
+    },
+    {
+      "id": "module:entry-points",
+      "status": "documented"
+    },
+    {
+      "id": "module:orders",
+      "status": "documented"
+    },
+    {
+      "id": "module:storage",
+      "status": "documented"
+    }
+  ],
+  "issues": [],
+  "flows": [
+    {
+      "id": "flow:cli-places-order",
+      "status": "current",
+      "staleSteps": []
+    },
+    {
+      "id": "flow:countdown",
+      "status": "current",
+      "staleSteps": []
+    },
+    {
+      "id": "flow:http-order-request",
+      "status": "current",
+      "staleSteps": []
+    }
+  ]
+}

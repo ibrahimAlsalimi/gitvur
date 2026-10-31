@@ -1,6 +1,8 @@
 //! Read-only execution inspection, always using a fresh index.
 use anyhow::Context as _;
-use gitvur_schema::{Annotations, Structure, Trace, TraceKind, to_canonical_json};
+use gitvur_schema::{
+    Annotations, FlowState, Severity, Structure, Trace, TraceKind, to_canonical_json,
+};
 use std::{collections::BTreeMap, fs, path::Path};
 
 fn load(repo: &Path) -> anyhow::Result<(Structure, Option<Annotations>)> {
@@ -100,8 +102,12 @@ fn text(trace: &Trace) -> String {
     output
 }
 
+/// Lists entry points and flows. Flow status comes from a fresh validation; nothing is
+/// written.
 pub fn list(repo: &Path) -> anyhow::Result<()> {
     let (structure, annotations) = load(repo)?;
+    let report = gitvur_validate::validate_repo(repo)?;
+    let statuses: BTreeMap<_, _> = report.flows.iter().map(|f| (f.id.as_str(), f)).collect();
     println!("Entry points:");
     for entry in &structure.entry_points {
         println!(
@@ -118,14 +124,29 @@ pub fn list(repo: &Path) -> anyhow::Result<()> {
     let mut flows = annotations.map(|a| a.flows).unwrap_or_default();
     flows.sort_by(|a, b| a.id.cmp(&b.id));
     for flow in &flows {
+        let status = statuses.get(flow.id.as_str());
+        let state = status.map_or("unknown", |s| match s.status {
+            FlowState::Current => "current",
+            FlowState::Stale => "stale",
+            FlowState::Broken => "broken",
+        });
         println!(
-            "  {}  {} [unchecked] → {}",
+            "  {}  {} [{state}] → {}",
             flow.id, flow.name, flow.entry_point
         );
+        if let Some(status) = status.filter(|s| !s.stale_steps.is_empty()) {
+            println!("      stale steps: {}", status.stale_steps.join(", "));
+        }
+        for issue in report
+            .issues
+            .iter()
+            .filter(|i| i.severity == Severity::Error && i.id.as_deref() == Some(flow.id.as_str()))
+        {
+            println!("      {}: {}", issue.code, issue.message);
+        }
     }
     if flows.is_empty() {
         println!("  (none)");
     }
-    println!("Flow status: unchecked (flow validation is not yet available).");
     Ok(())
 }

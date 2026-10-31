@@ -7,7 +7,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 use anyhow::Context as _;
-use gitvur_schema::{Annotations, NodeType, Report, SourceRange, Status, Structure};
+use gitvur_schema::{
+    Annotations, EntryPoint, FlowState, NodeType, Report, SourceRange, Status, Structure, Trace,
+};
 use gitvur_validate::codes::{AI_EDGE_NO_EVIDENCE, SCHEMA_INVALID};
 use serde::Serialize;
 
@@ -62,6 +64,23 @@ pub struct ModuleRef {
     pub name: String,
 }
 
+/// A flow the agent must update, with what the validator found.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FlowWork {
+    pub id: String,
+    /// Steps whose `basedOnHash` no longer matches their node.
+    pub stale_steps: Vec<String>,
+    /// Every issue reported on the flow, errors first.
+    pub issues: Vec<FlowIssue>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct FlowIssue {
+    pub code: String,
+    pub message: String,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Packet {
@@ -73,6 +92,14 @@ pub struct Packet {
     pub unassigned_files: Vec<String>,
     /// Modules with a valid ID, sorted by `id`.
     pub existing_modules: Vec<ModuleRef>,
+    /// Extractor and agent entry points, sorted by `id`.
+    pub entry_points: Vec<EntryPoint>,
+    /// The deterministic trace (default limits) of each entry point, sorted by `start`.
+    pub traces: Vec<Trace>,
+    /// Incremental mode only: flows that are `stale` (and not broken), sorted by `id`.
+    pub stale_flows: Vec<FlowWork>,
+    /// Incremental mode only: flows that are `broken`, sorted by `id`.
+    pub broken_flows: Vec<FlowWork>,
 }
 
 /// Builds the packet from already-computed inputs. `report` must come from validating the
@@ -159,14 +186,7 @@ pub fn build(
     }
     todo.sort_by(|a, b| a.id.cmp(&b.id));
 
-    let unassigned_files = structure
-        .nodes
-        .iter()
-        .filter(|n| n.node_type == NodeType::File && !assigned.contains(n.id.as_str()))
-        .map(|n| n.id.clone())
-        .collect::<BTreeSet<_>>()
-        .into_iter()
-        .collect();
+    let unassigned_files = unassigned(structure, &assigned);
     let existing_modules = modules
         .into_iter()
         .map(|(id, name)| ModuleRef {
@@ -174,13 +194,89 @@ pub fn build(
             name: name.into(),
         })
         .collect();
+    let (entry_points, traces) = entries_and_traces(structure, annotations);
+    let (stale_flows, broken_flows) = match mode {
+        Mode::Initial => (Vec::new(), Vec::new()),
+        Mode::Incremental => flow_work(report),
+    };
     Packet {
         mode,
         commit_sha: report.commit_sha.clone(),
         todo,
         unassigned_files,
         existing_modules,
+        entry_points,
+        traces,
+        stale_flows,
+        broken_flows,
     }
+}
+
+/// File IDs not in `assigned`, sorted and unique.
+fn unassigned(structure: &Structure, assigned: &BTreeSet<&str>) -> Vec<String> {
+    structure
+        .nodes
+        .iter()
+        .filter(|n| n.node_type == NodeType::File && !assigned.contains(n.id.as_str()))
+        .map(|n| n.id.clone())
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect()
+}
+
+/// All entry points, and a trace for each. Agent entries whose ID an extractor entry
+/// already uses are left out; the validator reports them as `entry-bad-id`.
+fn entries_and_traces(
+    structure: &Structure,
+    annotations: Option<&Annotations>,
+) -> (Vec<EntryPoint>, Vec<Trace>) {
+    let mut merged = structure.clone();
+    let static_ids: BTreeSet<&str> = structure
+        .entry_points
+        .iter()
+        .map(|e| e.id.as_str())
+        .collect();
+    merged.entry_points.extend(
+        annotations
+            .into_iter()
+            .flat_map(|a| &a.entry_points)
+            .filter(|e| !static_ids.contains(e.id.as_str()))
+            .cloned(),
+    );
+    merged.canonicalize();
+    let options = gitvur_flow::TraceOptions::default();
+    let mut ids: Vec<&str> = merged.entry_points.iter().map(|e| e.id.as_str()).collect();
+    ids.dedup();
+    let traces = ids
+        .into_iter()
+        .map(|id| gitvur_flow::trace(&merged, id, &options))
+        .collect();
+    (merged.entry_points.clone(), traces)
+}
+
+fn flow_work(report: &Report) -> (Vec<FlowWork>, Vec<FlowWork>) {
+    let (mut stale, mut broken) = (Vec::new(), Vec::new());
+    for flow in &report.flows {
+        let work = FlowWork {
+            id: flow.id.clone(),
+            stale_steps: flow.stale_steps.clone(),
+            issues: report
+                .issues
+                .iter()
+                .filter(|i| i.id.as_deref() == Some(flow.id.as_str()))
+                .map(|i| FlowIssue {
+                    code: i.code.clone(),
+                    message: i.message.clone(),
+                })
+                .collect(),
+        };
+        match flow.status {
+            FlowState::Current => {}
+            FlowState::Stale => stale.push(work),
+            FlowState::Broken => broken.push(work),
+        }
+    }
+    (stale, broken)
 }
 
 /// Indexes and validates `repo`, then builds its packet. Returns the packet and any
@@ -378,6 +474,95 @@ mod tests {
     }
 
     #[test]
+    fn lists_entries_traces_and_flows_needing_work() {
+        use gitvur_schema::{
+            EntryKind, Evidence, FlowStatus, Issue, Provenance, Severity, TraceKind,
+        };
+        let (mut structure, mut report, mut annotations) = fixture();
+        let entry = |id: &str, kind, target: &str, calls: Vec<String>, provenance| EntryPoint {
+            id: id.into(),
+            kind,
+            name: id.into(),
+            target: Some(target.into()),
+            raw: None,
+            calls,
+            evidence: Some(Evidence {
+                file: "a.py".into(),
+                line: 1,
+            }),
+            provenance,
+        };
+        structure.entry_points.push(entry(
+            "entry:main-guard:a-py",
+            EntryKind::MainGuard,
+            "file:a.py",
+            vec!["function:a.py:new".into()],
+            Provenance::Syntactic,
+        ));
+        annotations.entry_points.push(entry(
+            "entry:job:nightly",
+            EntryKind::Job,
+            "function:a.py:A.n",
+            Vec::new(),
+            Provenance::Ai,
+        ));
+        let status = |id: &str, status, steps: &[&str]| FlowStatus {
+            id: id.into(),
+            status,
+            stale_steps: steps.iter().map(|s| (*s).into()).collect(),
+        };
+        report.flows = vec![
+            status("flow:broken", FlowState::Broken, &[]),
+            status("flow:fine", FlowState::Current, &[]),
+            status("flow:old", FlowState::Stale, &["s2"]),
+        ];
+        report.issues.push(Issue {
+            severity: Severity::Error,
+            code: "flow-dangling-step".into(),
+            message: "gone".into(),
+            id: Some("flow:broken".into()),
+        });
+
+        let packet = build(Mode::Incremental, &structure, &report, Some(&annotations));
+        let ids: Vec<&str> = packet.entry_points.iter().map(|e| e.id.as_str()).collect();
+        assert_eq!(ids, ["entry:job:nightly", "entry:main-guard:a-py"]);
+        let starts: Vec<&str> = packet.traces.iter().map(|t| t.start.as_str()).collect();
+        assert_eq!(starts, ids);
+        let roots = |t: &Trace| -> Vec<Option<String>> {
+            t.nodes
+                .iter()
+                .filter(|n| n.depth == 0 && n.kind == TraceKind::Node)
+                .map(|n| n.node.clone())
+                .collect()
+        };
+        assert_eq!(roots(&packet.traces[0]), [Some("function:a.py:A.n".into())]);
+        assert_eq!(roots(&packet.traces[1]), [Some("function:a.py:new".into())]);
+        assert_eq!(
+            packet.stale_flows,
+            [FlowWork {
+                id: "flow:old".into(),
+                stale_steps: vec!["s2".into()],
+                issues: Vec::new(),
+            }]
+        );
+        assert_eq!(
+            packet.broken_flows,
+            [FlowWork {
+                id: "flow:broken".into(),
+                stale_steps: Vec::new(),
+                issues: vec![FlowIssue {
+                    code: "flow-dangling-step".into(),
+                    message: "gone".into(),
+                }],
+            }]
+        );
+
+        let initial = build(Mode::Initial, &structure, &report, Some(&annotations));
+        assert_eq!(initial.traces.len(), 2);
+        assert!(initial.stale_flows.is_empty() && initial.broken_flows.is_empty());
+    }
+
+    #[test]
     fn serialises_in_contract_spelling() {
         let (structure, report, annotations) = fixture();
         let json = gitvur_schema::to_canonical_json(&build(
@@ -393,5 +578,8 @@ mod tests {
         assert!(json.contains("\"unassignedFiles\""));
         assert!(json.contains("\"existingModules\""));
         assert!(json.contains("\"action\": \"rehash\""));
+        for key in ["entryPoints", "traces", "staleFlows", "brokenFlows"] {
+            assert!(json.contains(&format!("\"{key}\"")), "{key}");
+        }
     }
 }

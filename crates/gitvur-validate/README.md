@@ -53,6 +53,58 @@ element the issue is about: the description, module or file ID, or an edge's `fr
 | `structure-out-of-date` | warning | `.gitvur/structure.json` is missing, unreadable, outside the repository, or not byte-identical to a fresh index |
 | `description-empty` | warning | A description's text is empty or only whitespace |
 
+### Entry points and flows
+
+These checks live in `gitvur-flow` (`check_flows`, pure; evidence is read through the
+validator's path-safe file cache) so the CLI and app share them. The issue `id` is the entry
+point ID or the flow ID. Agent entry points are checked against the fresh structure's
+extractor entry points; extractor entries themselves are always valid.
+
+| Code | Severity | Rule |
+| --- | --- | --- |
+| `entry-dangling-target` | error | An agent entry point's `target` is null or not in the structure, or one of its `calls` is not |
+| `entry-no-evidence` | error | An agent entry point has no `evidence` |
+| `entry-duplicates-static` | warning | An agent entry point has the same `kind` and `target` as an extractor entry point |
+| `entry-bad-id` | error | An agent entry ID is not `entry:<its kind>:<slug>` with slug `[a-z0-9-]+`, or an extractor entry already uses it |
+| `entry-bad-provenance` | error | An entry point in `annotations.json` has provenance other than `ai` |
+| `entry-evidence-out-of-range` | error | The evidence file does not exist or fails the path-safety check, or the line is outside the file |
+| `entry-evidence-mismatch` | warning | The evidence line contains neither the target's short name (as for `ai-edge-evidence-mismatch`) nor the entry's `name` |
+| `flow-bad-id` | error | A flow ID is not `flow:<slug>` with slug `[a-z0-9-]+`, or two flows share an ID |
+| `flow-dangling-entry` | error | `entryPoint` is neither an extractor nor an agent entry point ID |
+| `flow-dangling-step` | error | A step's `node` is not a file, class or function of the structure |
+| `flow-duplicate-step-id` | error | Two steps of a flow share an `id` (transitions use the first) |
+| `flow-bad-transition-ref` | error | A transition's `from` or `to` is not a step ID of the flow |
+| `flow-call-unsupported` | error | A `syntactic`/`semantic` transition of kind `call`, `branch`, `event` or `async` has no structure call from → to |
+| `flow-return-unsupported` | error | A `syntactic`/`semantic` `return` has no structure call to → from |
+| `flow-transition-no-evidence` | error | An `ai` transition has no `evidence` |
+| `flow-evidence-out-of-range` | error | The evidence file is missing or unsafe, or the line is outside the from-step's node range |
+| `flow-evidence-mismatch` | warning | The evidence line contains neither the to-step's short name nor the transition's `label` |
+| `flow-transition-should-be-static` | warning | An `ai` transition is backed by a structure call (the reverse call for `return`) |
+| `flow-branch-no-label` | error | A `branch` has no `label`, or only whitespace |
+| `flow-unreachable-step` | warning | A step is not reachable from the first step along the transitions |
+| `flow-too-long` | warning | A flow has more than 25 steps |
+| `flow-label-too-long` | warning | A step label has more than 60 characters (Unicode scalar values) |
+
+"Structure call" means a `calls` edge of any provenance in the fresh structure, or a call
+listed in an extractor entry point's `calls` from that entry's `target` (top-level code calls
+from its file). Checks needing a step's node are skipped when the node is dangling, which is
+already an error. The prompt names only `call`/`return` for the unsupported checks; `branch`,
+`event` and `async` are checked the same way because a static transition without a call would
+be a guessed relationship.
+
+### Flow status
+
+`report.json` has one `flows` entry per distinct flow ID, sorted by ID (omitted when there are
+no flows):
+
+| Status | Rule |
+| --- | --- |
+| `broken` | any error issue whose `id` is the flow |
+| `stale` | not broken, and some step's `basedOnHash` differs from its node's current `contentHash` |
+| `current` | otherwise |
+
+`staleSteps` lists those step IDs, sorted, also for a broken flow. Warnings never break a flow.
+
 ### Path safety
 
 Every path the validator reads is resolved against the canonical repository root by
@@ -81,6 +133,10 @@ Every node of the fresh structure except `project:root` gets one status:
   matches the current hash.
 - Descriptions for IDs that no longer exist (deleted or renamed elements) produce `dangling-ref`
   and no element.
+- Entry points (extractor entries from the fresh index, and agent entries) are `documented`
+  when some flow's `entryPoint` is their ID, else `undocumented`. Not every entry point needs a
+  flow, so entry elements are **left out of `summary` counts and of `gitvur stale`**: coverage
+  still means nodes and modules.
 
 ### Expected behaviour: ancestors go stale with their children
 

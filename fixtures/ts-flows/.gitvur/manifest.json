@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "0.3",
+  "projectName": "ts-flows",
+  "commitSha": "37f6222",
+  "generatedAt": "2026-10-31T12:18:53Z",
+  "extractor": {
+    "name": "gitvur-index",
+    "version": "0.2.0"
+  },
+  "languages": [
+    "typescript"
+  ]
+}

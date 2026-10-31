@@ -71,7 +71,7 @@ enum Command {
         #[arg(long)]
         json: bool,
     },
-    /// List entry points and curated flows (status is unchecked until flow validation).
+    /// List entry points and curated flows with their validation status (writes nothing).
     Flows { repo: PathBuf },
     /// Compare the structure of two revisions (read via Git; the working tree is untouched).
     Diff {
