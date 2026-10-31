@@ -1,5 +1,5 @@
 /** Geometry for orthogonal flow lines. */
-import type { Point } from "./layoutFlow";
+import type { FlowLayout, Point } from "./layoutFlow";
 
 const RADIUS = 8;
 
@@ -37,4 +37,20 @@ export function pathLength(points: readonly Point[]): number {
     if (a && b) total += Math.hypot(b[0] - a[0], b[1] - a[1]);
   }
   return total;
+}
+
+/** Zoom ≤ 1; centred horizontally; top-aligned when the diagram is shorter than the view. */
+export function fitViewport(layout: FlowLayout, width: number, height: number) {
+  const pad = 32;
+  const zoom = Math.max(
+    0.1,
+    Math.min(
+      1,
+      (width - 2 * pad) / Math.max(1, layout.width),
+      (height - pad) / Math.max(1, layout.height),
+    ),
+  );
+  const x = (width - layout.width * zoom) / 2;
+  const y = layout.height * zoom < height - pad ? 8 : (height - layout.height * zoom) / 2;
+  return { x, y, zoom };
 }

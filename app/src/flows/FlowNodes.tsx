@@ -255,7 +255,9 @@ export function StepRenderer({ data }: NodeProps<StepNode>) {
           <>
             <NodeGlyph node={view.node} />
             <span className="gv-step-name">{middleTruncate(view.qualified, 22)}</span>
-            {view.location && <span className="gv-step-loc">{view.location}</span>}
+            {view.location && view.location !== view.qualified && (
+              <span className="gv-step-loc">{view.location}</span>
+            )}
           </>
         )}
       </span>

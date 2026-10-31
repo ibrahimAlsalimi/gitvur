@@ -4,6 +4,7 @@
  *  - kind, status, provenance, diff and module colours ≥ 3:1 against --gv-bg-surface;
  *  - module colours distinguishable from each other (OKLab distance) and clear of the
  *    status and diff hues;
+ *  - text tokens ≥ 4.5:1 on the Flows tab's lane and active-step fills;
  *  - the two copies of the dark theme (media query and [data-theme="dark"]) are identical.
  * Run: `pnpm check:contrast`. Exits 1 on any failure.
  */
@@ -83,7 +84,11 @@ const MEANING = [
   ...["syntactic", "semantic", "ai"].map((p) => `--gv-prov-${p}`),
   ...["added", "removed", "modified", "moved"].map((d) => `--gv-diff-${d}`),
   ...MODULES,
+  "--gv-flow-visited",
+  "--gv-flow-rail",
 ];
+/** Fills that text sits on in the Flows tab (lanes, the active step). */
+const FLOW_FILLS = ["--gv-flow-lane-alt", "--gv-flow-step-active"];
 const RESERVED_HUES = [
   ...["documented", "stale", "error"].map((s) => `--gv-status-${s}`),
   ...["added", "removed", "modified", "moved"].map((d) => `--gv-diff-${d}`),
@@ -112,6 +117,14 @@ for (const [name, tokens] of [
       const c = contrast(get(tokens, text), get(tokens, surface));
       if (c < MIN_TEXT)
         failures.push(`${name}: ${text} on ${surface} = ${fmt(c)}:1 (< ${String(MIN_TEXT)})`);
+    }
+  }
+  for (const text of TEXT) {
+    for (const fill of FLOW_FILLS) {
+      checks++;
+      const c = contrast(get(tokens, text), get(tokens, fill));
+      if (c < MIN_TEXT)
+        failures.push(`${name}: ${text} on ${fill} = ${fmt(c)}:1 (< ${String(MIN_TEXT)})`);
     }
   }
   checks++;

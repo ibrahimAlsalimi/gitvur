@@ -36,6 +36,10 @@ interface FlowsState {
   traceFrom: string | null;
   trace: TraceState | null;
   listView: boolean;
+  /** Legend card expanded (collapsed by default so it never covers a small diagram). */
+  legendOpen: boolean;
+  /** Step last clicked (its context shows in the inspector when playback is at rest). */
+  inspected: string | null;
   /** Ask the canvas to centre an element; `seq` changes on every request. */
   focus: { id: string; seq: number } | null;
 
@@ -77,6 +81,8 @@ export const useFlowsStore = create<FlowsState>((set, get) => ({
   traceFrom: null,
   trace: null,
   listView: false,
+  legendOpen: false,
+  inspected: null,
   focus: null,
 
   setFilter(filter) {
@@ -87,7 +93,7 @@ export const useFlowsStore = create<FlowsState>((set, get) => ({
   },
   usePlaybackOf(flowId) {
     if (get().playbackFlow !== flowId) {
-      set({ playbackFlow: flowId, playback: REST, stack: [], playing: false });
+      set({ playbackFlow: flowId, playback: REST, stack: [], playing: false, inspected: null });
     }
   },
   stepNext(flow) {
@@ -229,6 +235,7 @@ useAppStore.subscribe((s, prev) => {
       playing: false,
       traceFrom: null,
       trace: null,
+      inspected: null,
       focus: null,
     });
   } else if (s.bundle !== prev.bundle) {

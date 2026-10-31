@@ -45,7 +45,12 @@ function Shape({ shape }: { shape: GlyphShape }) {
         </>
       );
     case "play":
-      return <path d="M4.5 2.75v10.5L13 8z" fill="currentColor" />;
+      return (
+        <>
+          <circle cx="8" cy="8" r="6.25" {...line} />
+          <path d="M6.5 5.25v5.5L11 8z" fill="currentColor" />
+        </>
+      );
     case "clock":
       return (
         <>

@@ -12,6 +12,7 @@ import type { Model, ModelEdge, ModelNode } from "../model/buildModel";
 import { ancestors } from "../model/tree";
 import { useAppStore } from "../store/useAppStore";
 import { ChangeSection } from "./ChangeSection";
+import { FlowsThroughHere, TraceFromHere } from "./FlowSections";
 import { CodeViewer } from "./CodeViewer";
 import { trustText } from "./trust";
 import { copy } from "../copy";
@@ -233,6 +234,7 @@ function Header({ model, node }: { model: Model; node: ModelNode }) {
           </>
         )}
         {range && <CopyPath path={range.file} />}
+        {node.kind !== "file" && <TraceFromHere node={node} />}
       </div>
     </header>
   );
@@ -535,6 +537,7 @@ function NodeDetails({ model, node }: { model: Model; node: ModelNode }) {
       <Header model={model} node={node} />
       <DescriptionBlock node={node} />
       <IssueList node={node} />
+      <FlowsThroughHere model={model} node={node} />
       {(node.kind === "file" || node.kind === "module") && <MentionedInDocs id={node.id} />}
       {evidence ? (
         <EvidenceView model={model} edge={evidence} />
@@ -559,8 +562,11 @@ function NodeDetails({ model, node }: { model: Model; node: ModelNode }) {
   );
 }
 
-/** Details of the selected element: description, source, relationships. */
-export function Inspector() {
+/**
+ * Details of the selected element: description, source, relationships. `top` is shown above
+ * them (the Flows tab's step context).
+ */
+export function Inspector({ top }: { top?: React.ReactNode } = {}) {
   const model = useAppStore((s) => s.model);
   const bundle = useAppStore((s) => s.bundle);
   const selectedId = useAppStore((s) => s.selectedId);
@@ -582,6 +588,7 @@ export function Inspector() {
         </button>
       </div>
       <div className="pane-body">
+        {top}
         {model && node && node.kind !== "project" ? (
           <NodeDetails key={node.id} model={model} node={node} />
         ) : (
