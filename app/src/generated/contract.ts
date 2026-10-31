@@ -140,7 +140,15 @@ export type SourceRange = {
  */
 file: string, startLine: number, endLine: number, };
 
-export type Annotations = { modules: Array<Module>, descriptions: Array<Description>,
+export type Architecture = { version: number, summary: string, components: Array<ArchitectureComponent>, relationships: Array<ArchitectureRelationship>, };
+
+export type ArchitectureComponent = { id: string, name: string, kind: string, responsibility: string, sources: Array<ArchitectureSource>, parent?: string, provenance: Provenance, evidence: Array<Evidence>, };
+
+export type ArchitectureSource = { node: string, basedOnHash: string, };
+
+export type ArchitectureRelationship = { id: string, from: string, to: string, kind: string, label: string, provenance: Provenance, evidence: Array<Evidence>, };
+
+export type Annotations = { architecture?: Architecture, modules: Array<Module>, descriptions: Array<Description>,
 /**
  * Hidden relationships; every one must have `provenance: "ai"` and evidence.
  */
@@ -253,6 +261,10 @@ evidence: Evidence, };
 export type DiffSummary = { added: number, removed: number, modified: number, moved: number, unchanged: number, edgesAdded: number, edgesRemoved: number, };
 
 export type RepoBundle = {
+/**
+ * Fresh source/evidence checks; absent in legacy browser bundles.
+ */
+architectureIssues?: Array<Issue>,
 /**
  * Canonical absolute path of the repository root.
  */

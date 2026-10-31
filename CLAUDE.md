@@ -119,7 +119,7 @@ A session is not done until `cargo fmt`, `clippy`, `cargo test`, and (for app wo
 
 ## Repository views
 
-- **Map**, **Docs** and **Flows** are top-level tabs (`Ctrl/Cmd+1/2/3`). The map stays mounted across tab switches, preserving its viewport, selection and lens. Tab, document path, reading position, flow selection and Flow/Trace mode are saved with the per-repository view in the app data folder.
+- **Map**, **Docs**, **Flows** and **Diagram** are top-level tabs (`Ctrl/Cmd+1/2/3/4`). The map stays mounted across tab switches, preserving its viewport, selection and lens. Tab, document path, reading position, flow selection and Flow/Trace mode are saved with the per-repository view in the app data folder.
 - `gitvur_index::discover_docs` reuses the source walker's ignore and skip rules and discovers `.md`/`.markdown` without changing extraction output.
 - Read-only Tauri commands: `list_docs(path)`, `read_doc(path, docPath)` (2 MB), `read_doc_asset(path, docPath, href)` (5 MB; canonical path must stay inside the selected repository).
 - `app/src/docs/` owns safe rendering, pure link resolution, exact unique code mentions, and the worker-built docs/backlink index (first 500 documents). `app/src/tabs/` owns the accessible tab bar. Document titles/headings are searchable in the palette; file/module inspectors show "Mentioned in docs".
@@ -152,3 +152,16 @@ A session is not done until `cargo fmt`, `clippy`, `cargo test`, and (for app wo
 - The extractor detects static entry points; `gitvur-flow::trace` computes bounded call trees; `gitvur-flow::check_flows` checks agent entry points and flows (the validator calls it and writes `report.flows`). Rules: `crates/gitvur-validate/README.md`.
 - `gitvur packet` carries `entryPoints`, a trace per entry, and (incremental) `staleFlows`/`brokenFlows`. Agent rules: `agent/codeDOC.md` section 11.
 - `fixtures/py-flows` and `fixtures/ts-flows` have reviewed goldens and committed, zero-issue `.gitvur/`. Existing py-small/ts-small data stays frozen; the Flows UI is Phase 15.
+
+## Architecture diagram (Phase 16)
+
+- `app/src/diagram/` projects indexed files into neutral directory groups, aggregates verified
+  imports/calls, and overlays current AI components. Large directory trees support drill-down.
+  Dagre runs in the existing layout worker; Mermaid preserves groups. SVG/PNG reuse safe exports.
+- Optional `annotations.architecture` has independent version 1; old annotations remain valid.
+  `gitvur-validate::architecture` checks references, hashes, hierarchy, membership and bounded
+  evidence. Components own disjoint files (prefer file source references); parent components
+  require their own source. Fresh `RepoBundle.architectureIssues` gates enrichment at open time.
+  Stale or broken enrichment falls back to indexed groups. Cached reports are never sufficient.
+- Agent workflow: `agent/codeDOC.md` section 12 and packet `architectureIssues`. Evidence checks
+  establish source traceability; semantic claims require source review. No AI service was added.

@@ -270,3 +270,18 @@ budget. No omission means no truncation even at an exact limit. Missing source l
 sort as empty file/line zero; IDs break source-position ties. See the
 [flow crate rules](../gitvur-flow/README.md) for traversal and deterministic ordering.
 The output is canonical as constructed; sorting the occurrence array would break IDs.
+
+## Architecture extension (Phase 16)
+
+Annotations v0.3 optionally carries `architecture` with independent `version: 1`, summary,
+components and relationships. Absent architecture is omitted on serialization: old v0.2/v0.3
+repositories need no migration; existing goldens stay unchanged. Older strict readers need
+an upgrade to read enriched annotations.
+
+IDs are unique `arch:[a-z0-9-]+` across components and relationships. Sources reference indexed
+files/classes/functions with `basedOnHash`. Parents form an acyclic tree. Agent provenance
+is `ai`; the viewer generates independent syntactic directory groups and aggregates verified
+imports/calls. Status is computed, never an authored confidence score. Findings use
+`architecture-*` report issues; packets include `architectureIssues`. The read-only viewer
+rechecks evidence at open time, independently of cached reports. It writes no architecture data.
+Membership and evidence rules: `agent/codeDOC.md` section 12.

@@ -137,6 +137,7 @@ fn full_annotations(structure: &Structure) -> Annotations {
         })
         .collect();
     let mut annotations = Annotations {
+        architecture: None,
         entry_points: Vec::new(),
         flows: Vec::new(),
         modules: vec![module("module:app", app), module("module:shop", shop)],

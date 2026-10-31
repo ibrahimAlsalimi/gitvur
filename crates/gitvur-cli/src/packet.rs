@@ -100,10 +100,13 @@ pub struct Packet {
     pub stale_flows: Vec<FlowWork>,
     /// Incremental mode only: flows that are `broken`, sorted by `id`.
     pub broken_flows: Vec<FlowWork>,
+    /// Architecture issues to resolve; source nodes/hashes are in structure.json.
+    pub architecture_issues: Vec<gitvur_schema::Issue>,
 }
 
 /// Builds the packet from already-computed inputs. `report` must come from validating the
 /// same `structure` with the same `annotations`.
+#[allow(clippy::too_many_lines)] // assembles the documentation packet from validated inputs
 pub fn build(
     mode: Mode,
     structure: &Structure,
@@ -200,6 +203,12 @@ pub fn build(
         Mode::Incremental => flow_work(report),
     };
     Packet {
+        architecture_issues: report
+            .issues
+            .iter()
+            .filter(|i| i.code.starts_with("architecture-"))
+            .cloned()
+            .collect(),
         mode,
         commit_sha: report.commit_sha.clone(),
         todo,
@@ -363,6 +372,7 @@ mod tests {
             based_on_hash: hash.into(),
         };
         let annotations = Annotations {
+            architecture: None,
             entry_points: Vec::new(),
             flows: Vec::new(),
             modules: vec![

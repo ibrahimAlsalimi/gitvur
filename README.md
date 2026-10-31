@@ -22,3 +22,16 @@ pnpm install
 pnpm typecheck && pnpm lint && pnpm test
 pnpm tauri dev
 ```
+
+### Architecture diagram
+
+Open **Diagram** (`Ctrl/Cmd+4`) for a high-level view of indexed source directories and their
+verified dependencies. Select components or arrows to inspect responsibilities, source references
+and evidence, then navigate to Map or related Docs. Large source trees expose nested groups.
+Filter components, zoom, fit or reset the layout; copy grouped Mermaid or export SVG/PNG through
+the save dialog. Exports are refused inside the analyzed repository.
+
+The diagram works without AI. The existing documentation agent can optionally enrich it using
+version-1 `architecture` annotations (`agent/codeDOC.md`, section 12). Invalid or outdated
+annotations revert to structural groups. Evidence establishes traceability; semantic descriptions
+still need review. Existing repositories require no migration.

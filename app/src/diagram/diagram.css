@@ -1,0 +1,214 @@
+.gv-architecture-panel {
+  position: absolute;
+  inset: 0;
+  background: var(--gv-bg-surface);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--gv-architecture-inspector, 360px);
+  height: 100%;
+  min-height: 0;
+}
+.gv-architecture-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--gv-bg-canvas);
+}
+.gv-architecture-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--gv-space-2);
+  padding: var(--gv-space-3);
+  border-bottom: var(--gv-hairline) solid var(--gv-border-default);
+  background: var(--gv-bg-surface);
+  font-size: var(--gv-text-sm);
+}
+.gv-architecture-toolbar label {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-1);
+}
+.gv-architecture-filter input {
+  width: 120px;
+  padding: var(--gv-space-1);
+  color: var(--gv-text-primary);
+  background: var(--gv-bg-canvas);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+  border-radius: var(--gv-radius-sm);
+}
+.gv-architecture-export {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--gv-bg-canvas);
+}
+.gv-architecture-header {
+  padding: var(--gv-space-6) var(--gv-space-8);
+}
+.gv-architecture-header h2 {
+  font-size: var(--gv-text-2xl);
+  margin: var(--gv-space-2) 0;
+}
+.gv-architecture-header p {
+  color: var(--gv-text-secondary);
+  max-width: 80ch;
+  line-height: var(--gv-line-normal);
+  margin: var(--gv-space-2) 0;
+}
+.gv-architecture-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-4);
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-xs);
+  letter-spacing: var(--gv-tracking-caps);
+}
+.gv-architecture-eyebrow span {
+  letter-spacing: normal;
+  background: var(--gv-accent-soft);
+  color: var(--gv-accent);
+  border-radius: var(--gv-radius-pill);
+  padding: var(--gv-space-1) var(--gv-space-2);
+}
+.gv-architecture-meta,
+.gv-architecture-muted {
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-sm);
+}
+.gv-architecture-canvas {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+.gv-architecture-card {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: var(--gv-space-4);
+  background: var(--gv-bg-surface);
+  border: var(--gv-hairline) solid var(--gv-border-strong);
+  border-left: var(--gv-band-width) solid var(--gv-kind-file);
+  border-radius: var(--gv-radius-lg);
+  color: var(--gv-text-primary);
+}
+.gv-architecture-card[data-kind="api"],
+.gv-architecture-card[data-kind="frontend"] {
+  border-left-color: var(--gv-kind-module);
+}
+.gv-architecture-card[data-kind="persistence"],
+.gv-architecture-card[data-kind="database"] {
+  border-left-color: var(--gv-kind-class);
+}
+.gv-architecture-card[data-kind="subsystem"],
+.gv-architecture-card[data-kind="worker"] {
+  border-left-color: var(--gv-kind-function);
+}
+.gv-architecture-card[data-selected="true"] {
+  outline: var(--gv-focus-width) solid var(--gv-accent);
+  background: var(--gv-accent-soft);
+}
+.gv-architecture-card[data-dimmed="true"],
+.gv-architecture-edge.dimmed {
+  opacity: var(--gv-opacity-dimmed);
+}
+.gv-architecture-kind {
+  display: flex;
+  justify-content: space-between;
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-xs);
+  text-transform: uppercase;
+}
+.gv-architecture-kind span {
+  text-transform: none;
+}
+.gv-architecture-card h3 {
+  font-size: var(--gv-text-lg);
+  margin: var(--gv-space-2) 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gv-architecture-card p {
+  font-size: var(--gv-text-sm);
+  line-height: var(--gv-line-normal);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.gv-architecture-card footer {
+  margin-top: var(--gv-space-3);
+  font-size: var(--gv-text-xs);
+  color: var(--gv-text-secondary);
+}
+.gv-architecture-canvas .react-flow__edge-path {
+  stroke: var(--gv-border-strong);
+  stroke-width: var(--gv-border-emphasis);
+}
+.gv-architecture-canvas .react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--gv-accent);
+}
+.gv-architecture-canvas .react-flow__edge-text {
+  fill: var(--gv-text-primary);
+  font-size: var(--gv-text-xs);
+}
+.gv-architecture-canvas .react-flow__edge-textbg {
+  fill: var(--gv-bg-canvas);
+}
+.gv-architecture-canvas .react-flow__controls button {
+  background: var(--gv-bg-surface);
+  color: var(--gv-text-primary);
+  border-color: var(--gv-border-default);
+}
+.gv-architecture-context {
+  padding: var(--gv-space-4);
+  line-height: var(--gv-line-normal);
+}
+.gv-architecture-context h3 {
+  font-size: var(--gv-text-xl);
+}
+.gv-architecture-sources {
+  max-height: 28vh;
+  overflow: auto;
+  margin-bottom: var(--gv-space-4);
+}
+.gv-architecture-sources button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.gv-architecture-sources details {
+  margin: var(--gv-space-2) 0;
+}
+.gv-architecture-sources summary {
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.gv-architecture-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--gv-text-secondary);
+  padding: var(--gv-space-8);
+}
+.gv-architecture-notice {
+  padding: 0 var(--gv-space-3);
+  font-size: var(--gv-text-sm);
+  color: var(--gv-text-secondary);
+}
+.gv-architecture-edge-label {
+  position: absolute;
+  padding: var(--gv-space-1) var(--gv-space-2);
+  border-radius: var(--gv-radius-sm);
+  background: var(--gv-bg-canvas);
+  color: var(--gv-text-primary);
+  font-size: var(--gv-text-sm);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.gv-architecture-edge-label[data-selected="true"] {
+  color: var(--gv-accent);
+}

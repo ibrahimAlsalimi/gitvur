@@ -40,7 +40,7 @@ export type BannerId = "report-missing" | "structure-out-of-date" | "report-stal
 const LENSES: readonly Lens[] = ["structure", "coverage", "changes"];
 
 /** Top-level repository views. */
-export type TabId = "map" | "docs" | "flows";
+export type TabId = "map" | "docs" | "flows" | "diagram";
 
 /** Flows tab canvas mode: the agent's curated flow, or the deterministic call tree. */
 export type FlowMode = "flow" | "trace";
@@ -282,7 +282,10 @@ export const useAppStore = create<AppState>()((set, get) => {
     const selected =
       view.selectedId !== undefined && exists(view.selectedId) ? view.selectedId : null;
     set({
-      activeTab: view.activeTab === "docs" || view.activeTab === "flows" ? view.activeTab : "map",
+      activeTab:
+        view.activeTab === "docs" || view.activeTab === "flows" || view.activeTab === "diagram"
+          ? view.activeTab
+          : "map",
       flowSelection:
         view.flowSelection !== undefined &&
         (model.flows.flowsById.has(view.flowSelection) ||

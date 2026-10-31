@@ -17,6 +17,9 @@ pub const MAX_SOURCE_LINES: u32 = 2_000;
 #[derive(Debug, Clone, Serialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct RepoBundle {
+    /// Fresh source/evidence checks; absent in legacy browser bundles.
+    #[ts(optional)]
+    pub architecture_issues: Option<Vec<gitvur_schema::Issue>>,
     /// Canonical absolute path of the repository root.
     pub root: String,
     pub manifest: Manifest,
@@ -116,6 +119,7 @@ fn parse<T: serde::de::DeserializeOwned>(name: &str, text: &str) -> Result<T, Ap
 
 /// Loads the four `.gitvur/` files. `manifest.json` and `structure.json` are required;
 /// problems with `annotations.json` or `report.json` become warnings.
+#[allow(clippy::too_many_lines)] // independent optional artifact loading and fresh evidence checks
 pub fn open_repository(path: &str) -> Result<RepoBundle, AppError> {
     let root = repo_root(path)?;
     let no_gitvur = || {
@@ -202,7 +206,16 @@ pub fn open_repository(path: &str) -> Result<RepoBundle, AppError> {
             }
         },
     };
+    let architecture_issues = Some(gitvur_validate::architecture::validate_architecture(
+        &gitvur_validate::ValidateInput {
+            structure: structure.clone(),
+            annotations: annotations.clone(),
+            repo_root: root.clone(),
+            commit_sha: manifest.commit_sha.clone(),
+        },
+    ));
     Ok(RepoBundle {
+        architecture_issues,
         root: root.to_string_lossy().into_owned(),
         manifest,
         structure,

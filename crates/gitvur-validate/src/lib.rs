@@ -12,6 +12,7 @@ use gitvur_schema::{
     Structure, Summary,
 };
 
+pub mod architecture;
 mod checks;
 pub mod codes;
 mod repo;
@@ -41,6 +42,13 @@ pub fn validate(input: &ValidateInput) -> Report {
     if let Some(annotations) = &input.annotations {
         checks::check(input, annotations, &mut issues);
         let mut files = checks::EvidenceFiles::new(input);
+        if let Some(a) = &annotations.architecture {
+            issues.extend(architecture::check_architecture(
+                &input.structure,
+                a,
+                &mut files,
+            ));
+        }
         let result = gitvur_flow::check_flows(&input.structure, annotations, &mut files);
         issues.extend(result.issues);
         flows = result.flows;

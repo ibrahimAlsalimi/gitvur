@@ -1138,6 +1138,54 @@ Open questions:
   Phase 16 has not been started. Existing untracked `fixtures/c-small/src/.gitvur/`
   data was left untouched. Regenerated browser screenshots were discarded after testing.
 
+## Phase 16 — Architecture Diagram (2026-10-31)
+
+- Audit/design: read the phase prompt, contract, agent workflow, tab/store integration,
+  inspector, layout worker, packet, Tauri loading/export and existing tests. Plan:
+  `prompts/16-implementation-plan.md`. Followed the newly supplied Architecture Diagram
+  phase prompt; Git Timeline is now phase 17. Existing prompt renames and untracked
+  `fixtures/c-small/src/.gitvur/` were preserved.
+- Contract: optional `annotations.architecture`, independent version 1, explicit component /
+  relationship / source-hash types. Old annotation files serialize unchanged when absent;
+  schemas and TS bindings regenerated. Computed status is never trusted from the agent.
+- Validation: architecture IDs, source membership (disjoint files), provenance, hierarchy,
+  missing/dangling refs, source hashes and canonical repository-safe evidence reads. A relationship
+  needs source-side evidence mentioning its target or exact label. Fresh architecture checks
+  on repository open gate enrichment, independent of cached reports. Stale/broken components
+  fall back to structural groups; verified dependencies survive. Natural-language semantics
+  require source review. Packet `architectureIssues` and codeDOC section 12 extend the existing
+  agent workflow; no AI runtime, new dependencies or network services.
+- UI: fourth Diagram tab, Ctrl/Cmd+4 and persisted tab restoration; conservative indexed
+  directory grouping, dependency aggregation, worker Dagre layout, hierarchy drill-down, filter,
+  zoom/pan/fit/reset, component and relationship inspection, source evidence, Map navigation and
+  source-specific Docs backlinks. Provenance is visible; parallel edges have distinct curved
+  routes and labels. Inspector collapse works. Structure-only mode remains available.
+- Export: grouped/escaped Mermaid; current-view SVG/PNG reuse styled capture and the safe
+  save-dialog path (inside-repository destinations remain refused). Browser tests inspect PNG
+  signatures and SVG content. No exports or analysis artifacts are automatically written to
+  the target repository.
+- Tests: Rust workspace tests and strict Clippy/fmt pass; old fixture goldens untouched. Shared
+  browser architecture fixture is validated against real py-flows sources in Rust. Frontend
+  covers determinism/stable IDs, membership/aggregation, stale fallback, empty/1,000-directory
+  input, layout, Mermaid escaping and hierarchy roll-up. Browser checks: 6 Diagram + 26 Docs /
+  Flows in light and dark, including accessibility, evidence, navigation, exports and nested
+  groups. Production build and all 259 contrast checks pass. Reviewed four Diagram screenshots
+  (light/dark, structural/enriched); fixed Map bleed-through, duplicate banner landmark,
+  inspector padding and overlapping parallel labels. Discarded regenerated existing Docs/Flows
+  screenshots; retained the four new Diagram screenshots.
+- Verification note: the search latency test failed at 49 ms during concurrent browser/build
+  work; the complete frontend unit suite passed when rerun without those jobs. No test budgets
+  or assertions were weakened. Existing ResizeObserver / Map target-handle warnings still appear
+  in regression runs (already parked before this phase).
+- Limits/follow-up: fallback describes directory organization, not inferred runtime purpose.
+  Components own whole files even when a function/class is the cited source; parents need their
+  own disjoint source. Large flat roots rely on filtering/zoom; no virtualization. Diagram camera,
+  selection and drill-down reset when leaving the tab (active tab itself persists). SVG capture
+  uses the existing foreignObject-based exporter; Mermaid is the portable text alternative.
+  Native desktop save-dialog interaction was not manually retested; backend confinement tests
+  and browser exports pass. Follow up with native export review and large real-repository UX
+  before adding richer grouping heuristics or persisted diagram camera state.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).
