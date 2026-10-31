@@ -1120,6 +1120,24 @@ Open questions:
 - Partial extraction of files with syntax errors would help C most (macros can confuse the
   parser); still parked.
 
+## Phase 15 — merge and verification follow-up (2026-10-31)
+
+- Read the existing phase records: Phase 15 was already implemented, so resumed its
+  verification rather than rebuilding it. Pushed `phase-15-flows-tab` and `languages-c-go`;
+  merged PR #5 (Flows tab) and PR #6 (C/Go) into `main`. Local main fast-forwarded to
+  `1fd348e`; follow-up branch: `phase-15-verification`.
+- Checks: workspace fmt, Clippy and Rust tests pass; frontend typecheck, lint,
+  100 unit tests, 259 contrast checks, and all 16 flow browser tests (light/dark) pass.
+  An initial concurrent run measured search at 31.4 ms against its 30 ms budget;
+  the complete unit suite passed when rerun after browser testing finished.
+- Began native verification: `pnpm tauri dev` launches successfully; confirmed the
+  Gitvur Wayland window and rendered Map/Docs/Flows shell in a desktop screenshot
+  (`/tmp/gitvur-phase15-native.png`, temporary artifact).
+- Remaining: native fixture playback and save-dialog export, and Linux pan frame-rate
+  measurement. GitHub CI was still running when the locally verified PRs were merged.
+  Phase 16 has not been started. Existing untracked `fixtures/c-small/src/.gitvur/`
+  data was left untouched. Regenerated browser screenshots were discarded after testing.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).
