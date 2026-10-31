@@ -12,7 +12,7 @@ The full plan is in `PROTOTYPE_V2_PLAN.md`. Phase prompts are in `prompts/`. **T
 
 **Structure is extracted deterministically. Meaning is written by an AI agent. Everything the agent writes is validated.**
 
-- `gitvur-index` (Rust + tree-sitter) produces nodes, ranges, hashes, imports, calls. No AI, no network.
+- `gitvur-index` (Rust + tree-sitter) produces nodes, ranges, hashes, imports, calls for Python, TypeScript, C and Go. No AI, no network.
 - An AI agent, following `agent/codeDOC.md`, writes logical modules, descriptions, and hidden relationships with evidence.
 - `gitvur-validate` checks both layers and detects staleness by comparing content hashes.
 - The Tauri app merges both layers and renders them.

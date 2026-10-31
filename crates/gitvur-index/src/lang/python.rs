@@ -119,6 +119,8 @@ impl LanguageBackend for Python {
                 parent: enclosing_definition(*node).and_then(|p| index_of.get(&p.id()).copied()),
                 start_line: line_of(start),
                 end_line: end_line_of(*node),
+                receiver: None,
+                internal: false,
             });
         }
 
@@ -350,6 +352,7 @@ fn collect_entries(
             && let Some(body) = node.child_by_field_name("consequence")
         {
             parsed.entries.push(super::ParsedEntry {
+                target: None,
                 kind: gitvur_schema::EntryKind::MainGuard,
                 name: relpath.into(),
                 line: line_of(node),
@@ -367,6 +370,7 @@ fn collect_entries(
     }
     if relpath == "__main__.py" || relpath.ends_with("/__main__.py") {
         parsed.entries.push(super::ParsedEntry {
+            target: None,
             kind: gitvur_schema::EntryKind::PackageMain,
             name: relpath
                 .strip_suffix("/__main__.py")

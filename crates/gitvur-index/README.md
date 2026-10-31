@@ -5,9 +5,11 @@ network, and no execution of repository code. The same input always gives byte-i
 (except `manifest.generatedAt`, which the caller passes in).
 
 The contract (ID format, hashing, ordering) is in `crates/gitvur-schema/README.md`. This file
-documents how the extractor applies it. Supported: **Python** (`.py`) and **TypeScript** (`.ts`,
-`.tsx`, `.mts`, `.cts`, `.d.ts`). Each language is a `LanguageBackend`; the core in
-`resolve.rs` is shared.
+documents how the extractor applies it. Supported: **Python** (`.py`), **TypeScript** (`.ts`,
+`.tsx`, `.mts`, `.cts`, `.d.ts`), **C** (`.c`, `.h`) and **Go** (`.go`). Each language is a
+`LanguageBackend`; the core in `resolve.rs` is shared. A backend declares how far bare names
+reach (`NameScope`): the file and its imports (Python, TypeScript), the package directory
+(Go), or the whole program (C linkage).
 
 ```text
 src/
@@ -177,6 +179,46 @@ The rules in "Calls" above apply unchanged, with these shapes:
 - Dynamic `import()`, calls on call results (`f()()`) and subscript calls are ignored. Calls in
   class field initialisers and at module level are dropped.
 
+## C
+
+- **Nodes.** `.c` and `.h` files. Function definitions with a body are functions (`static` ones
+  are marked internal); prototypes, macros and `extern` declarations are not nodes. Struct and
+  union definitions with a body are classes, named by their tag, or by the typedef name for
+  `typedef struct { … } name;`. Definitions inside `#if`/`#ifdef`/`#else` blocks (header guards)
+  count; nothing is preprocessed, compiled or run. Nested and anonymous records are not nodes.
+- **Includes.** `#include "p"`: the path relative to the including file; otherwise the single
+  indexed file whose path ends with `/p` (standing in for `-I` flags, which are never read). Two
+  or more such files resolve to nothing. `#include <p>` resolves only when `p` has a directory
+  (`<lib/x.h>`), by the same unique-suffix rule; `<stdio.h>`-style names never resolve. Includes
+  create `imports` edges only; they bind no names.
+- **Calls.** `name()`: a definition in the same file (including `static`), else every non-`static`
+  function of that name in any indexed C file (one → edge, two or more → unresolved). `x.f()` /
+  `x->f()` (function pointers in structs) and `(*fp)()` have no known target and are dropped.
+- **Entry points.** `int main(…)` defined at file level and not `static`: `main-function`, named by
+  the file path, targeting the function.
+
+## Go
+
+- **Nodes.** `.go` files (tests included). `type T struct{…}` / `type T interface{…}` are
+  classes (the type spec's lines); other type declarations are not nodes. `func F` is a
+  function. A method `func (r *T) M` (pointer, parenthesised and generic receivers unwrapped) is a
+  child of class `T` when `T` is declared **earlier in the same file**; otherwise it stays at file
+  level with ID `function:<file>:T.M` (name `M`), so a definition never precedes its parent.
+- **Imports.** Read from every `go.mod` (`module` directive only): an import path equal to or
+  under a module path names the directory after that prefix (longest module path wins). The
+  package's first file by path stands for it in bindings; `imports` edges go to **every file of
+  the package**. Without a matching module nothing resolves, and directory names alone are
+  never matched (a local `log/` is not the standard `log`). The local name is the alias, else the
+  last path segment; `_` and `.` imports bind nothing.
+- **Calls.** `F()`: the same file, then the package (every `.go` file in the directory), then
+  nothing. `pkg.F()` through an import: package-wide lookup. `r.M()` where `r` is the method's own
+  receiver: methods of the receiver's type anywhere in the package. Any other `x.M()`: the
+  unknown-receiver rule (two or more methods named `M` → unresolved, otherwise dropped);
+  interface method specs are not candidates. Calls inside function literals belong to the
+  enclosing function.
+- **Entry points.** `func main()` in a `package main` file: `main-function`, named by the
+  package directory (the file path at the root), targeting the function.
+
 ## Known limitations
 
 - **`.js`, `.jsx`, `.mjs`, `.cjs` are not indexed** in this prototype.
@@ -208,8 +250,8 @@ reports that checkout's `HEAD`), or `"uncommitted"`. `generatedAt` comes from th
 
 ## Dependencies
 
-- `tree-sitter`, `tree-sitter-python`, `tree-sitter-typescript` (`typescript` + `tsx` grammars):
-  parsing.
+- `tree-sitter`, `tree-sitter-python`, `tree-sitter-typescript` (`typescript` + `tsx` grammars),
+  `tree-sitter-c`, `tree-sitter-go`: parsing.
 - `ignore`: `.gitignore`-aware walking.
 - `gix` (`default-features = false`, `sha1`): reads `HEAD` without spawning `git`. Chosen over
   `git2` because it is pure Rust (no libgit2 / C toolchain or OpenSSL for CI and the Tauri build),

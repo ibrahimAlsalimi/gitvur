@@ -6,9 +6,10 @@ logical modules, descriptions and relationships backed by source evidence.
 
 ## What repositories work today?
 
-The indexer supports Python (`.py`) and TypeScript (`.ts`, `.tsx`, `.mts`, `.cts`,
-`.d.ts`). Mixed repositories work, but the map includes only supported source files.
-JavaScript, Rust, Go and other languages do not currently get code maps. The Docs
+The indexer supports Python (`.py`), TypeScript (`.ts`, `.tsx`, `.mts`, `.cts`,
+`.d.ts`), C (`.c`, `.h`) and Go (`.go`). Mixed repositories work, but the map includes
+only supported source files. JavaScript, Rust and other languages do not currently get
+code maps. Go imports resolve through the repository's `go.mod`. The Docs
 tab reads `.md` and `.markdown` files.
 
 The repository can be a local checkout or a plain directory. Git history is needed

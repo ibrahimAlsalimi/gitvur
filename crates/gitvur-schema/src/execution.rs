@@ -14,6 +14,8 @@ pub enum EntryKind {
     EventHandler,
     HttpRoute,
     Job,
+    /// C `main` or Go `func main` in `package main`; the target is the function.
+    MainFunction,
     MainGuard,
     NpmScript,
     Other,
@@ -31,6 +33,7 @@ impl EntryKind {
             Self::EventHandler => "event-handler",
             Self::HttpRoute => "http-route",
             Self::Job => "job",
+            Self::MainFunction => "main-function",
             Self::MainGuard => "main-guard",
             Self::NpmScript => "npm-script",
             Self::Other => "other",

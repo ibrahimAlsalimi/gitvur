@@ -33,6 +33,8 @@ pub struct ExtractorInfo {
 #[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(rename_all = "lowercase")]
 pub enum Language {
+    C,
+    Go,
     Python,
     Typescript,
 }

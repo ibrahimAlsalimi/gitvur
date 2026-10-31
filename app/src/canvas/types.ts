@@ -21,7 +21,7 @@ export interface ModuleData extends Record<string, unknown> {
 export interface FileData extends Record<string, unknown> {
   node: ModelNode;
   directory: string;
-  language: "py" | "ts" | "file";
+  language: "c" | "go" | "py" | "ts" | "file";
   /** Classes and functions inside the file. */
   childCount: number;
   expanded: boolean;

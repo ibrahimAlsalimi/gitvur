@@ -18,6 +18,7 @@ const KIND_SHAPE: Record<EntryKind, GlyphShape> = {
   "cli-command": "terminal",
   "package-bin": "terminal",
   "http-route": "globe",
+  "main-function": "play",
   "main-guard": "play",
   "package-main": "play",
   "top-level-call": "play",

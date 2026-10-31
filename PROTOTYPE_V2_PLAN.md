@@ -362,7 +362,7 @@ Also record these numbers without a fixed target, since they guide later decisio
 
 **Out of scope for this prototype:**
 
-- Languages other than Python and TypeScript
+- Languages other than Python, TypeScript, C and Go (C and Go were added after Phase 15)
 - Semantic indexers (e.g. `scip-python`, `scip-typescript`)
 - Execution flow UI (Phase 15; data layer introduced in Phase 14)
 - Full Git history timeline (start with a two-revision diff only)

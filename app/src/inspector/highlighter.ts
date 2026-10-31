@@ -14,14 +14,19 @@ export function getHighlighter(): Promise<HighlighterCore> {
     ]);
     return createHighlighterCore({
       themes: [import("shiki/themes/github-light.mjs"), import("shiki/themes/github-dark.mjs")],
-      langs: [import("shiki/langs/python.mjs"), import("shiki/langs/typescript.mjs")],
+      langs: [
+        import("shiki/langs/c.mjs"),
+        import("shiki/langs/go.mjs"),
+        import("shiki/langs/python.mjs"),
+        import("shiki/langs/typescript.mjs"),
+      ],
       engine: createJavaScriptRegexEngine(),
     });
   })();
   return highlighter;
 }
 
-export type CodeLanguage = "python" | "typescript" | "text";
+export type CodeLanguage = "c" | "go" | "python" | "typescript" | "text";
 
 /**
  * Tokens per line. Each token's `htmlStyle` holds `--shiki-light` / `--shiki-dark`; CSS
