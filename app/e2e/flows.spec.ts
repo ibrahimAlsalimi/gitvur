@@ -252,3 +252,58 @@ test("states, keyboard, list view and accessibility", async ({ page }) => {
       .map((v) => v.id),
   ).toEqual([]);
 });
+
+test("inspector resizes in Flows and keeps its width across tabs and reloads", async ({ page }) => {
+  await openFlows(page, "py-flows");
+  const flows = page.locator("#panel-flows");
+  const inspector = flows.getByRole("complementary", { name: "Inspector" });
+  const handle = flows.getByRole("separator", { name: "Resize inspector" });
+  await handle.focus();
+  await handle.press("Home");
+  await expect(handle).toHaveAttribute("aria-valuenow", "280");
+  const divider = await handle.boundingBox();
+  if (!divider) throw new Error("Inspector resize divider is missing");
+  await page.mouse.move(divider.x + divider.width / 2, divider.y + divider.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(divider.x + divider.width / 2 - 80, divider.y + divider.height / 2, {
+    steps: 5,
+  });
+  await page.mouse.up();
+  await expect(handle).toHaveAttribute("aria-valuenow", "360");
+  await expect.poll(async () => Math.round((await inspector.boundingBox())?.width ?? 0)).toBe(360);
+
+  await page.getByRole("tab", { name: "Map", exact: true }).click();
+  const map = page.locator("#panel-map");
+  await expect
+    .poll(async () =>
+      Math.round(
+        (await map.getByRole("complementary", { name: "Inspector" }).boundingBox())?.width ?? 0,
+      ),
+    )
+    .toBe(360);
+  const mapHandle = map.getByRole("separator", { name: "Resize inspector" });
+  await mapHandle.focus();
+  await mapHandle.press("ArrowRight");
+  await page.getByRole("tab", { name: "Flows", exact: true }).click();
+  await expect(handle).toHaveAttribute("aria-valuenow", "344");
+  await expect.poll(async () => Math.round((await inspector.boundingBox())?.width ?? 0)).toBe(344);
+  await inspector.getByRole("button", { name: "Collapse inspector" }).click();
+  await expect(handle).toHaveCount(0);
+  await flows.getByRole("button", { name: "Expand inspector" }).click();
+  await expect(handle).toHaveAttribute("aria-valuenow", "344");
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = localStorage.getItem("gitvur.mock.settings");
+        return saved ? (JSON.parse(saved) as { inspectorWidth: number }).inspectorWidth : null;
+      }),
+    )
+    .toBe(344);
+  await page.reload();
+  await page.getByRole("tab", { name: "Flows", exact: true }).click();
+  await expect(handle).toHaveAttribute("aria-valuenow", "344");
+  await expect.poll(async () => Math.round((await inspector.boundingBox())?.width ?? 0)).toBe(344);
+  await steps(page).first().click();
+  await expect(page.locator("#panel-flows .gv-code-line").first()).toBeVisible();
+  await shot(page, "09-inspector-resized");
+});
