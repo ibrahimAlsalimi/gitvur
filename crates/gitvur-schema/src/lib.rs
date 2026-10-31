@@ -20,7 +20,8 @@ pub mod tree;
 
 pub use annotations::{Annotations, Description, Module};
 pub use architecture::{
-    Architecture, ArchitectureComponent, ArchitectureRelationship, ArchitectureSource,
+    Architecture, ArchitectureArtifact, ArchitectureComponent, ArchitectureRelationship,
+    ArchitectureSource, architecture_index_hash,
 };
 pub use common::{Edge, EdgeType, Evidence, Provenance, SourceRange};
 pub use diff::{ChangeKind, DiffSummary, EdgeChange, ElementChange, StructureDiff};

@@ -1,9 +1,10 @@
 # Phase 16 — Agent-Generated Architecture Diagrams
 
-**Status: planned revised design; documentation only.** Implementation must not begin as part
-of this documentation task. This plan supersedes the earlier deterministic grouping/enrichment
-plan. The existing directory-based Diagram and `annotations.architecture` implementation are
-legacy behavior, recorded historically in `PROGRESS.md`; they do not implement this proposal.
+**Status: implemented contract and acceptance plan (2026-10-31).** The user subsequently
+authorized implementation after the documentation-only planning task. This document retains
+workstream acceptance criteria; current implementation and verification are recorded in
+`PROGRESS.md`. The earlier directory-based enrichment model remains legacy compatibility,
+not the default Diagram experience.
 
 ## Ownership and scope
 
@@ -23,22 +24,25 @@ validated data with no AI invocation on tab open. Missing architecture leaves th
 Reuse React Flow, Dagre and existing worker, inspector and safe export infrastructure.
 Keep local-first operation; never execute untrusted repository code or require a new AI service.
 
-## Proposed artifact contract
+## Artifact contract
 
-Proposed path: `<repo>/.gitvur/architecture.json`. This is a design proposal, **not a supported
-standalone schema or CLI input today**. See the current contract in
-[the schema README](crates/gitvur-schema/README.md). Do not alter generated schemas now.
+Path: `<repo>/.gitvur/architecture.json`, written by the Documentation Agent. See
+[the schema README](crates/gitvur-schema/README.md) and generated
+[standalone schema](schemas/architecture.schema.json). Existing validate/stale/packet paths and
+repository loading support it. Indexing does not generate semantic architecture.
 
-| Area | Proposed contents |
+| Area | Contents |
 | --- | --- |
 | Overview | Short architecture summary; optional important design characteristics |
 | Component | Stable ID, name, type/category, concise English responsibility, indexed code references, optional parent/group, evidence references, provenance |
 | Relationship | Stable ID, source/target component IDs, typed interaction, short readable label, evidence references, provenance |
 | Metadata | Schema version, repository/index version or relevant snapshot identity; generation metadata only where consistent with existing conventions |
 
-Choose exact field names, ID namespace and version negotiation during schema implementation.
-Reuse existing code IDs unchanged; consider the existing `arch:<slug>` convention for stable
-architecture identities. Reuse `syntactic | semantic | ai` provenance semantics without labeling
+The root contains `schemaVersion: 1`, `commitSha`, `indexHash`, optional `designNotes`, and
+`architecture` (the version-1 summary/components/relationships model). Architecture IDs use
+`arch:<lowercase-kebab-slug>`. The index fingerprint is copied from `gitvur packet`.
+Reuse existing code IDs unchanged; retain stable architecture IDs across incremental edits.
+Reuse `syntactic | semantic | ai` provenance semantics without labeling
 AI interpretation as extracted fact. Code references should retain copied indexed hashes for
 freshness. Evidence uses repository-relative `/` paths and 1-based inclusive locations; enforce
 existing canonical path confinement, including symlinks. Define checks for duplicate IDs,
@@ -153,10 +157,36 @@ material readability defects before declaring completion.
 
 Order: 1 → (2 design and 3) → 4 → finish/activate 2 → 5 → 6 → 7 → 9.
 Workstream 8 accompanies all steps; its regression gate precedes final visual acceptance.
-A later implementation session must audit the existing legacy code and tests before changes.
+Implementation reused the legacy graph/layout/inspector/export infrastructure and retained
+its raw structure mode explicitly as secondary exploration.
 
-Unresolved: exact schema/version and metadata fields; ID namespace; typed interaction vocabulary;
-group representation and overlapping source membership; snapshot granularity; unresolved status
-and partial-rendering policy; legacy coexistence/migration/precedence. Resolve these explicitly
-in workstream 1 (status details in 3), preserving existing capabilities and compatibility.
-No workstream is marked implemented by this planning update.
+Implemented choices: independent schemaVersion 1 and model version 1; arch IDs; open nonempty
+interaction kinds (calls/invokes and imports/depends_on can carry direct structural support);
+optional parent groups with descendant evidence; overlapping source membership; canonical index
+fingerprint plus per-source hashes and on-disk freshness checks. Standalone data takes precedence
+even when malformed; legacy annotation maps remain readable only when it is absent. No migration
+occurs on open. Errors block the explanatory map, stale sources remain visibly marked, and
+traceable AI interactions without deterministic proof stay visible as unresolved warnings.
+
+Follow-up evaluation: native desktop save dialogs and substantially larger real-world architecture
+maps beyond the small Go and representative Python fixtures. Reference checks and automated UI
+tests do not replace human review of architectural interpretations.
+
+
+## Implementation file inventory
+
+- Contract: `crates/gitvur-schema/src/{architecture.rs,lib.rs,schema.rs}`,
+  `crates/gitvur-schema/tests/compatibility.rs`, `schemas/architecture.schema.json`, and
+  `app/src/generated/contract.ts`.
+- Validation: `crates/gitvur-validate/src/{architecture.rs,lib.rs,repo.rs}` and
+  `crates/gitvur-validate/tests/architecture.rs`.
+- CLI/bundle: `crates/gitvur-cli/src/{main.rs,packet.rs}`, `crates/gitvur-cli/tests/cli.rs`,
+  `app/src-tauri/src/{bundle.rs,bindings.rs}`, and `app/src-tauri/tests/bundle.rs`.
+- Diagram/inspection: `app/src/diagram/{DiagramTab.tsx,ComponentNode.tsx,RelationshipEdge.tsx,
+  model.ts,model.test.ts,layout.ts,mermaid.ts,diagram.css}` and `app/src/docs/DocsTab.tsx`.
+- Browser data/review: `app/src/api/mock.ts`, `app/e2e/diagram.spec.ts`,
+  `app/e2e/fixtures/architecture-artifact.json`, eight new Diagram review screenshots under
+  `app/e2e/__screenshots__/{light,dark}/`, and the documented `fixtures/go-small/.gitvur/` bundle.
+- Instructions/plans: `agent/codeDOC.md`, both schema/validator crate READMEs, `CLAUDE.md`,
+  `README.md`, `PROTOTYPE_V2_PLAN.md`, `PROGRESS.md`, this plan, `prompts/README.md`,
+  `prompts/16-Architecture-Diagram.md`, and `prompts/16-implementation-plan.md`.

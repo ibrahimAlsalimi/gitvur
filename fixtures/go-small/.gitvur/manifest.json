@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "0.3",
+  "projectName": "go-small",
+  "commitSha": "357d800",
+  "generatedAt": "2026-10-31T16:09:06Z",
+  "extractor": {
+    "name": "gitvur-index",
+    "version": "0.2.0"
+  },
+  "languages": [
+    "go"
+  ]
+}

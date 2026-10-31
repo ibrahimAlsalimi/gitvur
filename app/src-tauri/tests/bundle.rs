@@ -296,3 +296,44 @@ fn settings_and_recent_live_in_the_config_dir() {
     }
     assert_eq!(settings::recent(config.path()).len(), 10);
 }
+
+#[test]
+fn standalone_architecture_failures_do_not_break_existing_views() {
+    let dir = copy_of("py-flows");
+    let path = dir.path().join(".gitvur/architecture.json");
+    fs::write(
+        &path,
+        include_str!("../../e2e/fixtures/architecture-artifact.json"),
+    )
+    .unwrap();
+    let bundle = open_repository(s(dir.path())).unwrap();
+    assert!(bundle.architecture.is_some());
+    assert!(
+        bundle
+            .architecture_issues
+            .unwrap()
+            .iter()
+            .all(|i| i.severity != gitvur_schema::Severity::Error)
+    );
+    fs::write(dir.path().join("flowapp/service/orders.py"), "# removed\n").unwrap();
+    assert!(
+        open_repository(s(dir.path()))
+            .unwrap()
+            .architecture_issues
+            .unwrap()
+            .iter()
+            .any(|i| i.code == "architecture-source" || i.code == "architecture-stale")
+    );
+    fs::write(&path, "not JSON").unwrap();
+    let bundle = open_repository(s(dir.path())).unwrap();
+    assert!(bundle.architecture.is_none());
+    assert!(bundle.annotations.is_some());
+    assert_ne!(bundle.structure.nodes, []);
+    assert!(
+        bundle
+            .architecture_issues
+            .unwrap()
+            .iter()
+            .any(|i| i.code == "architecture-schema")
+    );
+}

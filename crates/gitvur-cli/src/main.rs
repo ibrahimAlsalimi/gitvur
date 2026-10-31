@@ -228,6 +228,17 @@ fn run_validate(repo: &Path) -> anyhow::Result<bool> {
 fn run_stale(repo: &Path, json: bool) -> anyhow::Result<()> {
     let report = gitvur_validate::validate_repo(repo)
         .with_context(|| format!("validating {}", repo.display()))?;
+    for issue in report
+        .issues
+        .iter()
+        .filter(|i| i.code.starts_with("architecture-"))
+    {
+        let severity = match issue.severity {
+            gitvur_schema::Severity::Error => "error",
+            gitvur_schema::Severity::Warning => "warning",
+        };
+        eprintln!("{severity}[{}]: {}", issue.code, issue.message);
+    }
     let ids = gitvur_validate::stale_ids(&report);
     if json {
         print!("{}", gitvur_schema::to_canonical_json(&ids));

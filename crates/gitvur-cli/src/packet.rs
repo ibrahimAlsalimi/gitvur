@@ -86,6 +86,15 @@ pub struct FlowIssue {
 pub struct Packet {
     pub mode: Mode,
     pub commit_sha: String,
+    /// Copy this fingerprint into architecture.json after reviewing changed boundaries.
+    pub architecture_index_hash: String,
+    pub architecture_schema_version: u32,
+    /// create | review | repair | preserve; unresolved semantics alone do not force a rewrite.
+    pub architecture_action: String,
+    pub legacy_architecture: Option<gitvur_schema::Architecture>,
+    /// Previous standalone output, including stale data for incremental repair.
+    pub architecture: Option<gitvur_schema::ArchitectureArtifact>,
+
     /// Sorted by `id`.
     pub todo: Vec<TodoItem>,
     /// File IDs that belong to no module, sorted.
@@ -203,6 +212,11 @@ pub fn build(
         Mode::Incremental => flow_work(report),
     };
     Packet {
+        architecture_index_hash: gitvur_schema::architecture_index_hash(structure),
+        architecture_schema_version: 1,
+        architecture_action: "create".into(),
+        legacy_architecture: annotations.and_then(|a| a.architecture.clone()),
+        architecture: None,
         architecture_issues: report
             .issues
             .iter()
@@ -299,10 +313,32 @@ pub fn for_repo(repo: &Path, mode: Mode) -> anyhow::Result<(Packet, Vec<String>)
         .filter(|i| i.code == SCHEMA_INVALID || i.code == AI_EDGE_NO_EVIDENCE)
         .map(|i| format!("{}: {}", i.code, i.message))
         .collect();
-    Ok((
-        build(mode, &input.structure, &report, input.annotations.as_ref()),
-        problems,
-    ))
+    let mut packet = build(mode, &input.structure, &report, input.annotations.as_ref());
+    packet.architecture = gitvur_validate::architecture::for_repository(&input).0;
+    packet.architecture_action = if packet
+        .architecture_issues
+        .iter()
+        .any(|i| i.severity == gitvur_schema::Severity::Error)
+    {
+        "repair"
+    } else if packet.architecture.is_none() {
+        "create"
+    } else if mode == Mode::Initial
+        || !packet.todo.is_empty()
+        || !packet.unassigned_files.is_empty()
+        || packet.architecture_issues.iter().any(|i| {
+            matches!(
+                i.code.as_str(),
+                "architecture-stale" | "architecture-snapshot"
+            )
+        })
+    {
+        "review"
+    } else {
+        "preserve"
+    }
+    .into();
+    Ok((packet, problems))
 }
 
 #[cfg(test)]
@@ -581,9 +617,7 @@ mod tests {
             &report,
             Some(&annotations),
         ));
-        assert!(json.starts_with(
-            "{\n  \"mode\": \"incremental\",\n  \"commitSha\": \"abc1234\",\n  \"todo\": ["
-        ));
+        assert!(json.starts_with("{\n  \"mode\": \"incremental\",\n  \"commitSha\": \"abc1234\","));
         assert!(json.contains("\"previousDescription\""));
         assert!(json.contains("\"unassignedFiles\""));
         assert!(json.contains("\"existingModules\""));

@@ -1,0 +1,389 @@
+{
+  "nodes": [
+    {
+      "id": "class:internal/orders/orders.go:Service",
+      "type": "class",
+      "name": "Service",
+      "parentId": "file:internal/orders/orders.go",
+      "source": {
+        "file": "internal/orders/orders.go",
+        "startLine": 9,
+        "endLine": 11
+      },
+      "contentHash": "sha256:c1b48c25036879e57ffc02a013b95fee52370778be86048d5f9ab6fdc7d4968a"
+    },
+    {
+      "id": "class:internal/store/store.go:Cache",
+      "type": "class",
+      "name": "Cache",
+      "parentId": "file:internal/store/store.go",
+      "source": {
+        "file": "internal/store/store.go",
+        "startLine": 17,
+        "endLine": 17
+      },
+      "contentHash": "sha256:7ef3386c41f76f8f873965c391ac08022d282a7f28e0d1b93c58459d2cb6ea60"
+    },
+    {
+      "id": "class:internal/store/store.go:Repo",
+      "type": "class",
+      "name": "Repo",
+      "parentId": "file:internal/store/store.go",
+      "source": {
+        "file": "internal/store/store.go",
+        "startLine": 7,
+        "endLine": 7
+      },
+      "contentHash": "sha256:7a7e7bbbcbe2f0f995303d071d84ae22b7e6205b7dc619a68135e86ec1831f3b"
+    },
+    {
+      "id": "class:internal/store/store.go:Saver",
+      "type": "class",
+      "name": "Saver",
+      "parentId": "file:internal/store/store.go",
+      "source": {
+        "file": "internal/store/store.go",
+        "startLine": 3,
+        "endLine": 5
+      },
+      "contentHash": "sha256:b33d7c109bf6b4b5e2f5d917da6e725f88b9aecd427f90aa63d583e5fb0a738e"
+    },
+    {
+      "id": "file:cmd/shop/main.go",
+      "type": "file",
+      "name": "main.go",
+      "parentId": "project:root",
+      "source": {
+        "file": "cmd/shop/main.go",
+        "startLine": 1,
+        "endLine": 10
+      },
+      "contentHash": "sha256:ce6a5337befd7b26189d4e10bd2a43fe120fb11aed95194b240711fa7be2c323"
+    },
+    {
+      "id": "file:internal/orders/count.go",
+      "type": "file",
+      "name": "count.go",
+      "parentId": "project:root",
+      "source": {
+        "file": "internal/orders/count.go",
+        "startLine": 1,
+        "endLine": 12
+      },
+      "contentHash": "sha256:26a4c46c8751292e760820ddd73e3b4a5280467c1c9996d18f3aec6878dcfcdf"
+    },
+    {
+      "id": "file:internal/orders/orders.go",
+      "type": "file",
+      "name": "orders.go",
+      "parentId": "project:root",
+      "source": {
+        "file": "internal/orders/orders.go",
+        "startLine": 1,
+        "endLine": 27
+      },
+      "contentHash": "sha256:aca312d3243feac15286a0dc577eac4bf8d184f3d1f738b4e4254c7b4d5e6a90"
+    },
+    {
+      "id": "file:internal/orders/validate.go",
+      "type": "file",
+      "name": "validate.go",
+      "parentId": "project:root",
+      "source": {
+        "file": "internal/orders/validate.go",
+        "startLine": 1,
+        "endLine": 10
+      },
+      "contentHash": "sha256:453b1ce266f800bb7baf2b78d4370bcb822328a8ffa4be52fa9c7be44b9b3185"
+    },
+    {
+      "id": "file:internal/store/store.go",
+      "type": "file",
+      "name": "store.go",
+      "parentId": "project:root",
+      "source": {
+        "file": "internal/store/store.go",
+        "startLine": 1,
+        "endLine": 21
+      },
+      "contentHash": "sha256:cef83a17b27951c6a4eb6feb8afb70baedcf5b746bd3aa75ad4780aa4406be4e"
+    },
+    {
+      "id": "function:cmd/shop/main.go:main",
+      "type": "function",
+      "name": "main",
+      "parentId": "file:cmd/shop/main.go",
+      "source": {
+        "file": "cmd/shop/main.go",
+        "startLine": 5,
+        "endLine": 8
+      },
+      "contentHash": "sha256:762559bf4e66835933f6cad0afd20a966909b94852c06be8b6f3a887fe57cab8"
+    },
+    {
+      "id": "function:cmd/shop/main.go:run",
+      "type": "function",
+      "name": "run",
+      "parentId": "file:cmd/shop/main.go",
+      "source": {
+        "file": "cmd/shop/main.go",
+        "startLine": 10,
+        "endLine": 10
+      },
+      "contentHash": "sha256:9377290f116831acf0ac02fc15faf331f381199d0db99d6416d43274714d526d"
+    },
+    {
+      "id": "function:internal/orders/count.go:Service.Count",
+      "type": "function",
+      "name": "Count",
+      "parentId": "file:internal/orders/count.go",
+      "source": {
+        "file": "internal/orders/count.go",
+        "startLine": 3,
+        "endLine": 5
+      },
+      "contentHash": "sha256:3e00270805695af9d8f8e42673baf00d6ec91c7da125851082ec1c7ed3a24674"
+    },
+    {
+      "id": "function:internal/orders/count.go:countdown",
+      "type": "function",
+      "name": "countdown",
+      "parentId": "file:internal/orders/count.go",
+      "source": {
+        "file": "internal/orders/count.go",
+        "startLine": 7,
+        "endLine": 12
+      },
+      "contentHash": "sha256:4c22327b902be5a1a0c67acf1e0a6d79d8a91dc14685533bf9f4bc88a679e4b2"
+    },
+    {
+      "id": "function:internal/orders/orders.go:NewService",
+      "type": "function",
+      "name": "NewService",
+      "parentId": "file:internal/orders/orders.go",
+      "source": {
+        "file": "internal/orders/orders.go",
+        "startLine": 13,
+        "endLine": 15
+      },
+      "contentHash": "sha256:c9a5290331f9f3dff1318d422088531dafe31890ebb36ea5ed14f71c13a10626"
+    },
+    {
+      "id": "function:internal/orders/orders.go:Service.Place",
+      "type": "function",
+      "name": "Place",
+      "parentId": "class:internal/orders/orders.go:Service",
+      "source": {
+        "file": "internal/orders/orders.go",
+        "startLine": 22,
+        "endLine": 27
+      },
+      "contentHash": "sha256:04fa11f8ed9750a0b3b27f95e922b76854178b10dacfd5dea04282a28e8d8397"
+    },
+    {
+      "id": "function:internal/orders/orders.go:Submit",
+      "type": "function",
+      "name": "Submit",
+      "parentId": "file:internal/orders/orders.go",
+      "source": {
+        "file": "internal/orders/orders.go",
+        "startLine": 17,
+        "endLine": 20
+      },
+      "contentHash": "sha256:446d511123f9be4e69b63161737db9a79e034af947768ccac64938c9e6b63426"
+    },
+    {
+      "id": "function:internal/orders/validate.go:validate",
+      "type": "function",
+      "name": "validate",
+      "parentId": "file:internal/orders/validate.go",
+      "source": {
+        "file": "internal/orders/validate.go",
+        "startLine": 5,
+        "endLine": 10
+      },
+      "contentHash": "sha256:1bb42c49b6e39a4f8bfd8cd150e16ba46eafeeb96021c5f0cf333fe1b47bc400"
+    },
+    {
+      "id": "function:internal/store/store.go:Cache.Save",
+      "type": "function",
+      "name": "Save",
+      "parentId": "class:internal/store/store.go:Cache",
+      "source": {
+        "file": "internal/store/store.go",
+        "startLine": 19,
+        "endLine": 21
+      },
+      "contentHash": "sha256:bacf03968dd63cbf08eab1abacbdecbab8b37cdb7ec1f0b5e15a6bb8b75ab55c"
+    },
+    {
+      "id": "function:internal/store/store.go:Repo.Save",
+      "type": "function",
+      "name": "Save",
+      "parentId": "class:internal/store/store.go:Repo",
+      "source": {
+        "file": "internal/store/store.go",
+        "startLine": 9,
+        "endLine": 11
+      },
+      "contentHash": "sha256:ce4b908ecbd5d10bb486c7941a1d2530dd1f4ba5b6dc4d982da1b283dabfacf9"
+    },
+    {
+      "id": "function:internal/store/store.go:Repo.flush",
+      "type": "function",
+      "name": "flush",
+      "parentId": "class:internal/store/store.go:Repo",
+      "source": {
+        "file": "internal/store/store.go",
+        "startLine": 13,
+        "endLine": 15
+      },
+      "contentHash": "sha256:20ffcdc88630cff27940660d2f2a35dc6fd4a248edb852cfb3ceb5ba0f2d36a8"
+    },
+    {
+      "id": "project:root",
+      "type": "project",
+      "name": "go-small"
+    }
+  ],
+  "edges": [
+    {
+      "from": "file:cmd/shop/main.go",
+      "to": "file:internal/orders/count.go",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "cmd/shop/main.go",
+        "line": 3
+      }
+    },
+    {
+      "from": "file:cmd/shop/main.go",
+      "to": "file:internal/orders/orders.go",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "cmd/shop/main.go",
+        "line": 3
+      }
+    },
+    {
+      "from": "file:cmd/shop/main.go",
+      "to": "file:internal/orders/validate.go",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "cmd/shop/main.go",
+        "line": 3
+      }
+    },
+    {
+      "from": "file:internal/orders/orders.go",
+      "to": "file:internal/store/store.go",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "internal/orders/orders.go",
+        "line": 6
+      }
+    },
+    {
+      "from": "function:cmd/shop/main.go:main",
+      "to": "function:cmd/shop/main.go:run",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "cmd/shop/main.go",
+        "line": 7
+      }
+    },
+    {
+      "from": "function:cmd/shop/main.go:main",
+      "to": "function:internal/orders/orders.go:Submit",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "cmd/shop/main.go",
+        "line": 6
+      }
+    },
+    {
+      "from": "function:internal/orders/count.go:Service.Count",
+      "to": "function:internal/orders/count.go:countdown",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "internal/orders/count.go",
+        "line": 4
+      }
+    },
+    {
+      "from": "function:internal/orders/count.go:countdown",
+      "to": "function:internal/orders/count.go:countdown",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "internal/orders/count.go",
+        "line": 11
+      }
+    },
+    {
+      "from": "function:internal/orders/orders.go:Service.Place",
+      "to": "function:internal/orders/validate.go:validate",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "internal/orders/orders.go",
+        "line": 23
+      }
+    },
+    {
+      "from": "function:internal/orders/orders.go:Submit",
+      "to": "function:internal/orders/orders.go:NewService",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "internal/orders/orders.go",
+        "line": 18
+      }
+    },
+    {
+      "from": "function:internal/store/store.go:Repo.Save",
+      "to": "function:internal/store/store.go:Repo.flush",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "internal/store/store.go",
+        "line": 10
+      }
+    }
+  ],
+  "unresolvedCalls": [
+    {
+      "from": "function:internal/orders/orders.go:Service.Place",
+      "name": "Save",
+      "evidence": {
+        "file": "internal/orders/orders.go",
+        "line": 26
+      },
+      "candidates": [
+        "function:internal/store/store.go:Cache.Save",
+        "function:internal/store/store.go:Repo.Save"
+      ]
+    }
+  ],
+  "entryPoints": [
+    {
+      "id": "entry:main-function:cmd-shop",
+      "kind": "main-function",
+      "name": "cmd/shop",
+      "target": "function:cmd/shop/main.go:main",
+      "calls": [],
+      "evidence": {
+        "file": "cmd/shop/main.go",
+        "line": 5
+      },
+      "provenance": "syntactic"
+    }
+  ]
+}

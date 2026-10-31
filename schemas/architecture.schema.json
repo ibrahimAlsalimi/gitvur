@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ArchitectureArtifact",
+  "description": "Standalone agent output. The index fingerprint is supplied by `gitvur packet`.\nLayout and validation status are deliberately not part of the authored contract.",
+  "type": "object",
+  "properties": {
+    "architecture": {
+      "$ref": "#/$defs/Architecture"
+    },
+    "commitSha": {
+      "type": "string"
+    },
+    "designNotes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "indexHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "commitSha",
+    "indexHash",
+    "architecture"
+  ],
+  "$defs": {
+    "Architecture": {
+      "type": "object",
+      "properties": {
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArchitectureComponent"
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArchitectureRelationship"
+          }
+        },
+        "summary": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "summary",
+        "components",
+        "relationships"
+      ]
+    },
+    "ArchitectureComponent": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "parent": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "responsibility": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArchitectureSource"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "responsibility",
+        "sources",
+        "provenance",
+        "evidence"
+      ]
+    },
+    "ArchitectureRelationship": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "from": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "from",
+        "to",
+        "kind",
+        "label",
+        "provenance",
+        "evidence"
+      ]
+    },
+    "ArchitectureSource": {
+      "type": "object",
+      "properties": {
+        "basedOnHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "node": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "node",
+        "basedOnHash"
+      ]
+    },
+    "Evidence": {
+      "description": "A location that justifies an edge: the line where the relationship is visible.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Path relative to the repository root, `/`-separated.",
+          "type": "string"
+        },
+        "line": {
+          "description": "1-based line number.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "line"
+      ]
+    },
+    "Provenance": {
+      "description": "Who established a relationship. Order (used only as a sort tie-breaker):\n`syntactic`, `semantic`, `ai`.",
+      "type": "string",
+      "enum": [
+        "syntactic",
+        "semantic",
+        "ai"
+      ]
+    }
+  }
+}

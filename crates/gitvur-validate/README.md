@@ -191,13 +191,29 @@ architecture-* issues; changed hashes are stale warnings. These checks establish
 natural-language architectural truth still requires source review. The viewer excludes rejected
 and stale components and their AI relationships while retaining structural dependencies.
 
-## Planned Phase 16 standalone artifact validation
+## Standalone architecture validation (Phase 16)
 
-The revised design proposes `.gitvur/architecture.json`; the checks above describe the existing
-annotation extension, not support for that proposed standalone artifact. Future validation will
-check its schema, indexed source IDs, component/group/relationship references, safe evidence
-locations and stale or missing references. Unsupported interactions are unresolved when no
-deterministic proof exists; schema/reference success alone does not prove semantic correctness.
-Computed findings preserve structural versus AI provenance. See
-[the Phase 16 plan](../../PHASE_16_ARCHITECTURE_DIAGRAM.md) for status and compatibility design.
-No validator changes or new commands are part of this documentation update.
+The existing validate/stale/packet paths load optional `.gitvur/architecture.json`. Schema errors
+use `architecture-schema`; schemaVersion 1, nonempty commitSha and a SHA-256 indexHash are
+required. The standalone artifact takes precedence over legacy annotation architecture even
+when invalid. No file is migrated or authored by validation.
+
+Checks cover component/relationship IDs, names and responsibilities, indexed references/hashes,
+acyclic groups, endpoints and readable evidence bounded by source ranges. Group evidence can
+refer to descendants; semantic source membership may overlap. Current on-disk source text is
+hashed too, so stale cached indexes cannot conceal source changes. A changed canonical index
+fingerprint yields `architecture-snapshot`; changed/missing source text yields
+`architecture-stale`. Repository validation uses a fresh index; the read-only bundle loader
+also indexes afresh when a standalone artifact exists. No repository code runs.
+
+`invokes`/`calls` interactions can have matching indexed calls, and `imports`/`depends_on`
+interactions matching imports, with endpoints owned by referenced components and a cited
+matching edge location. Other meanings are not proved by those edges. Valid, source-grounded
+AI relationships without this deterministic proof receive warning `architecture-unresolved`;
+non-AI relationships claiming such proof receive error `architecture-unsupported`. Provenance
+is never upgraded. Even matching references and calls cannot prove every natural-language label.
+The legacy exact-target/label heuristic applies only to legacy annotations.
+
+The UI blocks an erroneous map with a repair state, retains source-stale maps with visible
+review indicators, and labels unresolved relationships explicitly. Missing architecture gets
+an empty state with a separate Raw structure choice; Map, Docs and Flows continue working.

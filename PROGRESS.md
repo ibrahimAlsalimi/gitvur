@@ -1214,6 +1214,100 @@ Open questions:
   No root documentation-check script is defined; runtime tests are not needed for Markdown-only
   changes. Documentation checks do not assert that the proposed schema or CLI support exists.
 
+## 2026-10-31 — Document go-small with the current agent contract
+
+- Documented an isolated copy first, then indexed `fixtures/go-small` with the existing CLI
+  and copied the reviewed agent annotations into its `.gitvur/` directory. Generated manifest,
+  structure and report are CLI outputs; no Go source or `expected/` files changed.
+- Added three responsibility modules, 20 source descriptions, two AI call edges and one curated
+  sample-order flow. Receiver evidence resolves Submit → Service.Place (local constructor)
+  and Service.Place → Repo.Save (concrete `*store.Repo` field); the deterministic ambiguous
+  call remains in structure. The flow follows the nonempty-name path through a no-op flush.
+- Added three source-backed components and two relationships using the currently supported
+  optional `annotations.architecture` format. Descriptions explicitly distinguish store stubs
+  from actual persistence. No proposed standalone `architecture.json` was created; planned
+  Phase 16 instructions remain inactive. No repository code was executed.
+- Verification: `gitvur validate fixtures/go-small` reports 23 documented (20 source elements
+  plus three modules), zero stale/undocumented, zero errors and zero warnings; `gitvur flows`
+  reports the flow current; incremental packet has zero todo and zero unassigned files.
+  `git diff --check` passes. No suspicious instruction-like repository content was encountered.
+- Existing untracked `fixtures/c-small/src/.gitvur/` remains untouched. No feature implementation
+  or dependencies added; no unresolved documentation warnings.
+
+## 2026-10-31 — Phase 16 redesign — saved, agent-generated architecture maps
+
+- Implemented the subsequently authorized architecture redesign. Earlier planning-only and
+  directory-enrichment sessions above remain historical. Diagram now defaults to the saved
+  semantic map: summary, responsibilities, important entry points, subsystems and labeled
+  interactions. It never fills unclaimed areas with directory nodes or import arrows.
+- Contract: optional `.gitvur/architecture.json`, independent schemaVersion 1, informational
+  commitSha, canonical indexHash, optional designNotes and the version-1 architecture model.
+  Generated standalone schema and TypeScript bindings added. Source hashes and arch IDs are
+  reused; layout coordinates and computed statuses stay out of authored semantic data.
+- Compatibility: standalone data takes precedence even when malformed. Without it, legacy
+  annotation architecture remains readable as authored components only. No automatic migration
+  or write occurs on open. Missing data gets an explicit empty state; an authored empty map
+  retains its explanation without invented components. Raw structure is a separate secondary
+  directory/dependency view, never presented as equivalent to architecture.
+- Validation: schema/version, IDs, indexed references, endpoints, hierarchy, source-range evidence,
+  snapshot and on-disk source freshness. Groups may cite descendants without inventing source
+  ownership; semantic memberships can overlap. Direct cited calls/imports support only their
+  corresponding kinds. Traceable AI interpretations without deterministic proof remain
+  architecture-unresolved warnings; provenance is preserved. Errors block the map; stale sources
+  and unresolved interactions remain visibly marked. Reference validity does not prove semantics.
+- CLI/bundle/agent: existing validate/stale/packet paths load the artifact. Packets provide prior
+  output, legacy context, schema version, index fingerprint and create/review/repair/preserve
+  action. Stale diagnostics go to stderr without changing the source-ID JSON output. Bundle open
+  indexes afresh for standalone references and supplies a fresh fingerprint for evidence-cache
+  invalidation. Agent section 12 is active; incremental review preserves unaffected data/IDs.
+- UI: React Flow and the existing Dagre worker now render subsystem containers, with readable
+  responsibilities, labeled interactions and entry badges. Long shallow stories fold into
+  reading rows; fit-on-load, fit/reset, search and explicit Raw structure controls are retained.
+  Pointer/keyboard selection explains components and relationships, evidence, related flows,
+  source ranges and Docs/Map navigation. Shared docs backlinks receive distinct region labels;
+  evidence and unselected text retain contrast in both themes.
+- Exports: Mermaid includes responsibilities, hierarchy, provenance line styles and review notes;
+  SVG/PNG reuse safe save-dialog exports. Exports remove selection dimming so the whole map
+  remains legible. No AI invocation occurs on tab open, and analyzed repository code is never run.
+  No dependencies, extractor logic or existing golden expectations changed.
+- Fixtures/review: moved the previously documented Go fixture's reviewed architecture into a
+  standalone artifact, keeping normal annotations/flow documentation. It has three components,
+  zero validation errors and one honest unresolved save-interaction warning (the deterministic
+  indexer cannot resolve that receiver call); its incremental packet says preserve. Added a
+  shared five-component Python artifact checked against real fixture sources. Source review
+  distinguishes in-memory saved records/stubs from actual persistence. Reviewed eight new
+  light/dark overview, inspector, Go and subsystem screenshots; discarded regenerated unrelated
+  tracked Docs/Flows screenshots. Existing untracked C fixture artifacts remain untouched.
+- Verification: cargo fmt --all --check, strict workspace Clippy and cargo test --workspace pass;
+  frontend typecheck/lint, 110 unit tests, production build and all 259 contrast checks pass.
+  All 14 Diagram browser tests pass in light/dark (missing/empty/invalid/stale/legacy models,
+  keyboard inspector selection, navigation, Mermaid and SVG/PNG). All 26 existing Docs/Flows
+  browser regressions passed separately. Schema/binding drift, safe paths, read-only compatibility,
+  incremental packets, source freshness and grouped layout have coverage. git diff --check and
+  local Markdown-link review pass. Pre-existing ResizeObserver/Map handle warnings remain parked.
+- Limits/follow-up: human semantic review and visual evaluation on substantially larger real
+  repositories are still needed. Native desktop save dialogs were not manually exercised in
+  this session; browser exports and backend path confinement passed. SVG retains the existing
+  foreignObject-based exporter. Camera/selection reset on leaving Diagram; no new persistence
+  policy or AI runtime was added. Repository-open indexing cost merits measurement on large repos.
+
+## 2026-10-31 — Wallz documentation for the architecture-map trial
+
+- Reviewed `/home/crynexl/Projects/tests/wallz` as data in an isolated copy. Existing nine
+  modules, 947 descriptions, 26 agent entry points and eight flows were already current and
+  remain byte-identical. No Wallz code, builds, scripts or tests were executed.
+- Added `.gitvur/architecture.json` with 11 meaningful components, 19 source-backed interactions
+  and one application-services subsystem. The map covers HTTP/runtime, identity, social features,
+  photos/privacy/likes, wall/discovery, JPEG workers, cleanup, PostgreSQL, S3 storage and local
+  tools. Flutter remains explicitly a placeholder, not an invented implemented frontend.
+- Published the artifact and regenerated only the target validation report. Existing manifest,
+  structure and annotations are unchanged. Source snapshot matches the actual Wallz revision.
+- Validation: 956 documented, zero stale/undocumented, zero errors; 14 architecture-unresolved
+  warnings retain semantic interpretations the deterministic indexer cannot prove. The final
+  incremental packet says preserve with no source/flow work. Gitvur's architecture model, grouped
+  layout and Mermaid export accept all 11 components without raw directory fallback. Browser
+  evaluation against this real repository was not performed in this documentation session.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).

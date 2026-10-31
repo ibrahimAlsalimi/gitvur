@@ -1,4 +1,4 @@
-//! Optional agent-authored architecture, independently versioned within annotations v0.3.
+//! Agent-authored architecture: standalone artifact plus legacy annotation compatibility.
 use crate::{Evidence, Provenance};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -65,4 +65,33 @@ impl Architecture {
             r.evidence.dedup();
         }
     }
+}
+
+/// Standalone agent output. The index fingerprint is supplied by `gitvur packet`.
+/// Layout and validation status are deliberately not part of the authored contract.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ArchitectureArtifact {
+    #[schemars(range(min = 1, max = 1))]
+    pub schema_version: u32,
+    pub commit_sha: String,
+    #[schemars(regex(pattern = r"^sha256:[0-9a-f]{64}$"))]
+    pub index_hash: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub design_notes: Vec<String>,
+    pub architecture: Architecture,
+}
+
+impl ArchitectureArtifact {
+    pub fn canonicalize(&mut self) {
+        self.architecture.canonicalize();
+    }
+}
+
+/// Canonical structural snapshot identity; independent of manifest timestamps.
+pub fn architecture_index_hash(structure: &crate::Structure) -> String {
+    let mut structure = structure.clone();
+    structure.canonicalize();
+    crate::content_hash(&crate::to_canonical_json(&structure))
 }

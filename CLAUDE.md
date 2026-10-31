@@ -60,6 +60,7 @@ Files in `<repo>/.gitvur/`, one writer each:
 | `manifest.json` | extractor |
 | `structure.json` | extractor |
 | `annotations.json` | documenting agent |
+| `architecture.json` (optional, independent v1) | documenting agent |
 | `report.json` | validator |
 
 Node ID format (exact rules in `crates/gitvur-schema/README.md` once Phase 01 lands):
@@ -153,17 +154,20 @@ A session is not done until `cargo fmt`, `clippy`, `cargo test`, and (for app wo
 - `gitvur packet` carries `entryPoints`, a trace per entry, and (incremental) `staleFlows`/`brokenFlows`. Agent rules: `agent/codeDOC.md` section 11.
 - `fixtures/py-flows` and `fixtures/ts-flows` have reviewed goldens and committed, zero-issue `.gitvur/`. Existing py-small/ts-small data stays frozen; the Flows UI is Phase 15.
 
-## Architecture diagram (Phase 16 — revised design, planned)
+## Architecture diagram (Phase 16)
 
-- The agreed target pipeline is Indexer → Documentation Agent → Architecture Artifact →
-  Validator → Diagram UI. The agent interprets architecture during normal documentation;
-  the indexer supplies deterministic facts and indexed identities, not semantic architecture.
-- Proposed `.gitvur/architecture.json` is separate from annotations and rendering layout.
-  The Diagram tab reads the saved, validated artifact without invoking AI. Missing architecture
-  leaves Map, Docs and Flows usable. Architecture remains optional, local-first and read-only.
-- Reference/evidence validation does not prove semantic correctness; unsupported interactions
-  remain unresolved. See [the implementation plan](PHASE_16_ARCHITECTURE_DIAGRAM.md).
-- Existing code has an earlier directory-based Diagram with optional `annotations.architecture`.
-  That is legacy behavior, not implementation of the revised contract. No runtime migration is
-  part of this documentation update. Agent section 12 describes the legacy optional contract;
-  section 13 is future-only. Do not activate the proposed artifact until implementation lands.
+- Pipeline: Indexer → Documentation Agent → `.gitvur/architecture.json` → Validator → Diagram UI.
+  The agent writes the semantic map during normal documentation; indexer facts/IDs stay authoritative.
+- Optional standalone artifact has independent schemaVersion 1, index fingerprint, revision,
+  design notes and architecture model. `gitvur packet` supplies prior output, fingerprint,
+  findings and create/review/repair/preserve action. Agent section 12 is active.
+- Diagram defaults to saved authored components/relationships only, with subsystem containers,
+  summary, responsibilities and entry points. Missing data gets an empty state; Raw structure
+  is an explicit secondary exploration view. Map/Docs/Flows remain independent.
+- Standalone data takes precedence; legacy `annotations.architecture` remains readable only
+  when absent. No migration, AI invocation or repository write occurs on tab open.
+- Validation checks schema, safe evidence, references, source/snapshot freshness and hierarchy.
+  Traceable AI interactions without deterministic proof remain unresolved; checks do not prove
+  semantics. Errors block the map; stale/unresolved findings are visible. Layout is separate.
+- React Flow/Dagre/worker, inspector/Map/Docs/flow links and safe Mermaid/SVG/PNG exports are reused.
+  No new dependencies or AI runtime. See `PHASE_16_ARCHITECTURE_DIAGRAM.md` and `PROGRESS.md`.

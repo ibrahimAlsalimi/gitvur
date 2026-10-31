@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "commitSha": "357d800",
+  "indexHash": "sha256:e12fb0bd76ddf7a7e912973a0308d0fba8df77337ce6d7d72a09944c2b6cb535",
+  "designNotes": [
+    "Repository and cache implementations are no-op stubs; no data is persisted."
+  ],
+  "architecture": {
+    "version": 1,
+    "summary": "A tiny shop CLI submits a named order through a validating service to a no-op store. It demonstrates Go package and receiver relationships, not a working persistence system.",
+    "components": [
+      {
+        "id": "arch:order-handling",
+        "name": "Order handling",
+        "kind": "service",
+        "responsibility": "Constructs the service, rejects empty names and delegates saving; also contains a recursive counting example.",
+        "sources": [
+          {
+            "node": "file:internal/orders/count.go",
+            "basedOnHash": "sha256:26a4c46c8751292e760820ddd73e3b4a5280467c1c9996d18f3aec6878dcfcdf"
+          },
+          {
+            "node": "file:internal/orders/orders.go",
+            "basedOnHash": "sha256:aca312d3243feac15286a0dc577eac4bf8d184f3d1f738b4e4254c7b4d5e6a90"
+          },
+          {
+            "node": "file:internal/orders/validate.go",
+            "basedOnHash": "sha256:453b1ce266f800bb7baf2b78d4370bcb822328a8ffa4be52fa9c7be44b9b3185"
+          }
+        ],
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "internal/orders/orders.go",
+            "line": 23
+          }
+        ]
+      },
+      {
+        "id": "arch:shop-cli",
+        "name": "Shop CLI",
+        "kind": "cli",
+        "responsibility": "Submits a sample book order and ignores any returned error.",
+        "sources": [
+          {
+            "node": "file:cmd/shop/main.go",
+            "basedOnHash": "sha256:ce6a5337befd7b26189d4e10bd2a43fe120fb11aed95194b240711fa7be2c323"
+          }
+        ],
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "cmd/shop/main.go",
+            "line": 6
+          }
+        ]
+      },
+      {
+        "id": "arch:store-stubs",
+        "name": "Store stubs",
+        "kind": "subsystem",
+        "responsibility": "Defines the save contract and no-op repository/cache implementations; performs no persistence.",
+        "sources": [
+          {
+            "node": "file:internal/store/store.go",
+            "basedOnHash": "sha256:cef83a17b27951c6a4eb6feb8afb70baedcf5b746bd3aa75ad4780aa4406be4e"
+          },
+          {
+            "node": "function:internal/store/store.go:Repo.Save",
+            "basedOnHash": "sha256:ce4b908ecbd5d10bb486c7941a1d2530dd1f4ba5b6dc4d982da1b283dabfacf9"
+          }
+        ],
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "internal/store/store.go",
+            "line": 10
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "id": "arch:cli-submits-order",
+        "from": "arch:shop-cli",
+        "to": "arch:order-handling",
+        "kind": "invokes",
+        "label": "Submits a sample order",
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "cmd/shop/main.go",
+            "line": 6
+          }
+        ]
+      },
+      {
+        "id": "arch:orders-delegate-save",
+        "from": "arch:order-handling",
+        "to": "arch:store-stubs",
+        "kind": "invokes",
+        "label": "Delegates saving to a no-op repository",
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "internal/orders/orders.go",
+            "line": 26
+          }
+        ]
+      }
+    ]
+  }
+}

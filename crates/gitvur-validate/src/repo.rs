@@ -35,10 +35,12 @@ pub fn resolve_in_repo(root: &Path, relpath: &str) -> Option<PathBuf> {
 
 /// Reads `.gitvur/<name>`. `Ok(None)` when it does not exist; `Err` when it exists but is
 /// unreadable or resolves outside the repository.
-fn read_gitvur_file(root: &Path, name: &str) -> Result<Option<String>, String> {
+pub(crate) fn read_gitvur_file(root: &Path, name: &str) -> Result<Option<String>, String> {
     let relpath = format!(".gitvur/{name}");
-    if fs::symlink_metadata(root.join(&relpath)).is_err() {
-        return Ok(None);
+    match fs::symlink_metadata(root.join(&relpath)) {
+        Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(None),
+        Err(e) => return Err(format!("cannot inspect {relpath}: {e}")),
+        Ok(_) => {}
     }
     let path = resolve_in_repo(root, &relpath)
         .ok_or_else(|| format!("{relpath} resolves outside the repository"))?;
