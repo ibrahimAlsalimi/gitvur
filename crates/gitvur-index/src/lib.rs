@@ -19,6 +19,8 @@ mod resolve;
 pub mod walk;
 
 use lang::LanguageBackend;
+use lang::c::C;
+use lang::go::Go;
 use lang::python::Python;
 use lang::typescript::TypeScript;
 pub use output::write_output;
@@ -49,14 +51,25 @@ pub enum IndexError {
     },
 }
 
+/// Every language backend, in the order they are asked whether they handle a path.
+fn backends(go_modules: Vec<(String, String)>) -> Vec<Box<dyn LanguageBackend>> {
+    vec![
+        Box::new(Python::new()),
+        Box::new(TypeScript::new()),
+        Box::new(C::new()),
+        Box::new(Go::new(go_modules)),
+    ]
+}
+
 /// Indexes the repository at `repo`.
 pub fn index(repo: &Path, opts: &IndexOptions) -> Result<IndexOutput, IndexError> {
     let root = repo.canonicalize().map_err(|source| IndexError::Repo {
         path: repo.to_path_buf(),
         source,
     })?;
-    let backends: Vec<Box<dyn LanguageBackend>> =
-        vec![Box::new(Python::new()), Box::new(TypeScript::new())];
+    let mut warnings = Vec::new();
+    let go_modules = config::go_modules(&root, &mut warnings);
+    let backends = backends(go_modules);
     let backend_for = |relpath: &str| {
         backends
             .iter()
@@ -64,7 +77,8 @@ pub fn index(repo: &Path, opts: &IndexOptions) -> Result<IndexOutput, IndexError
             .map(AsRef::as_ref)
     };
 
-    let (relpaths, mut warnings) = walk::discover(&root, |p| backend_for(p).is_some());
+    let (relpaths, walk_warnings) = walk::discover(&root, |p| backend_for(p).is_some());
+    warnings.extend(walk_warnings);
     let mut files = Vec::with_capacity(relpaths.len());
     let mut languages = BTreeSet::new();
     for relpath in relpaths {
@@ -133,12 +147,12 @@ pub fn index(repo: &Path, opts: &IndexOptions) -> Result<IndexOutput, IndexError
 /// that materialise a revision write only what indexing needs; directories in
 /// [`walk::SKIPPED_DIRS`] are still the walker's to skip.
 pub fn index_inputs() -> impl Fn(&str) -> bool {
-    let backends: Vec<Box<dyn LanguageBackend>> =
-        vec![Box::new(Python::new()), Box::new(TypeScript::new())];
+    let backends = backends(Vec::new());
     move |relpath: &str| {
         relpath == ".gitignore"
             || relpath.ends_with("/.gitignore")
             || config::is_config(relpath)
+            || config::is_go_mod(relpath)
             || backends.iter().any(|b| b.handles(relpath))
     }
 }

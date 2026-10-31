@@ -29,6 +29,8 @@ pub struct RepoBundle {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, TS)]
 #[serde(rename_all = "lowercase")]
 pub enum SourceLanguage {
+    C,
+    Go,
     Python,
     Typescript,
     Text,
@@ -262,6 +264,10 @@ fn language_of(file: &str) -> SourceLanguage {
         .any(|e| file.ends_with(e))
     {
         SourceLanguage::Typescript
+    } else if file.ends_with(".c") || file.ends_with(".h") {
+        SourceLanguage::C
+    } else if file.ends_with(".go") {
+        SourceLanguage::Go
     } else {
         SourceLanguage::Text
     }

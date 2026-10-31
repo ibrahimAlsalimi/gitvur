@@ -84,20 +84,29 @@
       ]
     },
     "EntryKind": {
-      "type": "string",
-      "enum": [
-        "cli-command",
-        "console-script",
-        "event-handler",
-        "http-route",
-        "job",
-        "main-guard",
-        "npm-script",
-        "other",
-        "package-bin",
-        "package-main",
-        "test",
-        "top-level-call"
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "cli-command",
+            "console-script",
+            "event-handler",
+            "http-route",
+            "job",
+            "main-guard",
+            "npm-script",
+            "other",
+            "package-bin",
+            "package-main",
+            "test",
+            "top-level-call"
+          ]
+        },
+        {
+          "description": "C `main` or Go `func main` in `package main`; the target is the function.",
+          "type": "string",
+          "const": "main-function"
+        }
       ]
     },
     "EntryPoint": {

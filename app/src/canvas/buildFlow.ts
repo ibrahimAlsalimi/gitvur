@@ -1,4 +1,5 @@
 import type { Model, ModelNode } from "../model/buildModel";
+import { languageOf } from "./text";
 import { UNASSIGNED_MODULE_ID } from "../model/buildModel";
 import { fileRows } from "../layout/fromModel";
 import type { LayoutResult } from "../layout/types";
@@ -29,12 +30,6 @@ export function nodeLabel(node: ModelNode, method = false): string {
   return node.synthetic
     ? `${kind} ${node.name}`
     : `${kind} ${node.name}, ${STATUS_WORD[node.docStatus]}`;
-}
-
-function languageOf(path: string): "py" | "ts" | "file" {
-  if (path.endsWith(".py")) return "py";
-  if (/\.(?:ts|tsx|mts|cts)$/.test(path)) return "ts";
-  return "file";
 }
 
 function countDescendants(model: Model, id: string): number {

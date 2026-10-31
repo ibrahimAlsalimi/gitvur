@@ -9,8 +9,21 @@ use std::collections::BTreeSet;
 use gitvur_schema::Language;
 use tree_sitter::Node;
 
+pub mod c;
+pub mod go;
 pub mod python;
 pub mod typescript;
+
+/// Where a bare called name may be defined beyond its own file and imports.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NameScope {
+    /// Only the file and what it imports (Python, TypeScript).
+    File,
+    /// Every file of the same language in the same directory (a Go package).
+    Package,
+    /// Every non-`internal` top-level function of the same language (C linkage).
+    Program,
+}
 
 /// One language supported by the extractor.
 pub trait LanguageBackend {
@@ -35,6 +48,11 @@ pub trait LanguageBackend {
     /// for languages where an imported name may itself be a module.
     fn submodule(&self, _module: &str, _name: &str) -> Option<String> {
         None
+    }
+
+    /// How far bare names reach beyond the file (see [`NameScope`]).
+    fn name_scope(&self) -> NameScope {
+        NameScope::File
     }
 }
 
@@ -84,6 +102,11 @@ pub struct Definition {
     pub parent: Option<usize>,
     pub start_line: u32,
     pub end_line: u32,
+    /// For a method declared apart from its type (Go): the type's name. The ID is then
+    /// qualified `Type.name` although the definition sits at file level.
+    pub receiver: Option<String>,
+    /// Not visible outside its file (C `static`): excluded from [`NameScope::Program`].
+    pub internal: bool,
 }
 
 /// One import statement (or one module of a multi-module statement).
@@ -174,6 +197,9 @@ pub struct ParsedEntry {
     pub name: String,
     pub line: u32,
     pub calls: Vec<EntryCall>,
+    /// The entry is this definition (index into [`ParsedFile::definitions`]) rather than
+    /// the file's top-level code, e.g. a C or Go `main` function.
+    pub target: Option<usize>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -18,7 +18,7 @@ generatedAt: string, extractor: ExtractorInfo, languages: Array<Language>, };
 
 export type ExtractorInfo = { name: string, version: string, };
 
-export type Language = "python" | "typescript";
+export type Language = "c" | "go" | "python" | "typescript";
 
 export type Structure = { nodes: Array<Node>, edges: Array<Edge>,
 /**
@@ -96,7 +96,7 @@ target: string | null, raw?: string, calls: Array<string>,
  */
 evidence?: Evidence, provenance: Provenance, };
 
-export type EntryKind = "cli-command" | "console-script" | "event-handler" | "http-route" | "job" | "main-guard" | "npm-script" | "other" | "package-bin" | "package-main" | "test" | "top-level-call";
+export type EntryKind = "cli-command" | "console-script" | "event-handler" | "http-route" | "job" | "main-function" | "main-guard" | "npm-script" | "other" | "package-bin" | "package-main" | "test" | "top-level-call";
 
 export type Flow = { id: string, name: string, description: string, entryPoint: string,
 /**
@@ -272,7 +272,7 @@ export type SourceSlice = { file: string,
  */
 startLine: number, lines: Array<string>, language: SourceLanguage, };
 
-export type SourceLanguage = "python" | "typescript" | "text";
+export type SourceLanguage = "c" | "go" | "python" | "typescript" | "text";
 
 export type RecentRepo = { path: string, name: string,
 /**

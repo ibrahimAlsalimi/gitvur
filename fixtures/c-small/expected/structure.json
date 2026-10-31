@@ -1,0 +1,335 @@
+{
+  "nodes": [
+    {
+      "id": "class:include/store.h:item",
+      "type": "class",
+      "name": "item",
+      "parentId": "file:include/store.h",
+      "source": {
+        "file": "include/store.h",
+        "startLine": 4,
+        "endLine": 7
+      },
+      "contentHash": "sha256:0fc8d9043e5bf2fb4af62853522eb2f699b5e71088b51040fd9aa11b264a6af2"
+    },
+    {
+      "id": "class:include/store.h:stats_t",
+      "type": "class",
+      "name": "stats_t",
+      "parentId": "file:include/store.h",
+      "source": {
+        "file": "include/store.h",
+        "startLine": 9,
+        "endLine": 11
+      },
+      "contentHash": "sha256:6e25119fa102f69d929a7915b67a0e417751393bf00870104f0085a13898b1ef"
+    },
+    {
+      "id": "file:include/store.h",
+      "type": "file",
+      "name": "store.h",
+      "parentId": "project:root",
+      "source": {
+        "file": "include/store.h",
+        "startLine": 1,
+        "endLine": 16
+      },
+      "contentHash": "sha256:f5deef377382ce6522ba3a0b26d7451b2f3c53629017a159c1fc2d2c8c3e19f8"
+    },
+    {
+      "id": "file:src/log_a.c",
+      "type": "file",
+      "name": "log_a.c",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/log_a.c",
+        "startLine": 1,
+        "endLine": 5
+      },
+      "contentHash": "sha256:329802cdc071e1b82748bbf86aef36c97fddffcadd4aa71c898fe8b2640b8fc5"
+    },
+    {
+      "id": "file:src/main.c",
+      "type": "file",
+      "name": "main.c",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/main.c",
+        "startLine": 1,
+        "endLine": 17
+      },
+      "contentHash": "sha256:5f79180b14d368da118e9cb46a359ea38e00de85099bb66f3676a119eb32c2b5"
+    },
+    {
+      "id": "file:src/store.c",
+      "type": "file",
+      "name": "store.c",
+      "parentId": "project:root",
+      "source": {
+        "file": "src/store.c",
+        "startLine": 1,
+        "endLine": 21
+      },
+      "contentHash": "sha256:08d939fcbd894ac01c71e2c6a40a17cb3926436012aa3cc6b25a23e9d0102bd7"
+    },
+    {
+      "id": "file:tools/log_b.c",
+      "type": "file",
+      "name": "log_b.c",
+      "parentId": "project:root",
+      "source": {
+        "file": "tools/log_b.c",
+        "startLine": 1,
+        "endLine": 14
+      },
+      "contentHash": "sha256:6cdba655a07d1e31140a99390186e8ca5dc70ae5007592bd3475de778a62ebf9"
+    },
+    {
+      "id": "function:src/log_a.c:log_line",
+      "type": "function",
+      "name": "log_line",
+      "parentId": "file:src/log_a.c",
+      "source": {
+        "file": "src/log_a.c",
+        "startLine": 3,
+        "endLine": 5
+      },
+      "contentHash": "sha256:151182d33d3507b59781c0198f85b7ed612b25b9f2675904a50623e8d11307c4"
+    },
+    {
+      "id": "function:src/main.c:fact",
+      "type": "function",
+      "name": "fact",
+      "parentId": "file:src/main.c",
+      "source": {
+        "file": "src/main.c",
+        "startLine": 3,
+        "endLine": 5
+      },
+      "contentHash": "sha256:6d06235a196ff4e3367968a7a82ebf701f060744b5f4557628e274992504f999"
+    },
+    {
+      "id": "function:src/main.c:main",
+      "type": "function",
+      "name": "main",
+      "parentId": "file:src/main.c",
+      "source": {
+        "file": "src/main.c",
+        "startLine": 11,
+        "endLine": 17
+      },
+      "contentHash": "sha256:2080aa072da55ae281fe0086d5b6f4ffe667f770ca226e35da6e61cca19cbc12"
+    },
+    {
+      "id": "function:src/main.c:run",
+      "type": "function",
+      "name": "run",
+      "parentId": "file:src/main.c",
+      "source": {
+        "file": "src/main.c",
+        "startLine": 7,
+        "endLine": 9
+      },
+      "contentHash": "sha256:86422e18182990290b98bc4d808e1389e84331ef464258eb5ce04122c2da6ee5"
+    },
+    {
+      "id": "function:src/store.c:store_report",
+      "type": "function",
+      "name": "store_report",
+      "parentId": "file:src/store.c",
+      "source": {
+        "file": "src/store.c",
+        "startLine": 19,
+        "endLine": 21
+      },
+      "contentHash": "sha256:b7c61920f0935f9fd34db45fd9e08dbebd77efc7bea13e22a9d1cb81576d825f"
+    },
+    {
+      "id": "function:src/store.c:store_save",
+      "type": "function",
+      "name": "store_save",
+      "parentId": "file:src/store.c",
+      "source": {
+        "file": "src/store.c",
+        "startLine": 10,
+        "endLine": 17
+      },
+      "contentHash": "sha256:7ccf64f80d83332bdaf55f6b645e227a0a6e8d4560dc9895933ce53e6c401641"
+    },
+    {
+      "id": "function:src/store.c:validate",
+      "type": "function",
+      "name": "validate",
+      "parentId": "file:src/store.c",
+      "source": {
+        "file": "src/store.c",
+        "startLine": 6,
+        "endLine": 8
+      },
+      "contentHash": "sha256:449d0d564eb97e69e40a93a8ec97e29ec9327a013fe993939077fb9b5197eb05"
+    },
+    {
+      "id": "function:tools/log_b.c:log_line",
+      "type": "function",
+      "name": "log_line",
+      "parentId": "file:tools/log_b.c",
+      "source": {
+        "file": "tools/log_b.c",
+        "startLine": 3,
+        "endLine": 5
+      },
+      "contentHash": "sha256:80c7ed6697c1e8ceb471ac84f459e30d429869f0689b338103cbdcbffcb634c5"
+    },
+    {
+      "id": "function:tools/log_b.c:main",
+      "type": "function",
+      "name": "main",
+      "parentId": "file:tools/log_b.c",
+      "source": {
+        "file": "tools/log_b.c",
+        "startLine": 11,
+        "endLine": 14
+      },
+      "contentHash": "sha256:5f9d8fc40b542bf532361899c88db5a01800b6c6dcde73d2b459560b9045f39b"
+    },
+    {
+      "id": "function:tools/log_b.c:tool_name",
+      "type": "function",
+      "name": "tool_name",
+      "parentId": "file:tools/log_b.c",
+      "source": {
+        "file": "tools/log_b.c",
+        "startLine": 7,
+        "endLine": 9
+      },
+      "contentHash": "sha256:f7643468ef3344827045f6a41b35e9a7548a730b837fa5be59971eab1fb75563"
+    },
+    {
+      "id": "project:root",
+      "type": "project",
+      "name": "c-small"
+    }
+  ],
+  "edges": [
+    {
+      "from": "file:src/main.c",
+      "to": "file:include/store.h",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.c",
+        "line": 1
+      }
+    },
+    {
+      "from": "file:src/store.c",
+      "to": "file:include/store.h",
+      "type": "imports",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/store.c",
+        "line": 2
+      }
+    },
+    {
+      "from": "function:src/main.c:fact",
+      "to": "function:src/main.c:fact",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.c",
+        "line": 4
+      }
+    },
+    {
+      "from": "function:src/main.c:main",
+      "to": "function:src/main.c:fact",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.c",
+        "line": 14
+      }
+    },
+    {
+      "from": "function:src/main.c:main",
+      "to": "function:src/main.c:run",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.c",
+        "line": 15
+      }
+    },
+    {
+      "from": "function:src/main.c:main",
+      "to": "function:src/store.c:store_save",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/main.c",
+        "line": 13
+      }
+    },
+    {
+      "from": "function:src/store.c:store_save",
+      "to": "function:src/store.c:validate",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "src/store.c",
+        "line": 11
+      }
+    },
+    {
+      "from": "function:tools/log_b.c:main",
+      "to": "function:tools/log_b.c:log_line",
+      "type": "calls",
+      "provenance": "syntactic",
+      "evidence": {
+        "file": "tools/log_b.c",
+        "line": 12
+      }
+    }
+  ],
+  "unresolvedCalls": [
+    {
+      "from": "function:src/store.c:store_save",
+      "name": "log_line",
+      "evidence": {
+        "file": "src/store.c",
+        "line": 15
+      },
+      "candidates": [
+        "function:src/log_a.c:log_line",
+        "function:tools/log_b.c:log_line"
+      ]
+    }
+  ],
+  "entryPoints": [
+    {
+      "id": "entry:main-function:src-main-c",
+      "kind": "main-function",
+      "name": "src/main.c",
+      "target": "function:src/main.c:main",
+      "calls": [],
+      "evidence": {
+        "file": "src/main.c",
+        "line": 11
+      },
+      "provenance": "syntactic"
+    },
+    {
+      "id": "entry:main-function:tools-log-b-c",
+      "kind": "main-function",
+      "name": "tools/log_b.c",
+      "target": "function:tools/log_b.c:main",
+      "calls": [],
+      "evidence": {
+        "file": "tools/log_b.c",
+        "line": 11
+      },
+      "provenance": "syntactic"
+    }
+  ]
+}

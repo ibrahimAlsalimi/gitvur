@@ -223,7 +223,8 @@ mapping or receiver-type inference is attempted. Script calls are metadata, not
 file-to-function graph edges; ambiguous sites use their entry ID in unresolvedCalls.
 
 Static kinds: main-guard, package-main, console-script, package-bin, npm-script,
-top-level-call. Agent kinds: http-route, cli-command, job, event-handler, test, other.
+top-level-call, main-function (C `main`, Go `func main` in `package main`; the target is
+the function). Agent kinds: http-route, cli-command, job, event-handler, test, other.
 Static provenance is syntactic; agent provenance is ai and requires evidence.
 Agents normally use agent kinds; a static kind is allowed for an entry the extractor
 cannot read (e.g. a `setup.cfg` console script) and is warned about when it duplicates
@@ -244,6 +245,10 @@ validator; see `crates/gitvur-validate/README.md` for every rule.
 
 Existing v0.2 golden graph files remain frozen. Legacy extraction tests compare their
 v0.2 projection; new py-flows/ts-flows goldens cover the complete v0.3 structure.
+
+Manifest `languages` values: `c`, `go`, `python`, `typescript` (sorted). `c` and `go` and the
+`main-function` entry kind were added within v0.3; older readers reject them, so the app and
+validator are updated together.
 
 ## 9. Trace output (Phase 14 Part C)
 

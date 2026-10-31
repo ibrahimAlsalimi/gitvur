@@ -57,6 +57,8 @@
     "Language": {
       "type": "string",
       "enum": [
+        "c",
+        "go",
         "python",
         "typescript"
       ]

@@ -8,7 +8,9 @@ use gitvur_schema::{
     content_hash, extract_lines, line_count,
 };
 
-use crate::lang::{Binding, CallSite, Callee, DefKind, DefaultExport, LanguageBackend, ParsedFile};
+use crate::lang::{
+    Binding, CallSite, Callee, DefKind, DefaultExport, LanguageBackend, NameScope, ParsedFile,
+};
 
 /// One discovered file, ready for resolution.
 pub(crate) struct SourceFile<'a> {
@@ -102,9 +104,10 @@ fn definition_ids(file: &SourceFile<'_>) -> Vec<String> {
     let mut qualified: Vec<String> = Vec::with_capacity(defs.len());
     let mut seen: HashMap<String, u32> = HashMap::new();
     for def in defs {
-        let base = match def.parent {
-            Some(p) => format!("{}.{}", qualified[p], def.name),
-            None => def.name.clone(),
+        let base = match (def.parent, &def.receiver) {
+            (Some(p), _) => format!("{}.{}", qualified[p], def.name),
+            (None, Some(receiver)) => format!("{receiver}.{}", def.name),
+            (None, None) => def.name.clone(),
         };
         let count = seen.entry(base.clone()).or_insert(0);
         *count += 1;
@@ -190,6 +193,12 @@ impl<'f, 'a> Resolver<'f, 'a> {
             let defs = definitions(file);
             for (di, def) in defs.iter().enumerate() {
                 match def.parent {
+                    // A method declared apart from its type is not a top-level name.
+                    None if def.receiver.is_some() => resolver
+                        .methods
+                        .entry(def.name.clone())
+                        .or_default()
+                        .push((fi, di)),
                     None => resolver.top_level[fi]
                         .entry(def.name.clone())
                         .or_default()
@@ -259,7 +268,12 @@ impl<'f, 'a> Resolver<'f, 'a> {
                     });
                     self.bindings[fi].insert(local.clone(), bound);
                 }
-                for target in targets.into_iter().flatten().filter(|&t| t != fi) {
+                let targets: Vec<usize> = targets
+                    .into_iter()
+                    .flatten()
+                    .flat_map(|t| package_files(files, t))
+                    .collect();
+                for target in targets.into_iter().filter(|&t| t != fi) {
                     let line = import_edges.entry((fi, target)).or_insert(import.line);
                     *line = (*line).min(import.line);
                 }
@@ -427,11 +441,15 @@ impl<'f, 'a> Resolver<'f, 'a> {
                     call.from.clone_from(&id);
                     structure.unresolved_calls.push(call);
                 }
+                let target = entry.target.map_or_else(
+                    || format!("file:{}", file.relpath),
+                    |d| self.ids[fi][d].clone(),
+                );
                 structure.entry_points.push(EntryPoint {
                     id,
                     kind: entry.kind,
                     name: entry.name.clone(),
-                    target: Some(format!("file:{}", file.relpath)),
+                    target: Some(target),
                     raw: None,
                     calls: calls.into_iter().collect(),
                     evidence: Some(Evidence {
@@ -469,17 +487,27 @@ impl<'f, 'a> Resolver<'f, 'a> {
                 let mut current = caller.and_then(|d| self.def((file, d)).parent);
                 while let Some(d) = current {
                     if self.def((file, d)).kind == DefKind::Class {
-                        let methods: Vec<DefRef> = self
+                        let mut methods: Vec<DefRef> = self
                             .children(file, d, name)
                             .into_iter()
                             .filter(|&r| self.def(r).kind == DefKind::Function)
                             .collect();
+                        if methods.is_empty() && self.scope(file) == NameScope::Package {
+                            methods = self.type_members(file, &self.def((file, d)).name, name);
+                        }
                         if !methods.is_empty() {
                             return decide(methods);
                         }
                         break;
                     }
                     current = self.def((file, d)).parent;
+                }
+                // A Go method declared apart from its type: look the type up in the package.
+                if let Some(receiver) = caller.and_then(|d| self.def((file, d)).receiver.clone()) {
+                    let methods = self.type_members(file, &receiver, name);
+                    if !methods.is_empty() {
+                        return decide(methods);
+                    }
                 }
                 self.unknown_receiver(name)
             }
@@ -530,6 +558,10 @@ impl<'f, 'a> Resolver<'f, 'a> {
         if let Some(found) = self.top_level[file].get(name) {
             return found.iter().map(|&d| (file, d)).collect();
         }
+        let shared = self.shared_candidates(file, name);
+        if !shared.is_empty() {
+            return shared;
+        }
         match self.bindings[file].get(name) {
             Some(Bound::Name {
                 file: Some(module),
@@ -563,6 +595,13 @@ impl<'f, 'a> Resolver<'f, 'a> {
             if let Some(found) = self.top_level[file].get(&name) {
                 return found.iter().map(|&d| (file, d)).collect();
             }
+            if self.scope(file) == NameScope::Package {
+                // A Go package exports what any of its files declares.
+                let found = self.shared_candidates(file, &name);
+                if !found.is_empty() {
+                    return found;
+                }
+            }
             match self.bindings[file].get(&name) {
                 Some(Bound::Name {
                     file: Some(next),
@@ -576,6 +615,61 @@ impl<'f, 'a> Resolver<'f, 'a> {
         Vec::new()
     }
 
+    fn scope(&self, file: usize) -> NameScope {
+        self.files[file].backend.name_scope()
+    }
+
+    /// Top-level definitions named `name` in the other files `file` shares names with: its
+    /// package (Go), or every file of its language where only non-internal functions count
+    /// (C). Empty for file-scoped languages.
+    fn shared_candidates(&self, file: usize, name: &str) -> Vec<DefRef> {
+        let others: Vec<usize> = match self.scope(file) {
+            NameScope::File => return Vec::new(),
+            NameScope::Package => package_files(self.files, file),
+            NameScope::Program => (0..self.files.len())
+                .filter(|&f| same_language(self.files, f, file))
+                .collect(),
+        };
+        let program = self.scope(file) == NameScope::Program;
+        others
+            .into_iter()
+            .filter(|&f| f != file)
+            .flat_map(|f| {
+                self.top_level[f]
+                    .get(name)
+                    .into_iter()
+                    .flatten()
+                    .map(move |&d| (f, d))
+            })
+            .filter(|&r| {
+                !program || (self.def(r).kind == DefKind::Function && !self.def(r).internal)
+            })
+            .collect()
+    }
+
+    /// Methods named `name` of type `type_name` anywhere in `file`'s package: children of
+    /// a class of that name, and methods declared apart from it.
+    fn type_members(&self, file: usize, type_name: &str, name: &str) -> Vec<DefRef> {
+        let mut found = Vec::new();
+        for f in package_files(self.files, file) {
+            for (d, def) in definitions(&self.files[f]).iter().enumerate() {
+                if def.kind != DefKind::Function || def.name != name {
+                    continue;
+                }
+                let parent_is_type = def.parent.is_some_and(|p| {
+                    let parent = self.def((f, p));
+                    parent.kind == DefKind::Class
+                        && parent.parent.is_none()
+                        && parent.name == type_name
+                });
+                if parent_is_type || def.receiver.as_deref() == Some(type_name) {
+                    found.push((f, d));
+                }
+            }
+        }
+        found
+    }
+
     /// Name matching on every in-repo method: only two or more candidates are kept.
     fn unknown_receiver(&self, name: &str) -> Outcome {
         match self.methods.get(name) {
@@ -583,6 +677,22 @@ impl<'f, 'a> Resolver<'f, 'a> {
             _ => Outcome::Drop,
         }
     }
+}
+
+fn same_language(files: &[SourceFile<'_>], a: usize, b: usize) -> bool {
+    files[a].backend.language() == files[b].backend.language()
+}
+
+/// The files that form one namespace with `file`: its directory's files of the same
+/// language for package-scoped languages (Go), else just `file`. Sorted by path.
+fn package_files(files: &[SourceFile<'_>], file: usize) -> Vec<usize> {
+    if files[file].backend.name_scope() != NameScope::Package {
+        return vec![file];
+    }
+    let dir = |f: usize| files[f].relpath.rsplit_once('/').map_or("", |(d, _)| d);
+    (0..files.len())
+        .filter(|&f| same_language(files, f, file) && dir(f) == dir(file))
+        .collect()
 }
 
 fn entry_id(

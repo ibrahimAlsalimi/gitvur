@@ -3,7 +3,7 @@ import type { Node, NodeProps } from "@xyflow/react";
 import type { CSSProperties } from "react";
 
 import { ClassGlyph, FunctionGlyph, LanguageGlyph } from "../canvas/glyphs";
-import { middleTruncate } from "../canvas/text";
+import { languageOf, middleTruncate } from "../canvas/text";
 import { copy } from "../copy";
 import type { EntryPoint, Provenance, TransitionKind } from "../generated/contract";
 import type { ModelNode } from "../model/buildModel";
@@ -219,10 +219,7 @@ export function NodeGlyph({ node }: { node: ModelNode | undefined }) {
   if (node.kind === "class") return <ClassGlyph />;
   if (node.kind === "function")
     return <FunctionGlyph method={node.id.split(":").at(-1)?.includes(".") ?? false} />;
-  const ext = node.name.split(".").at(-1);
-  return (
-    <LanguageGlyph language={ext === "py" ? "py" : ext === "ts" || ext === "tsx" ? "ts" : "file"} />
-  );
+  return <LanguageGlyph language={languageOf(node.name)} />;
 }
 
 export function StepRenderer({ data }: NodeProps<StepNode>) {

@@ -1079,6 +1079,47 @@ Open questions / parking lot:
 - Forward edges that skip ranks run straight down the target column and can pass behind
   intermediate cards in that lane (not seen in the fixtures).
 
+## C and Go extraction (2026-10-31)
+
+- User request (no phase prompt): add C and Go to the extractor so C repositories such as
+  `~/Projects/cprac-git-test2` get maps, traces and flows. Branch `languages-c-go`, stacked on
+  `phase-15-flows-tab`.
+- Test first: new fixtures `fixtures/c-small` and `fixtures/go-small` with
+  `expected/structure.json` and `NOTES.md` written by reading the source **before** the
+  backends existed; a helper only hashed declared line ranges. Both goldens passed unchanged on
+  the first implementation run. **HUMAN REVIEW REQUIRED:** `fixtures/c-small/expected/`,
+  `fixtures/go-small/expected/`.
+- Backends `lang/c.rs` (tree-sitter-c 0.24.2) and `lang/go.rs` (tree-sitter-go 0.25.0), tree
+  walks rather than `.scm` queries (declarator and receiver unwrapping). Rules in the index
+  README: C program-wide linkage with `static` files-only, includes relative then by unique
+  path suffix, never bare `<x.h>`; Go package = directory, imports through `go.mod` module paths
+  only, method receivers, imports to every file of a package; `main` entry points.
+- Shared core: `LanguageBackend::name_scope` (`File` | `Package` | `Program`); `Definition`
+  gains `receiver` (Go methods declared apart from their type keep `T.M` IDs) and `internal`
+  (C `static`); `ParsedEntry.target` lets an entry target a definition. Python/TypeScript keep
+  `File` scope: their goldens and every existing test are unchanged.
+- Contract (additive, within v0.3): `manifest.languages` gains `c` and `go`; entry kind
+  `main-function`. Schemas and TypeScript bindings regenerated; the Flows list maps the new kind
+  to the play glyph. App: C/Go source language, Shiki `c`/`go` grammars, `c`/`go` file marks
+  (one shared `languageOf`).
+- Real repository: `cprac-git-test2` (written nowhere; indexed into a scratch folder) now gives
+  13 files, 18 functions, 4 structs, 15 call and 11 include edges, its `main` entry, and a
+  trace across cpu/mem/term/ui with a shared-callee ref stub; no parse warnings.
+- Checks: cargo fmt, workspace Clippy (`-D warnings`), **174 Rust tests** (6 new); app
+  typecheck, lint, 100 Vitest tests.
+- Again found `fixtures/py-small/.gitvur/` rewritten (16:20:45–46, index then validate, as at
+  15:31); no test or script in the repository writes there, so it looks like Index/Validate in
+  a running app. Restored with `git checkout` as the user asked the first time; not committed.
+
+Open questions:
+
+- Go: the imported package's local name is the path's last segment, not the `package` clause
+  (they almost always match in one repository). C: function-like macros and calls through
+  function pointers are invisible; headers shared by several programs make same-named
+  functions ambiguous by design.
+- Partial extraction of files with syntax errors would help C most (macros can confuse the
+  parser); still parked.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).

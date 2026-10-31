@@ -166,6 +166,8 @@ impl LanguageBackend for TypeScript {
                 parent: enclosing(p.anchor, &index_of),
                 start_line: line_of(p.start),
                 end_line: end_line_of(p.range),
+                receiver: None,
+                internal: false,
             });
         }
 
@@ -552,6 +554,7 @@ fn collect_entries(
     }
     for (_, (statement, calls)) in statements {
         parsed.entries.push(super::ParsedEntry {
+            target: None,
             kind: gitvur_schema::EntryKind::TopLevelCall,
             name: relpath.into(),
             line: line_of(statement),

@@ -61,6 +61,49 @@ pub(crate) fn discover(root: &Path, warnings: &mut Vec<String>) -> Vec<ConfigEnt
     entries
 }
 
+/// `go.mod` files (read as data, like every other configuration file).
+pub(crate) fn is_go_mod(path: &str) -> bool {
+    path == "go.mod" || path.ends_with("/go.mod")
+}
+
+/// Every `go.mod` found by the walker as `(module directory, module path)`, sorted by
+/// directory. The directory is repo-relative (`""` for the root). Only the `module`
+/// directive is read; nothing is executed or downloaded.
+pub(crate) fn go_modules(root: &Path, warnings: &mut Vec<String>) -> Vec<(String, String)> {
+    let (paths, walk_warnings) = crate::walk::discover(root, is_go_mod);
+    warnings.extend(walk_warnings);
+    let mut modules = Vec::new();
+    for path in paths {
+        let Some(text) = root
+            .join(&path)
+            .canonicalize()
+            .ok()
+            .filter(|p| p.starts_with(root))
+            .and_then(|p| fs::read_to_string(p).ok())
+        else {
+            warnings.push(format!("{path}: cannot read go.mod; skipped"));
+            continue;
+        };
+        let module = text.lines().find_map(|line| {
+            let line = line.split("//").next().unwrap_or_default().trim();
+            let rest = line.strip_prefix("module")?;
+            let name = rest.trim().trim_matches('"').trim();
+            (rest.starts_with([' ', '\t']) && !name.is_empty()).then(|| name.to_owned())
+        });
+        match module {
+            Some(module) => {
+                let dir = path.rsplit_once('/').map_or("", |(d, _)| d).to_owned();
+                modules.push((dir, module));
+            }
+            None => warnings.push(format!(
+                "{path}: no module directive; Go imports from it are not resolved"
+            )),
+        }
+    }
+    modules.sort();
+    modules
+}
+
 fn line_at(text: &str, offset: usize) -> u32 {
     u32::try_from(text.bytes().take(offset).filter(|&b| b == b'\n').count() + 1).unwrap_or(u32::MAX)
 }

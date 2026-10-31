@@ -52,7 +52,7 @@ const imageFiles = import.meta.glob<string>(
   "../../../fixtures/*/**/*.{png,jpg,jpeg,gif,webp,svg}",
   { eager: true, query: "?url", import: "default" },
 );
-const sources = import.meta.glob<string>("../../../fixtures/*/**/*.{py,ts}", {
+const sources = import.meta.glob<string>("../../../fixtures/*/**/*.{py,ts,c,h,go}", {
   eager: true,
   query: "?raw",
   import: "default",
@@ -202,7 +202,15 @@ function sliceOf(
     file: relpath,
     startLine: first,
     lines: all.slice(first - 1, last),
-    language: relpath.endsWith(".py") ? "python" : relpath.endsWith(".ts") ? "typescript" : "text",
+    language: relpath.endsWith(".py")
+      ? "python"
+      : relpath.endsWith(".ts")
+        ? "typescript"
+        : /\.[ch]$/.test(relpath)
+          ? "c"
+          : relpath.endsWith(".go")
+            ? "go"
+            : "text",
   };
 }
 

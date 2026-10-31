@@ -3,7 +3,7 @@
 const svg = { "aria-hidden": true, focusable: false } as const;
 
 /** Language mark for a file card: a rounded square with the language's short name. */
-export function LanguageGlyph({ language }: { language: "py" | "ts" | "file" }) {
+export function LanguageGlyph({ language }: { language: "c" | "go" | "py" | "ts" | "file" }) {
   return (
     <svg {...svg} className="gv-glyph gv-glyph-language" viewBox="0 0 20 20">
       <rect
