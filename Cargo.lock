@@ -1530,6 +1530,7 @@ version = "0.2.0"
 dependencies = [
  "base64 0.22.1",
  "gitvur-diff",
+ "gitvur-flow",
  "gitvur-index",
  "gitvur-schema",
  "gitvur-validate",

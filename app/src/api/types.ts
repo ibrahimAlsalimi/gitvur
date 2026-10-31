@@ -10,6 +10,7 @@ import type {
   RepoBundle,
   Settings,
   SourceSlice,
+  Trace,
   ViewState,
 } from "../generated/contract";
 
@@ -31,6 +32,8 @@ export interface Api {
     end: number,
     context: number,
   ): Promise<SourceSlice>;
+  /** The deterministic call tree of an entry point or node; an unknown ID sets `error`. */
+  getTrace(path: string, start: string, depth: number, maxNodes: number): Promise<Trace>;
   recentRepositories(): Promise<RecentRepo[]>;
   getSettings(): Promise<Settings>;
   setSettings(settings: Settings): Promise<void>;

@@ -176,6 +176,17 @@ pub async fn clear_view_state(app: AppHandle, root: String) -> Result<(), AppErr
     blocking(move || settings::clear_view_state(&dir, &root)).await
 }
 
+/// The deterministic call tree of an entry point or node (read-only).
+#[tauri::command]
+pub async fn get_trace(
+    path: String,
+    start: String,
+    depth: u32,
+    max_nodes: u32,
+) -> Result<gitvur_schema::Trace, AppError> {
+    blocking(move || crate::trace::get_trace(&path, &start, depth, max_nodes)).await
+}
+
 #[tauri::command]
 pub async fn list_docs(path: String) -> Result<Vec<crate::docs::DocEntry>, AppError> {
     blocking(move || crate::docs::list_docs(&path)).await

@@ -296,7 +296,15 @@ date: number, };
 
 export type DiffBundle = { diff: StructureDiff, from: Structure, to: Structure, };
 
-export type ViewState = { activeTab?: string, docPath?: string, docScroll?: number, expandedIds: Array<string>,
+export type ViewState = { activeTab?: string, docPath?: string, docScroll?: number,
+/**
+ * Flows tab: the selected flow or entry point ID.
+ */
+flowSelection?: string,
+/**
+ * Flows tab: `flow` or `trace`.
+ */
+flowMode?: string, expandedIds: Array<string>,
 /**
  * Classes whose rows are folded on the map.
  */
