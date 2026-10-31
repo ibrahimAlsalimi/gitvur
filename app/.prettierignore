@@ -8,3 +8,4 @@ test-results
 playwright-report
 .synthetic
 src/api/mockDiff.json
+src/api/mockTraces.json
