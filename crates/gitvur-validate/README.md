@@ -180,7 +180,7 @@ proposed in `PROGRESS.md`.
 The report is built with `Report::canonicalize()` and written with `to_canonical_json`. It has
 no timestamps, so the same repository and annotations give byte-identical `report.json`.
 
-## Architecture
+## Legacy architecture annotation checks (currently supported)
 
 The optional version-1 extension is checked for unique arch: IDs, nonempty names/kinds/
 responsibilities, AI provenance, indexed sources, disjoint membership, acyclic parents,
@@ -190,3 +190,14 @@ or the exact label. Reads use the canonical repository-safe evidence loader. Fin
 architecture-* issues; changed hashes are stale warnings. These checks establish traceability;
 natural-language architectural truth still requires source review. The viewer excludes rejected
 and stale components and their AI relationships while retaining structural dependencies.
+
+## Planned Phase 16 standalone artifact validation
+
+The revised design proposes `.gitvur/architecture.json`; the checks above describe the existing
+annotation extension, not support for that proposed standalone artifact. Future validation will
+check its schema, indexed source IDs, component/group/relationship references, safe evidence
+locations and stale or missing references. Unsupported interactions are unresolved when no
+deterministic proof exists; schema/reference success alone does not prove semantic correctness.
+Computed findings preserve structural versus AI provenance. See
+[the Phase 16 plan](../../PHASE_16_ARCHITECTURE_DIAGRAM.md) for status and compatibility design.
+No validator changes or new commands are part of this documentation update.

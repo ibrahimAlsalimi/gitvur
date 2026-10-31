@@ -34,10 +34,10 @@ Read CLAUDE.md, PROTOTYPE_V2_PLAN.md and prompts/02-extractor-python.md, then ca
 | 13 | `13-docs-tab.md` | Feature: Docs tab | Tabs + safe Markdown reader linked to the map |
 | 14 | `14-entry-points-and-flows-data.md` | Feature: Flows (data) | Contract v0.3, entry points, trace, flow validation, **human review** of new fixtures |
 | 15 | `15-flows-tab.md` | Feature: Flows (**graphics**) | Swimlane flow diagrams, playback, trace, export |
+| 16 | `16-Architecture-Diagram.md` | Planned revised architecture | Agent artifact, validation, interactive Diagram; see dedicated plan |
+| 17 | `17-git-timeline.md` | Feature: Timeline (**graphics**) | History chart, module heatmap, branch graph, element history |
 
-| 16 | `16-git-timeline.md` | Feature: Timeline (**graphics**) | History chart, module heatmap, branch graph, element history |
-
-Phase 13 is independent of 14–15 and can run first or in parallel. Phase 15 needs Phase 14. Phase 16 needs Phase 10 and the tab bar from Phase 13.
+Phase 13 is independent of 14–15 and can run first or in parallel. Phase 15 needs Phase 14. Phase 17 needs Phase 10 and the tab bar from Phase 13. Phase 16 reuses Phase 13 tabs, Phase 14 packets and Phase 15 visualization/export infrastructure.
 
 Phase 14 (data layer) and Phase 15 (Flows tab) are implemented; see `PROGRESS.md` for decisions, the visual review and known limits.
 
@@ -52,3 +52,17 @@ The plan's Phase 5 (Viewer) is split here into Phases 06–09 and 11 to give the
 ## Note on fixtures
 
 In Phase 01 the agent writes both the fixture repositories and their expected `structure.json`, **before any extractor exists**, by reading the source by hand. This keeps the expected output independent from the extractor's code. Review those expected files yourself before Phase 02 — they are the source of truth for everything that follows.
+
+## Phase 16 — revised workflow (planned)
+
+[Implementation plan](../PHASE_16_ARCHITECTURE_DIAGRAM.md) is the source of truth for the
+revised design. The documentation agent will produce proposed `.gitvur/architecture.json`
+during its existing workflow: Indexer → Documentation Agent → Architecture Artifact →
+Validator → Diagram UI. The indexer supplies facts; the agent owns architecture interpretation.
+The UI reads saved validated data without invoking AI. Missing data has an optional empty state;
+Map, Docs and Flows remain independent and usable.
+
+The existing directory-based Diagram and optional annotation extension predate this decision.
+Their historical implementation does not complete the revised plan. `agent/codeDOC.md`
+section 13 stays inactive until schema, packet and validator support land; current documentation
+runs retain their existing contract. This documentation-only session must not implement Phase 16.

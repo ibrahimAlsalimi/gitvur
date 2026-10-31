@@ -362,7 +362,10 @@ password matches"). Ordinary sequential calls are `call`, not `branch`.
 `gitvur validate <repo>` reports **zero `entry-*` and `flow-*` errors**, and `gitvur flows
 <repo>` lists every flow as `current`. Warnings you leave go in your final report with a reason.
 
-## 12. Architecture diagram (optional, version 1)
+## 12. Legacy architecture diagram (currently supported optional version 1)
+
+This section describes the existing executable annotation extension. The revised Phase 16
+proposal in section 13 is inactive and does not change section 1 or these rules.
 
 Add `architecture` only when evidence supports a useful high-level view. Never introduce an
 AI service or execute the analyzed repository. Keep existing modules, flows and descriptions.
@@ -399,3 +402,39 @@ In incremental mode, resolve every architecture issue, re-read changed sources, 
 only after review, and preserve unchanged component IDs. Run `gitvur validate <repo>` until
 there are zero architecture errors or stale warnings. The viewer excludes rejected or stale
 components and restores their files to structural groups. Natural-language claims require review.
+
+## 13. Phase 16 — Planned Architecture Documentation
+
+**Future instructions only.** Do not create `.gitvur/architecture.json` yet. Its schema,
+packet integration and validation are proposed in
+[the Phase 16 plan](../PHASE_16_ARCHITECTURE_DIAGRAM.md). Current runs still write only
+`annotations.json`, follow sections 1–12 and use existing commands and completion gates.
+No current run requires a proposed schema, packet field, CLI command or validator capability.
+
+Once the revised feature is implemented, architecture documentation will be part of the
+existing initial/incremental documentation workflow, alongside normal documentation output:
+
+1. Complete the existing documentation process without weakening its evidence or safety rules.
+   Read indexed structure, hashes, entry points, flows and available source evidence. Indexed
+   identities remain authoritative; never invent source IDs or execute repository code.
+2. Identify major components, important entry points, subsystem boundaries and interactions.
+   Prefer roughly 5–15 components for a medium repository when justified. Use fewer when
+   appropriate; never pad a diagram or create a node per function or file.
+3. Give each component a stable ID, meaningful name/category, concise plain-English
+   responsibility, indexed source references, evidence and provenance. Group subsystems where
+   useful; the future schema will define grouping and membership rules.
+4. Give each relationship a stable ID, component endpoints, typed interaction, short label,
+   evidence and provenance. Read surrounding source: imports alone do not prove runtime data
+   flows. Distinguish direct structural evidence from AI interpretation; do not invent
+   interactions. Unsupported semantic claims must remain unresolved, not verified facts.
+5. Produce structured semantic data in the proposed `.gitvur/architecture.json`, not a static
+   image or canonical Mermaid text. Layout coordinates belong to rendering state.
+6. In incremental mode, review affected architecture when changed sources, entry points,
+   boundaries or interactions warrant it. Preserve unaffected components, relationships and
+   stable IDs where possible. Update hashes only after source review; repair or remove deleted
+   references. Do not rewrite the architecture for minor unrelated changes. Review additions
+   as well as stale references so new subsystems are not missed.
+
+The future validator checks schema, references, evidence and freshness; successful reference
+checks do not establish that every interpretation is correct. Opening Diagram reads the stored
+validated artifact without a new AI invocation. Missing architecture must leave the app usable.
