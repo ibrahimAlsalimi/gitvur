@@ -1014,7 +1014,7 @@ Open questions:
   flows through here, trace from here, Mermaid, PNG export, empty and out-of-index states,
   keyboard, list view, axe.
 - Checks: cargo fmt, workspace Clippy (`-D warnings`), **168 Rust tests**; app typecheck, lint,
-  **101 Vitest tests**, `check:contrast` (259), full Playwright **134 passed, 2 skipped** (the
+  **100 Vitest tests**, `check:contrast` (259), full Playwright **134 passed, 2 skipped** (the
   existing opt-in performance checks). Regenerated screenshots of existing views now show the
   third tab.
 - Budgets (Vitest, Node): a 25-step flow lays out in well under 30 ms; a 300-card trace tree
