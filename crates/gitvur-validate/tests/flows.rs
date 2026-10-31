@@ -641,9 +641,14 @@ fn committed_flow_fixtures_validate_without_issues() {
             report.flows.iter().all(|f| f.status == FlowState::Current),
             "{fixture}"
         );
-        let committed = fs::read_to_string(root.join(".gitvur/report.json")).unwrap();
+        // The committed report matches a fresh one except for `commitSha`, which names
+        // whatever commit was checked out when `gitvur validate` last ran.
+        let mut committed: Report =
+            serde_json::from_str(&fs::read_to_string(root.join(".gitvur/report.json")).unwrap())
+                .unwrap();
+        committed.commit_sha.clone_from(&report.commit_sha);
         assert_eq!(
-            committed,
+            to_canonical_json(&committed),
             to_canonical_json(&report),
             "{fixture} report.json"
         );
