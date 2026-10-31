@@ -1112,3 +1112,72 @@
   stroke-width: 2;
   stroke-dasharray: 5 4;
 }
+
+/* ---- Pinned flow (Phase 15) ----------------------------------------------------------- */
+
+.gv-map[data-pinned] .react-flow__node.gv-pin-dim {
+  opacity: var(--gv-opacity-dimmed);
+}
+
+.gv-map[data-pinned] .react-flow__edge {
+  opacity: 0.25;
+}
+
+.gv-pin-paths {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.gv-pin-path {
+  stroke: var(--gv-accent);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.gv-pin-arrowhead {
+  fill: var(--gv-accent);
+}
+
+.gv-pin-badges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.gv-pin-badge {
+  position: static;
+  box-shadow: var(--gv-shadow-float);
+}
+
+.gv-pin-badge[data-active] {
+  border-color: var(--gv-accent);
+  background: var(--gv-accent);
+  color: var(--gv-text-on-accent);
+}
+
+.gv-pin-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--gv-space-1);
+  padding: var(--gv-space-1) var(--gv-space-2);
+  border: var(--gv-hairline) solid var(--gv-accent);
+  border-radius: var(--gv-radius-pill);
+  background: var(--gv-bg-surface-raised);
+  box-shadow: var(--gv-shadow-float);
+  font-size: var(--gv-text-sm);
+}
+
+.gv-pin-name {
+  padding: 0 var(--gv-space-2);
+  color: var(--gv-text-primary);
+  font-weight: var(--gv-weight-medium);
+  font-variant-numeric: tabular-nums;
+}

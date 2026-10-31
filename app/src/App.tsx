@@ -2,6 +2,7 @@ import { type CSSProperties, useEffect } from "react";
 
 import { DocsTab } from "./docs/DocsTab";
 import { DocsController } from "./docs/useDocsStore";
+import { FlowsTab } from "./flows/FlowsTab";
 import { Canvas } from "./components/Canvas";
 import { Explorer } from "./components/Explorer";
 import { AboutDialog } from "./components/AboutDialog";
@@ -124,6 +125,7 @@ export function App() {
           )}
         </div>
         <DocsTab />
+        <FlowsTab />
       </div>
       <div className="drawer">{issuesOpen && <IssuesPanel />}</div>
       <StatusBar />

@@ -144,6 +144,14 @@ pub struct ViewState {
     #[ts(optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub doc_scroll: Option<f64>,
+    /// Flows tab: the selected flow or entry point ID.
+    #[ts(optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flow_selection: Option<String>,
+    /// Flows tab: `flow` or `trace`.
+    #[ts(optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flow_mode: Option<String>,
     pub expanded_ids: Vec<String>,
     /// Classes whose rows are folded on the map.
     pub collapsed_ids: Vec<String>,

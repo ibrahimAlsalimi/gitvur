@@ -9,6 +9,7 @@ import type {
   Status,
   UnresolvedCall,
 } from "../generated/contract";
+import { type FlowIndex, indexFlows } from "../flows/flowModel";
 
 /** Synthetic module that holds files no logical module claims. */
 export const UNASSIGNED_MODULE_ID = "module:__unassigned";
@@ -115,6 +116,8 @@ export interface Model {
   /** All report issues: errors first, then by code, id and message. */
   issues: Issue[];
   totals: Totals;
+  /** Entry points and flows (Flows tab, map overlay, inspector). */
+  flows: FlowIndex;
 }
 
 const ROOT_ID = "project:root";
@@ -396,5 +399,6 @@ export function buildModel(bundle: RepoBundle): Model {
     unresolvedByFrom,
     issues,
     totals,
+    flows: indexFlows(bundle),
   };
 }

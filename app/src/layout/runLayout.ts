@@ -1,3 +1,4 @@
+import { type FlowLayout, type FlowLayoutInput, layoutFlow } from "../flows/layoutFlow";
 import { computeLayout, createLayoutCache } from "./computeLayout";
 import type { LayoutRequest, LayoutResult } from "./types";
 import type { WorkerRequest, WorkerResponse } from "./layout.worker";
@@ -10,7 +11,7 @@ export interface TimedLayout {
 
 let worker: Worker | null | undefined;
 let nextId = 0;
-const pending = new Map<number, (r: TimedLayout) => void>();
+const pending = new Map<number, (r: { result: LayoutResult | FlowLayout; ms: number }) => void>();
 const inlineCache = createLayoutCache();
 
 function getWorker(): Worker | null {
@@ -38,8 +39,28 @@ export function runLayout(request: LayoutRequest): Promise<TimedLayout> {
   }
   const id = nextId++;
   return new Promise((resolve) => {
-    pending.set(id, resolve);
+    pending.set(id, (r) => {
+      resolve({ result: r.result as LayoutResult, ms: r.ms });
+    });
     const message: WorkerRequest = { id, request };
+    w.postMessage(message);
+  });
+}
+
+/** Lays out a flow or trace in the worker (inline without worker support). */
+export function runFlowLayout(flow: FlowLayoutInput): Promise<{ result: FlowLayout; ms: number }> {
+  const w = getWorker();
+  if (w === null) {
+    const start = performance.now();
+    const result = layoutFlow(flow);
+    return Promise.resolve({ result, ms: performance.now() - start });
+  }
+  const id = nextId++;
+  return new Promise((resolve) => {
+    pending.set(id, (r) => {
+      resolve({ result: r.result as FlowLayout, ms: r.ms });
+    });
+    const message: WorkerRequest = { id, flow };
     w.postMessage(message);
   });
 }

@@ -114,6 +114,12 @@
   --gv-prov-semantic: #2b5fd9;
   --gv-prov-ai: #a3489b;
 
+  /* Flows tab: alternate lane fill, playback cursor fill, visited mark, rail. */
+  --gv-flow-lane-alt: #ebeef3;
+  --gv-flow-step-active: #e7eefd;
+  --gv-flow-visited: #3358b5;
+  --gv-flow-rail: #7a8492;
+
   --gv-diff-added: #1b7f37;
   --gv-diff-removed: #c4352f;
   --gv-diff-modified: #9c6200;
@@ -174,6 +180,11 @@
     --gv-prov-semantic: #7fa3f5;
     --gv-prov-ai: #e08ad6;
 
+    --gv-flow-lane-alt: #171b21;
+    --gv-flow-step-active: #1c2a47;
+    --gv-flow-visited: #8fb0f5;
+    --gv-flow-rail: #737d8c;
+
     --gv-diff-added: #56c26f;
     --gv-diff-removed: #f07a73;
     --gv-diff-modified: #e0a43c;
@@ -231,6 +242,11 @@
   --gv-prov-syntactic: #a6b0bd;
   --gv-prov-semantic: #7fa3f5;
   --gv-prov-ai: #e08ad6;
+
+  --gv-flow-lane-alt: #171b21;
+  --gv-flow-step-active: #1c2a47;
+  --gv-flow-visited: #8fb0f5;
+  --gv-flow-rail: #737d8c;
 
   --gv-diff-added: #56c26f;
   --gv-diff-removed: #f07a73;

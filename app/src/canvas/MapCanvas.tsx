@@ -21,6 +21,8 @@ import { buildLayoutRequest, moduleEdges } from "../layout/fromModel";
 import { runLayout } from "../layout/runLayout";
 import { ancestors } from "../model/tree";
 import { subtree, visibleAncestor } from "../model/aggregateEdges";
+import { FlowOverlay } from "./FlowOverlay";
+import { pinnedLayout } from "./pinnedFlow";
 import type { LayoutResult } from "../layout/types";
 import { typingIn } from "../keys/typing";
 import { useAppStore } from "../store/useAppStore";
@@ -219,10 +221,26 @@ function MapInner() {
     for (const id of relations.endpoints) keep.add(id);
     return keep;
   }, [model, selectedId, relations.endpoints]);
-  const nodes = useMemo(
-    () => (flow ? applyFocus(flow.nodes, selectedId, focus) : []),
-    [flow, selectedId, focus],
-  );
+  // A pinned flow dims everything that is not on its path (or an ancestor of it).
+  const pinned = useAppStore((s) => s.pinnedFlow);
+  const pinnedKeep = useMemo(() => {
+    const pinnedFlow = pinned ? model?.flows.flowsById.get(pinned.flowId) : undefined;
+    if (!model || !pinnedFlow) return null;
+    const resolve = visibleAncestor(model, expandedIds, lod, collapsedIds);
+    const keep = new Set<string>([model.rootId]);
+    for (const step of pinnedLayout(model, pinnedFlow, resolve).steps) {
+      keep.add(step.at);
+      for (const a of ancestors(model, step.at)) keep.add(a);
+    }
+    return keep;
+  }, [model, pinned, expandedIds, collapsedIds, lod]);
+  const nodes = useMemo(() => {
+    const focused = flow ? applyFocus(flow.nodes, selectedId, focus) : [];
+    if (!pinnedKeep) return focused;
+    return focused.map((n) =>
+      pinnedKeep.has(n.id) ? n : { ...n, className: `${n.className ?? ""} gv-pin-dim`.trim() },
+    );
+  }, [flow, selectedId, focus, pinnedKeep]);
   const edges = useMemo<Edge[]>(
     () => [...(flow?.edges ?? []), ...relations.edges],
     [flow, relations.edges],
@@ -369,6 +387,7 @@ function MapInner() {
       data-lens={lens}
       data-animate={animate}
       data-focus={focus !== null}
+      data-pinned={pinnedKeep !== null || undefined}
       onKeyDown={onKeyDown}
       onFocus={onFocus}
     >
@@ -401,6 +420,7 @@ function MapInner() {
           <Minimap rects={miniRects} width={flow.layout.width} height={flow.layout.height} />
         )}
         {perfOpen && <PerfOverlay />}
+        {model && <FlowOverlay model={model} lod={lod} />}
       </ReactFlow>
     </div>
   );

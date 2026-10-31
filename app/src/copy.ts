@@ -9,6 +9,62 @@ import type { ErrorCode } from "./generated/contract";
 const plural = (n: number, one: string, many = `${one}s`) => `${String(n)} ${n === 1 ? one : many}`;
 
 export const copy = {
+  flows: {
+    listTitle: "Entry points",
+    filter: "Filter flows…",
+    noEntries: "No entry points were found in this repository.",
+    noEntriesAction: "Trace from a function",
+    noFlows:
+      "No flows written yet. Explore the call tree, or run the documentation agent to add flows.",
+    noFlowsAction: "Open Trace",
+    noMatch: "Nothing matches this filter.",
+    outside: (raw: string) => `This entry point points outside the indexed code (${raw}).`,
+    outsideTip: "Points outside the indexed code",
+    broken: "This flow refers to code that no longer exists.",
+    showIssues: "Show issues",
+    stale: (steps: string) => `Some steps changed since this flow was written: steps ${steps}.`,
+    truncated: (n: number) => `Showing the first ${plural(n, "call")}.`,
+    truncatedAction: "Expand from a node",
+    pickPrompt: "Pick an entry point or a flow.",
+    traceFailed: "Couldn't compute the call tree.",
+    flowBadge: "AI-curated · validated",
+    traceBadge: "Derived from code · no AI",
+    summary: (steps: number, code: number, ai: number) =>
+      `${plural(steps, "step")} · ${String(code)} from code · ${String(ai)} AI`,
+    status: { current: "Current", stale: "Stale", broken: "Broken" },
+    stepAria: (n: number, total: number, label: string, name: string, module: string) =>
+      `Step ${String(n)} of ${String(total)}: ${label}, ${name}, in module ${module}`,
+    gone: "Element no longer exists",
+    calledFrom: (step: number, name: string, line: number) =>
+      `Called from step ${String(step)} · ${name} line ${String(line)}`,
+    reachedFrom: (step: number, name: string) => `From step ${String(step)} · ${name}`,
+    aiEvidence: "AI evidence",
+    callSite: "Call site",
+    stepContext: "Step context",
+    flowsThroughHere: "Flows through here",
+    traceFromHere: "Trace from here",
+    pinned: (name: string) => `Flow: ${name}`,
+    unpin: "Remove flow from map",
+    pin: "Pin to map",
+    listView: "List view",
+    diagramView: "Diagram",
+    copyTrace: "Copy trace as text",
+    copied: "Copied",
+    exportMenu: "Export",
+    copyMermaid: "Copy as Mermaid",
+    exportSvg: "Export SVG",
+    exportPng: "Export PNG",
+    exportFailed: "Couldn't export the diagram.",
+    choose: "Choose a path",
+    otherwise: "otherwise",
+    refShown: "↻ shown above",
+    recursion: (name: string) => `⟲ recursion back to ${name}`,
+    ambiguous: (name: string, n: number) => `? ${name} · ${plural(n, "possible target")}`,
+    ambiguousNote: "The extractor can't tell which one is called.",
+    more: (n: number) => `+${String(n)}`,
+    legend: "Legend",
+    entryOutside: "outside the index",
+  },
   docs: {
     empty: "No Markdown files in this repository.",
     truncated: "This document is larger than 2 MB; showing the beginning.",
@@ -201,7 +257,7 @@ export const copy = {
 
 /** The keyboard map, listed exactly as the shortcuts sheet shows it. */
 export const SHORTCUTS: readonly { keys: string; action: string }[] = [
-  { keys: "Ctrl/Cmd+1 / 2", action: "Map / Docs tab" },
+  { keys: "Ctrl/Cmd+1 / 2 / 3", action: "Map / Docs / Flows tab" },
   { keys: "Ctrl/Cmd+K", action: "Search / palette" },
   { keys: "Ctrl/Cmd+O", action: "Open repository" },
   { keys: "Arrow keys on canvas", action: "Move focus: ↑ parent, ↓ first child, ← → siblings" },
@@ -212,5 +268,8 @@ export const SHORTCUTS: readonly { keys: string; action: string }[] = [
   { keys: "1 2 3", action: "Structure / Documentation / Changes lens" },
   { keys: "Alt+← / →", action: "Selection history" },
   { keys: "N / Shift+N", action: "Next / previous change (Changes lens)" },
+  { keys: "J / K", action: "Next / previous flow step (Flows)" },
+  { keys: "Space · Home", action: "Play or pause · restart a flow (Flows)" },
+  { keys: "T", action: "Flow / Trace mode (Flows)" },
   { keys: "?", action: "Keyboard shortcuts sheet" },
 ];

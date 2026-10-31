@@ -1,17 +1,18 @@
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { open } from "@tauri-apps/plugin-dialog";
+import { open, save } from "@tauri-apps/plugin-dialog";
 
 import type {
-  DocEntry,
-  DocContent,
   AssetData,
   CommitInfo,
   DiffBundle,
+  DocContent,
+  DocEntry,
   RecentRepo,
   RepoBundle,
   Settings,
   SourceSlice,
+  Trace,
   ViewState,
 } from "../generated/contract";
 import type { Api } from "./types";
@@ -35,6 +36,18 @@ export const tauriApi: Api = {
   validateRepository: (path) => invoke<RepoBundle>("validate_repository", { path }),
   readSource: (path, file, start, end, context) =>
     invoke<SourceSlice>("read_source", { path, file, start, end, context }),
+  async saveExport(repo, name, kind, data) {
+    const target = await save({
+      title: "Export diagram",
+      defaultPath: name,
+      filters: [{ name: kind === "png" ? "PNG image" : "SVG image", extensions: [kind] }],
+    });
+    if (typeof target !== "string") return false;
+    await invoke<undefined>("write_export", { repo, target, data });
+    return true;
+  },
+  getTrace: (path, start, depth, maxNodes) =>
+    invoke<Trace>("get_trace", { path, start, depth, maxNodes }),
   recentRepositories: () => invoke<RecentRepo[]>("recent_repositories"),
   getSettings: () => invoke<Settings>("get_settings"),
   setSettings: (settings) => invoke<undefined>("set_settings", { settings }),

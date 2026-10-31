@@ -39,6 +39,19 @@ export type BannerId = "report-missing" | "structure-out-of-date" | "report-stal
 
 const LENSES: readonly Lens[] = ["structure", "coverage", "changes"];
 
+/** Top-level repository views. */
+export type TabId = "map" | "docs" | "flows";
+
+/** Flows tab canvas mode: the agent's curated flow, or the deterministic call tree. */
+export type FlowMode = "flow" | "trace";
+
+/** A flow drawn on the map (Pin to map), at a playback position. */
+export interface PinnedFlow {
+  flowId: string;
+  /** Index into the flow's steps of the active step. */
+  index: number;
+}
+
 /** Debounce for saving the per-repository view. */
 const VIEW_SAVE_MS = 400;
 
@@ -48,11 +61,19 @@ export const PANE_LIMITS = {
 } as const;
 
 interface AppState {
-  activeTab: "map" | "docs";
+  activeTab: TabId;
+  /** Flows tab: the selected flow or entry point ID (persisted per repository). */
+  flowSelection: string | null;
+  flowMode: FlowMode;
+  /** The flow pinned onto the map, if any. */
+  pinnedFlow: PinnedFlow | null;
+  selectFlow: (id: string | null, mode?: FlowMode) => void;
+  setFlowMode: (mode: FlowMode) => void;
+  setPinnedFlow: (pin: PinnedFlow | null) => void;
   docPath: string | null;
   docScroll: number;
   docTarget: { anchor: string; nodeId?: string; seq: number } | null;
-  setActiveTab: (tab: "map" | "docs") => void;
+  setActiveTab: (tab: TabId) => void;
   openDoc: (path: string, anchor?: string, nodeId?: string) => void;
   setDocScroll: (scroll: number) => void;
   phase: Phase;
@@ -218,6 +239,9 @@ export const useAppStore = create<AppState>()((set, get) => {
           ? {}
           : {
               activeTab: "map" as const,
+              flowSelection: null,
+              flowMode: "flow" as const,
+              pinnedFlow: null,
               docPath: null,
               docScroll: 0,
               docTarget: null,
@@ -258,7 +282,14 @@ export const useAppStore = create<AppState>()((set, get) => {
     const selected =
       view.selectedId !== undefined && exists(view.selectedId) ? view.selectedId : null;
     set({
-      activeTab: view.activeTab === "docs" ? "docs" : "map",
+      activeTab: view.activeTab === "docs" || view.activeTab === "flows" ? view.activeTab : "map",
+      flowSelection:
+        view.flowSelection !== undefined &&
+        (model.flows.flowsById.has(view.flowSelection) ||
+          model.flows.entryPointsById.has(view.flowSelection))
+          ? view.flowSelection
+          : null,
+      flowMode: view.flowMode === "trace" ? "trace" : "flow",
       docPath: view.docPath ?? null,
       docScroll: Math.max(0, view.docScroll ?? 0),
       expandedIds: new Set([
@@ -313,6 +344,18 @@ export const useAppStore = create<AppState>()((set, get) => {
 
   return {
     activeTab: "map",
+    flowSelection: null,
+    flowMode: "flow",
+    pinnedFlow: null,
+    selectFlow(flowSelection, mode) {
+      set({ flowSelection, ...(mode ? { flowMode: mode } : {}) });
+    },
+    setFlowMode(flowMode) {
+      set({ flowMode });
+    },
+    setPinnedFlow(pinnedFlow) {
+      set({ pinnedFlow });
+    },
     docPath: null,
     docScroll: 0,
     docTarget: null,
@@ -611,6 +654,9 @@ export const useAppStore = create<AppState>()((set, get) => {
       if (!model) return;
       set({
         activeTab: "map",
+        flowSelection: null,
+        flowMode: "flow",
+        pinnedFlow: null,
         docPath: null,
         docScroll: 0,
         docTarget: null,
@@ -702,6 +748,8 @@ function currentView(s: AppState): ViewState {
     expandedIds: [...(s.base?.expandedIds ?? s.expandedIds)].sort(),
     collapsedIds: [...s.collapsedIds].sort(),
     activeTab: s.activeTab,
+    ...(s.flowSelection ? { flowSelection: s.flowSelection } : {}),
+    flowMode: s.flowMode,
     ...(s.docPath ? { docPath: s.docPath } : {}),
     docScroll: s.docScroll,
     lens: s.lens,
@@ -721,6 +769,8 @@ useAppStore.subscribe((s, prev) => {
   if (s.phase !== "ready" || !s.bundle || s.bundle !== prev.bundle) return;
   const changed =
     s.activeTab !== prev.activeTab ||
+    s.flowSelection !== prev.flowSelection ||
+    s.flowMode !== prev.flowMode ||
     s.docPath !== prev.docPath ||
     s.docScroll !== prev.docScroll ||
     s.expandedIds !== prev.expandedIds ||

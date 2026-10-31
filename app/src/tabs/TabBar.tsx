@@ -2,6 +2,7 @@ import { useAppStore } from "../store/useAppStore";
 const TABS = [
   { id: "map", label: "Map" },
   { id: "docs", label: "Docs" },
+  { id: "flows", label: "Flows" },
 ] as const;
 export function TabBar() {
   const active = useAppStore((s) => s.activeTab);

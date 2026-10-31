@@ -4,6 +4,7 @@ import { useAppStore } from "../store/useAppStore";
 import { typingIn } from "./typing";
 
 const LENS_KEYS = { "1": "structure", "2": "coverage", "3": "changes" } as const;
+const TAB_KEYS = { "1": "map", "2": "docs", "3": "flows" } as const;
 
 /**
  * App-wide shortcuts: Ctrl/Cmd+K palette, Ctrl/Cmd+O open, 1 2 3 lens, ? shortcuts,
@@ -16,9 +17,9 @@ export function useGlobalKeys() {
       const store = useAppStore.getState();
       const mod = e.ctrlKey || e.metaKey;
       const key = e.key.toLowerCase();
-      if (mod && !e.shiftKey && !e.altKey && (key === "1" || key === "2") && store.bundle) {
+      if (mod && !e.shiftKey && !e.altKey && key in TAB_KEYS && store.bundle) {
         e.preventDefault();
-        store.setActiveTab(key === "1" ? "map" : "docs");
+        store.setActiveTab(TAB_KEYS[key as keyof typeof TAB_KEYS]);
         return;
       }
       if (mod && !e.shiftKey && !e.altKey && key === "k") {
