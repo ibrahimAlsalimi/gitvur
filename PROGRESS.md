@@ -962,34 +962,122 @@ Open questions:
 - Should `gitvur flows` mark agent vs extractor entries, and should the summary gain flow
   counts? Both are UI-facing; deferred to Phase 15.
 
-## Phase 15 — in progress: data plumbing and layout (2026-10-31)
+## Phase 15 — Flows tab (2026-10-31)
 
-- Branch `phase-15-flows-tab`, stacked on `phase-14-flows-validation` (PR #4, open).
-- **Part A done.** Tauri `get_trace(path, start, depth, maxNodes)` wraps `gitvur_flow::trace`
-  over the repository's `.gitvur/` structure plus agent entry points (an agent entry reusing an
-  extractor ID is skipped); depth ≤ 64 and nodes ≤ 5000. `ViewState` gains `flowSelection` and
-  `flowMode` for per-repository persistence; bindings regenerated. The browser mock serves
-  `src/api/mockTraces.json`, generated from the real trace engine for every entry and node of
-  py-flows/ts-flows by a drift-checked test (`GITVUR_WRITE_MOCK_TRACES=1 cargo test -p
-  gitvur-app mock_traces`). `buildModel` attaches `model.flows` (`app/src/flows/flowModel.ts`):
-  `entryPointsById`, `flowsByEntry`, `flowStatusById`, `flowsThroughNode`. The report's verdict
-  wins; without one, status is computed from hashes (`broken` if the entry or a step node is
-  missing, `stale` on a hash change).
-- **Part C core done.** `app/src/flows/layoutFlow.ts`: pure swimlane layout (lanes by first
-  appearance, DFS back-edges, longest-path ranks, side-by-side same-lane/rank nodes, orthogonal
-  routing, right-side loop-back channels, label side switching with recorded overlaps). Runs in
-  the existing layout worker (`runFlowLayout`). 11 unit tests incl. a 25-step budget check.
-- Known layout limitation (for the visual review): forward edges cross lanes in the gap just
-  below the source rank, so an edge skipping ranks runs vertically through the target column
-  and may pass behind intermediate cards in that lane.
-- Remaining: Parts B–K (tab and list, step/transition rendering, legend and banners, playback,
-  Trace mode UI, map overlay and inspector sections, export, states, tokens and accessibility,
-  e2e tests, screenshot review), then CLAUDE.md and prompts/README.md.
-- **Needs a decision:** `fixtures/py-small/.gitvur/{manifest,structure,report}.json` were
-  rewritten at 15:31:33–38 today (index then validate, v0.3 output, commit `071469f`), not by
-  this session's commands — it looks like Index/Validate in a running app. The frozen data now
-  includes a main-guard entry, which fails two `app/src-tauri/tests/bundle.rs` tests. Left
-  uncommitted and untouched pending the user's call.
+- Branch `phase-15-flows-tab`, stacked on `phase-14-flows-validation` (PR #4, open). The user
+  restored `fixtures/py-small/.gitvur/` (rewritten outside this session by an Index/Validate
+  run); frozen fixture data is unchanged in every commit.
+- **A.** Tauri `get_trace` wraps `gitvur_flow::trace` over the repository's `.gitvur/` plus agent
+  entries (limits clamped). `ViewState` saves `flowSelection` and `flowMode`. `model.flows`
+  indexes entry points, flows by entry, statuses (report first, hash fallback) and
+  `flowsThroughNode`. The mock serves `mockTraces.json`, generated from the real engine by a
+  drift-checked test.
+- **B.** Third tab (`Ctrl/Cmd+3`): list grouped by entry (kind glyphs, target, AI pill,
+  out-of-index entries greyed with `raw`), nested flows with step count and status, filter over
+  entry names, flow names and step labels. First visit opens the first listed flow, or an
+  entry's trace when there are no flows.
+- **C.** `layoutFlow` (pure, layout worker): lanes by first appearance, longest-path ranks,
+  DFS back-edges as loop-backs, side-by-side siblings, orthogonal rounded routing, label side
+  switching. Step cards (badge, 2-line label, code line, location, stale dot, entry pill + tag,
+  terminal bar, ghost card for missing elements); transitions by provenance stroke and kind
+  marker (filled, open/thin for return, double chevron, diamond for branch, ⚡ chips, hover
+  "calls"/"returns", AI pill). Pinned lane headers, header with summary chip, stale/broken
+  banners, collapsible legend drawn with the real styles.
+- **D.** Playback machine (`playback.ts`): Next/Previous/Play/Restart, `J K Space Home`,
+  branch pauses with the labels plus "otherwise", declined targets dimmed, Play every 1.6 s
+  stopping at branches and the end. Rail with forks and jump-to-dot. Active/visited/upcoming
+  states, 600 ms travelling dash, camera keeps the active step in the middle third; reduced
+  motion drops both. The inspector selects the active step's element and shows Step context:
+  "Called from step N · name line L" with the call site (or "AI evidence") highlighted.
+- **E.** Trace mode (`T`, badges "Derived from code · no AI" / "AI-curated · validated"), compact
+  cards in the same lanes, depth-2 start with `+n` expanders, on-demand `get_trace` grafted
+  into truncated subtrees, ref / cycle (dashed loop) / ambiguous stubs with candidates, Copy
+  trace as text (byte-identical to `gitvur trace`).
+- **F.** Pin to map: numbered badges on each step's visible element, accent path clipped to card
+  borders, unrelated nodes dimmed, bottom chip with prev/next/✕. Inspector: "Flows through
+  here" (opens the flow at that step) and "Trace from here".
+- **G.** Copy as Mermaid (`flowchart TD`, subgraph per lane, dashed AI edges, labelled
+  event/async/branch, comment header with repo, commit and status); unit-tested and parsed by
+  the bundled mermaid grammar. SVG/PNG at 2× of header + diagram + legend in the current theme,
+  written only via the save dialog by `write_export`, which refuses paths inside the repository
+  (symlinks resolved) and non-.png/.svg names.
+- **H–I.** All state strings in `copy.flows`. Tokens `--gv-flow-lane-alt`, `-step-active`,
+  `-visited`, `-rail` in both themes; `check:contrast` now 259 checks (text on the new fills,
+  visited/rail as meaning colours). Steps focusable in reading order with the prompt's
+  `aria-label`; arrows move along transitions; List view as the text alternative; axe reports
+  no serious/critical issues in either view.
+- **J.** Unit: layout (lanes, ranks, back-edges, siblings, label sides, budgets), Mermaid,
+  playback (linear, call-then-event, return, branch, otherwise, recursion, restart/jump), trace
+  view and graft merge, flow index, export encoding. Playwright `e2e/flows.spec.ts` (light and
+  dark): every flow of both fixtures played to the end, a branch taken and declined, step
+  context, stale/broken states, cycle and ambiguous stubs, expansion, copy trace, pin to map,
+  flows through here, trace from here, Mermaid, PNG export, empty and out-of-index states,
+  keyboard, list view, axe.
+- Checks: cargo fmt, workspace Clippy (`-D warnings`), **168 Rust tests**; app typecheck, lint,
+  **101 Vitest tests**, `check:contrast` (259), full Playwright **134 passed, 2 skipped** (the
+  existing opt-in performance checks). Regenerated screenshots of existing views now show the
+  third tab.
+- Budgets (Vitest, Node): a 25-step flow lays out in well under 30 ms; a 300-card trace tree
+  in about 45 ms (budget 150 ms). **Not measured:** pan frame rate on Linux, and a native
+  `pnpm tauri dev` run (real save dialog, `get_trace` over IPC). Both should be checked by hand.
+- Dependency: `html-to-image` 1.11.13 (named by the prompt). Test-only: Vitest aliases
+  `dompurify` to a pass-through stub and inlines mermaid, so the real flowchart grammar runs in
+  Node (no jsdom added).
+
+Deviations / assumptions:
+
+- Lanes appear only for 2+ modules; a one-module flow is a single centred column without a
+  header. Lane header shows the number of steps in the lane.
+- The canvas fit keeps zoom ≥ 0.8 so labels stay readable; wider flows start at the top-left
+  and pan (wheel pans, pinned lane headers follow). Fit-to-all would drop 4-lane flows to
+  about 0.64 at 1440 px with the inspector open.
+- The legend starts collapsed (it covered small diagrams) and is opened for exports.
+- Back-edges into a lane to the left enter the target's right side; into a lane to the right,
+  its top.
+- The mock's `?state=flow-stale|flow-broken` edits only its in-memory py-flows copy, for the
+  stale/broken screenshots. The fixtures have no trace with a `ref` stub (no shared callee
+  under one root), so screenshot 5 shows a cycle and an expanded ambiguous call; refs are
+  covered by unit tests of the shared trace code and the click-to-focus wiring.
+- "Trace from here" lives in the inspector header (for steps too, via their element) rather
+  than a separate context menu.
+- `incomingEvidence` takes a static step's call-site line from the structure edge; a step
+  reached from a script file through an entry's top-level call has no edge evidence and shows
+  "From step N" without a code excerpt.
+
+Visual review (screenshots in `app/e2e/__screenshots__/{light,dark}/flows-0*.png`):
+
+1. *Can you explain the flow at rest in 30 seconds?* Yes for 1–3 lanes. For 4 lanes at
+   1440×900 with the inspector open, the last lane needs one pan; the List view or collapsing
+   the inspector shows everything. Accepted for readability (see fit above).
+2. *Is the step label read before the function name?* Yes: 13 px semibold label above an
+   11.5 px tertiary code line; the 2-line clipping found in the review was fixed (card heights).
+3. *Code-derived vs AI without the legend, in greyscale?* Yes: AI lines are dashed and carry an
+   "AI" pill; static lines are solid. Kind does not depend on colour (markers, ⚡, diamond).
+4. *One cursor, or a jumping camera?* One cursor: the camera only moves when the active step
+   leaves the middle third, with a 500 ms ease; the travelling dash shows where it came from.
+5. *Do lanes help or add noise?* They help from 3 lanes on; single-module flows drop them.
+   Alternate fills are subtle; lane bands match the map's module colours.
+6. *Is the export README-ready?* After the fix below, yes: header, lanes, typed lines, chips
+   and legend in the current theme. The canvas area below short diagrams is kept as is.
+
+Fixed during the review: list play glyph read as a disclosure arrow (now circled); duplicate
+file name on file steps; legend over steps; mid-canvas floating diagrams; inspector blank
+during playback and step-context spacing; map chip over the map toolbar; map path lines over
+card text (now border to border); export lost SVG styles (lines invisible, lanes black, hover
+chips shown) because html-to-image clones SVG without computed styles (now inlined before
+capture); return edge entering its caller's top over the call line; clipped two-line labels.
+No label overlaps were recorded by the layout for the fixture flows.
+
+Also fixed for PR #4 (cherry-picked and pushed to `phase-14-flows-validation`): the committed
+fixture report test compared `commitSha`, which changes with every commit.
+
+Open questions / parking lot:
+
+- Map pin does not refit the camera to the pinned path; badges are small at the overview zoom.
+- Exports keep the empty canvas area below short diagrams; cropping to the content would
+  need a sized off-screen render.
+- Forward edges that skip ranks run straight down the target column and can pass behind
+  intermediate cards in that lane (not seen in the fixtures).
 
 ## Parking lot
 
