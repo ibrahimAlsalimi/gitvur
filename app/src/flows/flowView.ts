@@ -5,8 +5,8 @@ import { UNASSIGNED_MODULE_ID } from "../model/buildModel";
 import type { FlowLayoutInput } from "./layoutFlow";
 
 export const STEP_WIDTH = 220;
-export const STEP_HEIGHT_ONE_LINE = 66;
-export const STEP_HEIGHT_TWO_LINES = 84;
+export const STEP_HEIGHT_ONE_LINE = 68;
+export const STEP_HEIGHT_TWO_LINES = 88;
 /** Characters of a 13px semibold label that fit on one line of a step card. */
 const LABEL_LINE_CHARS = 26;
 const CHIP_CHAR_PX = 6.6;

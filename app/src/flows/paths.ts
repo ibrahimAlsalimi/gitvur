@@ -39,18 +39,40 @@ export function pathLength(points: readonly Point[]): number {
   return total;
 }
 
-/** Zoom ≤ 1; centred horizontally; top-aligned when the diagram is shorter than the view. */
+/** Below this zoom step labels get too small to read; the view pans instead. */
+export const MIN_READABLE_ZOOM = 0.8;
+
+/**
+ * Fits the whole diagram when that keeps labels readable (zoom ≤ 1). Otherwise uses
+ * `MIN_READABLE_ZOOM` and starts at the top-left, where the flow begins; the camera follows
+ * playback and the lane headers stay pinned while panning.
+ */
 export function fitViewport(layout: FlowLayout, width: number, height: number) {
   const pad = 32;
-  const zoom = Math.max(
-    0.1,
-    Math.min(
-      1,
-      (width - 2 * pad) / Math.max(1, layout.width),
-      (height - pad) / Math.max(1, layout.height),
-    ),
+  const all = Math.min(
+    1,
+    (width - 2 * pad) / Math.max(1, layout.width),
+    (height - pad) / Math.max(1, layout.height),
   );
-  const x = (width - layout.width * zoom) / 2;
-  const y = layout.height * zoom < height - pad ? 8 : (height - layout.height * zoom) / 2;
+  const zoom = Math.max(all, Math.min(1, MIN_READABLE_ZOOM));
+  const x = layout.width * zoom <= width - 2 * pad ? (width - layout.width * zoom) / 2 : pad;
+  const y = layout.height * zoom < height - pad ? 8 : 0;
   return { x, y, zoom };
+}
+
+/** Where the segment from `a`'s centre towards `b`'s centre leaves rectangle `a`. */
+export function exitPoint(
+  a: { x: number; y: number; w: number; h: number },
+  b: { x: number; y: number; w: number; h: number },
+): [number, number] {
+  const ax = a.x + a.w / 2;
+  const ay = a.y + a.h / 2;
+  const dx = b.x + b.w / 2 - ax;
+  const dy = b.y + b.h / 2 - ay;
+  if (dx === 0 && dy === 0) return [ax, ay];
+  const t = Math.min(
+    dx === 0 ? Infinity : a.w / 2 / Math.abs(dx),
+    dy === 0 ? Infinity : a.h / 2 / Math.abs(dy),
+  );
+  return [ax + dx * t, ay + dy * t];
 }

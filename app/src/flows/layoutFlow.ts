@@ -7,7 +7,8 @@
  * - Nodes sharing a lane and rank sit side by side, in input order; the lane grows to fit.
  * - Edges are orthogonal polylines. Forward edges leave the source's bottom, cross lanes in
  *   the gap just below the source's rank, and enter the target's top. Back-edges go round
- *   the right side of the source's lane.
+ *   the right side of the source's lane, into the target's right side (same lane or a lane
+ *   to the left) or its top (a lane to the right).
  */
 
 export interface LayoutInputNode {
@@ -315,7 +316,8 @@ export function layoutFlow(input: FlowLayoutInput): FlowLayout {
       channels.set(s.lane, used + 1);
       const cx = (lane ? lane.x + lane.width : s.x + s.width) - CHANNEL_INSET - used * CHANNEL_STEP;
       const sy = s.y + s.height / 2;
-      if (t.lane === s.lane) {
+      if (t.lane === s.lane || t.x + t.width < s.x) {
+        // Same lane, or a lane to the left: come back into the target's right side.
         const ty = t.y + t.height / 2 + (t.id === s.id ? 12 : 0);
         points = [
           [s.x + s.width, sy],

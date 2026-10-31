@@ -537,6 +537,7 @@ function Inner({ model, subject }: { model: Model; subject: FlowSubject }) {
               nodesConnectable={false}
               elementsSelectable={false}
               nodesFocusable
+              panOnScroll
               minZoom={0.1}
               maxZoom={2}
               proOptions={{ hideAttribution: true }}

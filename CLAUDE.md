@@ -119,11 +119,18 @@ A session is not done until `cargo fmt`, `clippy`, `cargo test`, and (for app wo
 
 ## Repository views
 
-- **Map** and **Docs** are top-level tabs (`Ctrl/Cmd+1` and `Ctrl/Cmd+2`). The map stays mounted across tab switches, preserving its viewport, selection and lens. Tab, document path and reading position are saved with the per-repository view in the app data folder.
+- **Map**, **Docs** and **Flows** are top-level tabs (`Ctrl/Cmd+1/2/3`). The map stays mounted across tab switches, preserving its viewport, selection and lens. Tab, document path, reading position, flow selection and Flow/Trace mode are saved with the per-repository view in the app data folder.
 - `gitvur_index::discover_docs` reuses the source walker's ignore and skip rules and discovers `.md`/`.markdown` without changing extraction output.
 - Read-only Tauri commands: `list_docs(path)`, `read_doc(path, docPath)` (2 MB), `read_doc_asset(path, docPath, href)` (5 MB; canonical path must stay inside the selected repository).
 - `app/src/docs/` owns safe rendering, pure link resolution, exact unique code mentions, and the worker-built docs/backlink index (first 500 documents). `app/src/tabs/` owns the accessible tab bar. Document titles/headings are searchable in the palette; file/module inspectors show "Mentioned in docs".
 - Mermaid is lazy-loaded in strict mode, rendered as an image, with embedded resources/config overrides refused. Unsupported diagrams fall back to their source. Markdown entity decoding uses the DOM-free package entry so the same parser runs inside the docs worker.
+
+## Flows tab (Phase 15)
+
+- `app/src/flows/` owns the tab: `flowModel` (indexes on `model.flows`), `layoutFlow` (pure swimlane layout, run in the layout worker), `flowView`/`traceView` (render data), `playback` (pure cursor state machine), `mermaid`, `exportImage`. Flow mode draws the agent's flow; Trace mode the deterministic `get_trace` tree (Tauri, wraps `gitvur_flow::trace`).
+- Line pattern means provenance, marker and glyph mean transition kind. Lanes, lines and chips live in one non-interactive backdrop node under the step cards.
+- Pin to map draws the flow over the map (`canvas/FlowOverlay.tsx`); the inspector shows "Flows through here" and "Trace from here".
+- Exports are written only through the save dialog by `write_export`, which refuses any path inside the repository. The browser mock serves `src/api/mockTraces.json`, generated from the real trace engine (`GITVUR_WRITE_MOCK_TRACES=1 cargo test -p gitvur-app mock_traces`).
 
 ## Frontend conventions
 

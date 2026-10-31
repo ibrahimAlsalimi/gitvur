@@ -39,6 +39,8 @@ Read CLAUDE.md, PROTOTYPE_V2_PLAN.md and prompts/02-extractor-python.md, then ca
 
 Phase 13 is independent of 14–15 and can run first or in parallel. Phase 15 needs Phase 14. Phase 16 needs Phase 10 and the tab bar from Phase 13.
 
+Phase 14 (data layer) and Phase 15 (Flows tab) are implemented; see `PROGRESS.md` for decisions, the visual review and known limits.
+
 Phase 13 adds the Map/Docs tab foundation, safe Markdown reader and map backlinks. Its implementation and verification notes are recorded in `PROGRESS.md`; Phase 12 evaluation remains unfinished independently of these features.
 
 Phase 06 may start once Phase 02 passes (it can use fixture data), but it is simpler to go in order.
