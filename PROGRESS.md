@@ -1323,6 +1323,23 @@ Open questions:
   fonts without changing the app config. Unrelated Python/C fixture artifacts remain untouched.
 - Scope: frontend only; no Rust, dependencies or repository documentation artifacts changed.
 
+## 2026-10-31 — Shareable documentation (user request, no phase prompt)
+
+- Branch `docs/user-guide`. Rewrote `README.md` as a shareable landing page (features with
+  screenshots, pipeline diagram, quick start, CLI and shortcut tables). Rewrote
+  `docs/USING_GITVUR.md` as a six-step setup guide (tools incl. CI's apt packages, build,
+  index, app tour with screenshots, AI pass incl. `architecture.json`, keeping current,
+  troubleshooting). Removed the outdated "Flows UI is still pending" line. Added
+  `docs/HOW_IT_WORKS.md` with eight Mermaid diagrams (pipeline, `.gitvur/` writers, node
+  hierarchy, staleness, documentation loop, crate graph, Tauri commands, tab layout).
+- Screenshots: nine copies of existing Playwright screenshots in `docs/images/` (1.2 MB), so
+  regenerating e2e baselines never changes the docs. Some predate the Diagram tab and show three tabs.
+- Verified: every Mermaid block parses with the app's bundled mermaid (temporary Vitest file,
+  removed); all relative links and images resolve; `git diff --check` passes; crate graph taken
+  from the Cargo manifests; Tauri command list from `#[tauri::command]` functions.
+- Not verified: `pnpm tauri build` (the guide documents only `pnpm tauri dev`), and the guide's
+  `rsync` copy command, which is an example to adapt. No code, schemas or fixtures changed.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).
