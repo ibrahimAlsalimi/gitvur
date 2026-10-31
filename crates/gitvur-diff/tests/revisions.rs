@@ -320,6 +320,7 @@ fn carries_annotations_only_for_moves_with_matching_hashes() {
             .unwrap()
     };
     let annotations = Annotations {
+        architecture: None,
         entry_points: Vec::new(),
         flows: Vec::new(),
         modules: vec![Module {

@@ -196,6 +196,7 @@ mod tests {
     #[test]
     fn annotations_round_trip() {
         let mut a = Annotations {
+            architecture: None,
             entry_points: Vec::new(),
             flows: Vec::new(),
             modules: vec![Module {

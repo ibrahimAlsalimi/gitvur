@@ -3,6 +3,7 @@ const TABS = [
   { id: "map", label: "Map" },
   { id: "docs", label: "Docs" },
   { id: "flows", label: "Flows" },
+  { id: "diagram", label: "Diagram" },
 ] as const;
 export function TabBar() {
   const active = useAppStore((s) => s.activeTab);

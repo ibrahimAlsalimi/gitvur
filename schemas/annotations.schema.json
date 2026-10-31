@@ -3,6 +3,16 @@
   "title": "Annotations",
   "type": "object",
   "properties": {
+    "architecture": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Architecture"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "descriptions": {
       "type": "array",
       "items": {
@@ -42,6 +52,142 @@
     "edges"
   ],
   "$defs": {
+    "Architecture": {
+      "type": "object",
+      "properties": {
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArchitectureComponent"
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArchitectureRelationship"
+          }
+        },
+        "summary": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "summary",
+        "components",
+        "relationships"
+      ]
+    },
+    "ArchitectureComponent": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "parent": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "responsibility": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArchitectureSource"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "responsibility",
+        "sources",
+        "provenance",
+        "evidence"
+      ]
+    },
+    "ArchitectureRelationship": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "from": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "from",
+        "to",
+        "kind",
+        "label",
+        "provenance",
+        "evidence"
+      ]
+    },
+    "ArchitectureSource": {
+      "type": "object",
+      "properties": {
+        "basedOnHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "node": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "node",
+        "basedOnHash"
+      ]
+    },
     "Description": {
       "type": "object",
       "properties": {

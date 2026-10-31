@@ -179,3 +179,14 @@ proposed in `PROGRESS.md`.
 
 The report is built with `Report::canonicalize()` and written with `to_canonical_json`. It has
 no timestamps, so the same repository and annotations give byte-identical `report.json`.
+
+## Architecture
+
+The optional version-1 extension is checked for unique arch: IDs, nonempty names/kinds/
+responsibilities, AI provenance, indexed sources, disjoint membership, acyclic parents,
+source hash freshness, and readable evidence inside source ranges. Relationships require
+existing distinct endpoints and source-component evidence containing a target symbol/file stem
+or the exact label. Reads use the canonical repository-safe evidence loader. Findings are
+architecture-* issues; changed hashes are stale warnings. These checks establish traceability;
+natural-language architectural truth still requires source review. The viewer excludes rejected
+and stale components and their AI relationships while retaining structural dependencies.

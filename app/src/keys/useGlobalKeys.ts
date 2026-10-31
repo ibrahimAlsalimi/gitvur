@@ -4,7 +4,7 @@ import { useAppStore } from "../store/useAppStore";
 import { typingIn } from "./typing";
 
 const LENS_KEYS = { "1": "structure", "2": "coverage", "3": "changes" } as const;
-const TAB_KEYS = { "1": "map", "2": "docs", "3": "flows" } as const;
+const TAB_KEYS = { "1": "map", "2": "docs", "3": "flows", "4": "diagram" } as const;
 
 /**
  * App-wide shortcuts: Ctrl/Cmd+K palette, Ctrl/Cmd+O open, 1 2 3 lens, ? shortcuts,

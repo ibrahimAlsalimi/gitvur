@@ -10,6 +10,9 @@ use crate::common::{Edge, canonicalize_edges};
 #[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Annotations {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "ts", ts(optional))]
+    pub architecture: Option<crate::Architecture>,
     pub modules: Vec<Module>,
     pub descriptions: Vec<Description>,
     /// Hidden relationships; every one must have `provenance: "ai"` and evidence.
@@ -52,6 +55,9 @@ impl Annotations {
     /// Sorts modules (and each module's files) and descriptions by `id`, and edges
     /// by `(from, to, type, evidence.file, evidence.line)`.
     pub fn canonicalize(&mut self) {
+        if let Some(a) = &mut self.architecture {
+            a.canonicalize();
+        }
         crate::execution::canonicalize_entries(&mut self.entry_points);
         for flow in &mut self.flows {
             flow.transitions.sort();

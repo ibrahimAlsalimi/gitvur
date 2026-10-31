@@ -1,4 +1,6 @@
 import { type FlowLayout, type FlowLayoutInput, layoutFlow } from "../flows/layoutFlow";
+import { layoutDiagram, type DiagramPositions } from "../diagram/layout";
+import type { Diagram } from "../diagram/model";
 import { computeLayout, createLayoutCache } from "./computeLayout";
 import type { LayoutRequest, LayoutResult } from "./types";
 import type { WorkerRequest, WorkerResponse } from "./layout.worker";
@@ -11,7 +13,10 @@ export interface TimedLayout {
 
 let worker: Worker | null | undefined;
 let nextId = 0;
-const pending = new Map<number, (r: { result: LayoutResult | FlowLayout; ms: number }) => void>();
+const pending = new Map<
+  number,
+  (r: { result: LayoutResult | FlowLayout | DiagramPositions; ms: number }) => void
+>();
 const inlineCache = createLayoutCache();
 
 function getWorker(): Worker | null {
@@ -61,6 +66,19 @@ export function runFlowLayout(flow: FlowLayoutInput): Promise<{ result: FlowLayo
       resolve({ result: r.result as FlowLayout, ms: r.ms });
     });
     const message: WorkerRequest = { id, flow };
+    w.postMessage(message);
+  });
+}
+
+export function runDiagramLayout(diagram: Diagram): Promise<DiagramPositions> {
+  const w = getWorker();
+  if (!w) return Promise.resolve(layoutDiagram(diagram));
+  const id = nextId++;
+  return new Promise((resolve) => {
+    pending.set(id, (r) => {
+      resolve(r.result as DiagramPositions);
+    });
+    const message: WorkerRequest = { id, diagram };
     w.postMessage(message);
   });
 }

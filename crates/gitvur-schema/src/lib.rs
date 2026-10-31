@@ -5,6 +5,7 @@
 //! [`to_canonical_json`] then serialises the value in the canonical byte format.
 
 mod annotations;
+mod architecture;
 mod common;
 mod diff;
 mod execution;
@@ -18,6 +19,9 @@ mod trace;
 pub mod tree;
 
 pub use annotations::{Annotations, Description, Module};
+pub use architecture::{
+    Architecture, ArchitectureComponent, ArchitectureRelationship, ArchitectureSource,
+};
 pub use common::{Edge, EdgeType, Evidence, Provenance, SourceRange};
 pub use diff::{ChangeKind, DiffSummary, EdgeChange, ElementChange, StructureDiff};
 pub use execution::{

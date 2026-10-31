@@ -34,6 +34,7 @@ import type {
 } from "../generated/contract";
 import { localPath } from "../docs/resolveLink";
 import unsafeDoc from "../../e2e/fixtures/unsafe.md?raw";
+import mockArchitecture from "../../e2e/fixtures/architecture.json";
 import mockDiff from "./mockDiff.json";
 import mockTraces from "./mockTraces.json";
 import { trustBundle } from "./mockTrust";
@@ -134,6 +135,32 @@ function bundle(path: string): Promise<RepoBundle> {
         ]
       : [],
   };
+  if (
+    state === "architecture" ||
+    state === "architecture-stale" ||
+    state === "architecture-nested"
+  ) {
+    const architecture = structuredClone(mockArchitecture) as NonNullable<
+      Annotations["architecture"]
+    >;
+    if (state === "architecture-nested" && architecture.components[1])
+      architecture.components[1].parent = "arch:entry";
+    result.annotations = {
+      ...(result.annotations ?? { modules: [], descriptions: [], edges: [] }),
+      architecture,
+    };
+    result.architectureIssues =
+      state === "architecture-stale"
+        ? [
+            {
+              id: "arch:service",
+              code: "architecture-stale",
+              severity: "warning",
+              message: "Source changed",
+            },
+          ]
+        : [];
+  }
   if (state === "trust") return Promise.resolve(trustBundle(result));
   if (state === "report-stale" && result.report) {
     result.report = { ...result.report, commitSha: "1a2b3c4" };

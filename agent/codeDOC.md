@@ -361,3 +361,41 @@ password matches"). Ordinary sequential calls are `call`, not `branch`.
 
 `gitvur validate <repo>` reports **zero `entry-*` and `flow-*` errors**, and `gitvur flows
 <repo>` lists every flow as `current`. Warnings you leave go in your final report with a reason.
+
+## 12. Architecture diagram (optional, version 1)
+
+Add `architecture` only when evidence supports a useful high-level view. Never introduce an
+AI service or execute the analyzed repository. Keep existing modules, flows and descriptions.
+The Diagram tab always has a structural fallback.
+
+Read packet `architectureIssues`, structure nodes/hashes, module inventory and traces. Use
+roughly 5–15 major components when justified; never pad a diagram. Architecture contains
+`version: 1`, `summary`, `components` and `relationships` (see annotations.schema.json).
+
+Components have a stable `arch:<lowercase-slug>` ID, name, kind (api, frontend, persistence,
+cli, worker, subsystem, etc.), responsibility, `sources: [{node, basedOnHash}]`, optional
+parent, `provenance: "ai"`, and nonempty `evidence: [{file,line}]`. Reference indexed file,
+class or function IDs and copy hashes exactly. Prefer whole files. Membership must be
+disjoint, including between parents and children; parents need their own source (such as a
+subsystem entry file). Do not split a file between components: viewer ownership is by file.
+Evidence must lie inside a referenced source range. Use neutral names when purpose is unclear.
+
+Relationships have a unique `arch:<slug>` ID, from/to component IDs, kind, label,
+`provenance: "ai"`, and nonempty evidence. Evidence must be inside the source component and
+mention a target symbol/file stem or the exact relationship label. This proves traceability,
+not semantics: read surrounding code. An import alone supports "Depends on", never "Writes
+to database". Verified structural dependencies remain alongside enriched relationships.
+
+Example component (substitute actual hash):
+
+```json
+{"id":"arch:order-service","name":"Order service","kind":"service",
+ "responsibility":"Validates orders and emits save notifications.",
+ "sources":[{"node":"file:flowapp/service/orders.py","basedOnHash":"sha256:…"}],
+ "provenance":"ai","evidence":[{"file":"flowapp/service/orders.py","line":5}]}
+```
+
+In incremental mode, resolve every architecture issue, re-read changed sources, update hashes
+only after review, and preserve unchanged component IDs. Run `gitvur validate <repo>` until
+there are zero architecture errors or stale warnings. The viewer excludes rejected or stale
+components and restores their files to structural groups. Natural-language claims require review.

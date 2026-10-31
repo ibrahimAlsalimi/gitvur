@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "summary": "CLI and HTTP entry points submit orders to a validation service with storage notifications.",
+  "components": [
+    {
+      "id": "arch:entry",
+      "name": "Entry points",
+      "kind": "api",
+      "responsibility": "Accepts CLI and HTTP requests and passes orders to the service.",
+      "sources": [
+        {
+          "node": "file:flowapp/cli.py",
+          "basedOnHash": "sha256:525abe946df2bd9c45b6362e82b42ec7fb01576e50c3e0d794ebf740c1d25b18"
+        },
+        {
+          "node": "file:flowapp/api.py",
+          "basedOnHash": "sha256:89603a241bdab9b8c1f25ffff5639566244e8d73381b7cc206a239c6ce5feb69"
+        },
+        {
+          "node": "file:flowapp/__main__.py",
+          "basedOnHash": "sha256:69c10f98b1a0215fdd8e13b02f1afcdf9292680273d198dddecbe4fa47d732a3"
+        }
+      ],
+      "provenance": "ai",
+      "evidence": [
+        {
+          "file": "flowapp/cli.py",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "arch:service",
+      "name": "Order service",
+      "kind": "service",
+      "responsibility": "Validates orders and dispatches save notifications.",
+      "sources": [
+        {
+          "node": "file:flowapp/service/orders.py",
+          "basedOnHash": "sha256:718cb84dada1d58c87fa0621fc6ca0fe183098dcdab7472085709d430fecdf7a"
+        }
+      ],
+      "provenance": "ai",
+      "evidence": [
+        {
+          "file": "flowapp/service/orders.py",
+          "line": 1
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "arch:submit",
+      "from": "arch:entry",
+      "to": "arch:service",
+      "kind": "invokes",
+      "label": "Submits orders",
+      "provenance": "ai",
+      "evidence": [
+        {
+          "file": "flowapp/cli.py",
+          "line": 1
+        }
+      ]
+    }
+  ]
+}

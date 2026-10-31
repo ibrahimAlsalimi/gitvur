@@ -139,6 +139,7 @@ fn annotations(structure: &Structure) -> Annotations {
         .collect();
     let s = |id, node, label| step(structure, id, node, label);
     Annotations {
+        architecture: None,
         modules: vec![Module {
             id: "module:app".into(),
             name: "App".into(),

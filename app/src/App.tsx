@@ -1,5 +1,6 @@
 import { type CSSProperties, useEffect } from "react";
 
+import { DiagramTab } from "./diagram/DiagramTab";
 import { DocsTab } from "./docs/DocsTab";
 import { DocsController } from "./docs/useDocsStore";
 import { FlowsTab } from "./flows/FlowsTab";
@@ -126,6 +127,7 @@ export function App() {
         </div>
         <DocsTab />
         <FlowsTab />
+        <DiagramTab />
       </div>
       <div className="drawer">{issuesOpen && <IssuesPanel />}</div>
       <StatusBar />

@@ -257,7 +257,7 @@ export const copy = {
 
 /** The keyboard map, listed exactly as the shortcuts sheet shows it. */
 export const SHORTCUTS: readonly { keys: string; action: string }[] = [
-  { keys: "Ctrl/Cmd+1 / 2 / 3", action: "Map / Docs / Flows tab" },
+  { keys: "Ctrl/Cmd+1 / 2 / 3 / 4", action: "Map / Docs / Flows / Diagram tab" },
   { keys: "Ctrl/Cmd+K", action: "Search / palette" },
   { keys: "Ctrl/Cmd+O", action: "Open repository" },
   { keys: "Arrow keys on canvas", action: "Move focus: ↑ parent, ↓ first child, ← → siblings" },
