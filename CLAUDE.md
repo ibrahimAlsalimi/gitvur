@@ -37,7 +37,7 @@ gitvur/
 │   ├── gitvur-index/          # extractor
 │   ├── gitvur-validate/       # validator + staleness
 │   ├── gitvur-diff/           # structural diff
-│   ├── gitvur-flow/           # deterministic bounded call trace
+│   ├── gitvur-flow/           # deterministic bounded call trace + entry/flow checks
 │   └── gitvur-cli/            # `gitvur` binary
 ├── app/
 │   ├── src-tauri/             # Tauri 2 backend, depends on the crates
@@ -70,9 +70,13 @@ module:<slug>
 file:<relpath>
 class:<relpath>:<Qualified.Name>
 function:<relpath>:<Qualified.Name>
+entry:<kind>:<slug>
+flow:<slug>
 ```
 
 Edge `provenance` is one of `syntactic | semantic | ai`. AI edges must carry `evidence` (file + line). Lines are 1-based inclusive; paths are relative to the repo root, using `/`.
+
+v0.3 adds `structure.entryPoints` (extractor), `annotations.entryPoints` and `annotations.flows` (agent; `ai` entries and transitions need evidence), and `report.flows` (`current | stale | broken`). Readers accept v0.2 files; new arrays default to empty and are omitted when empty.
 
 ## Commands
 
@@ -136,10 +140,8 @@ A session is not done until `cargo fmt`, `clippy`, `cargo test`, and (for app wo
 - Prefer small, reviewable commits with clear messages: `phase-02: extract python classes and methods`.
 - At the end of every session, append to `PROGRESS.md`: date, phase, what was done, acceptance criteria status, deviations from the prompt, open questions.
 
-## Phase 14 checkpoint
+## Execution flows (Phase 14)
 
-Parts A–B introduce v0.3 entry/flow types and deterministic entry extraction. Readers
-accept v0.2. See the schema/index READMEs for the contract. The user authorized Part C after the fixture checkpoint. Deterministic tracing and
-read-only trace/flows CLI commands are implemented. Flow validation and packet/agent
-workflow remain for Parts D–F; flow listings report unchecked status.
-Existing py-small/ts-small data stays frozen; app UI work remains Phase 15.
+- The extractor detects static entry points; `gitvur-flow::trace` computes bounded call trees; `gitvur-flow::check_flows` checks agent entry points and flows (the validator calls it and writes `report.flows`). Rules: `crates/gitvur-validate/README.md`.
+- `gitvur packet` carries `entryPoints`, a trace per entry, and (incremental) `staleFlows`/`brokenFlows`. Agent rules: `agent/codeDOC.md` section 11.
+- `fixtures/py-flows` and `fixtures/ts-flows` have reviewed goldens and committed, zero-issue `.gitvur/`. Existing py-small/ts-small data stays frozen; the Flows UI is Phase 15.

@@ -203,5 +203,6 @@ To inspect execution entry points and their call trees:
 
 Use real IDs from your repository in place of these examples. Both commands inspect
 current source without writing index files. Rebuild the CLI after updating Gitvur.
-At the Part C checkpoint, curated flow status is `unchecked`; flow validation and
-the Flows UI are still pending.
+`flows` shows each curated flow as `current`, `stale` (with the steps whose code
+changed) or `broken` (with its errors), from a fresh validation. `validate` reports
+the same checks as `entry-*`/`flow-*` issues. The Flows UI is still pending.

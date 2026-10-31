@@ -1,12 +1,19 @@
-# gitvur-flow — deterministic call traces
+# gitvur-flow — deterministic call traces and flow checks
 
-Pure, read-only traversal of a `gitvur_schema::Structure`. No repository code is
-executed. CLI indexing and annotation loading live outside this crate.
+Pure, read-only traversal of a `gitvur_schema::Structure`, and the checks on agent-written
+entry points and flows. No repository code is executed and the crate does no I/O. CLI
+indexing and annotation loading live outside this crate.
 
 ```rust
-use gitvur_flow::{trace, TraceOptions};
+use gitvur_flow::{check_flows, trace, EvidenceSource, TraceOptions};
 // let tree = trace(&structure, "entry:console-script:flow-shop", &TraceOptions::default());
+// let result = check_flows(&structure, &annotations, &mut evidence_files);
 ```
+
+`check_flows` returns issues (codes in `gitvur_flow::codes`) and one `FlowStatus` per flow.
+Evidence lines are read through the caller's `EvidenceSource`, which must apply path safety;
+the validator passes its cached `resolve_in_repo` reader. Rules and statuses are documented
+in `crates/gitvur-validate/README.md`.
 
 ## Roots and edges
 
@@ -18,7 +25,7 @@ use gitvur_flow::{trace, TraceOptions};
 - Entry-owned unresolved sites appear as ambiguous roots after resolved roots.
 - Only `calls` edges with `syntactic` provenance are followed. `include_semantic`
   additionally follows `semantic`; `ai` edges are never followed. Duplicate edges
-  to the same target collapse. Dangling targets are omitted; Part D checks validity.
+  to the same target collapse. Dangling targets are omitted; the validator reports them.
 - Children sort by target `(file, startLine, id)`. Ambiguous sites join that order
   using their evidence location, after resolved children on a location tie. Candidate
   IDs sort and deduplicate, but never become automatic traversal targets.
@@ -63,7 +70,7 @@ for cycles, `?` for ambiguities, and `…` for truncation. JSON conforms to
 Both commands index current source in memory and read optional annotations without
 writing `.gitvur`. AI entries are merged by ID; conflicting IDs and malformed or
 outside-repository annotation files cause an error. Agent edges are not merged into
-the executable graph. `flows` lists static/AI entries and curated flows; statuses are
-explicitly `unchecked` until Part D provides validation, rather than trusting an old
-report or claiming that a parsed flow is current. Entry listing shows unresolved
-config targets explicitly. No app UI is added in Part C.
+the executable graph. `flows` lists static/AI entries and curated flows with the status
+from a fresh in-memory validation (`current`, `stale` with its stale steps, or `broken`
+with its errors); it never trusts an old `report.json` and writes nothing. Entry listing
+shows unresolved config targets explicitly.

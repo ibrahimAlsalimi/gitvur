@@ -20,6 +20,8 @@ Prototype v2 proves one thing: **a structure extracted deterministically from th
 - A validator that checks both layers and detects staleness.
 - A viewer that merges both layers, shows the provenance of every relationship, and collapses the tree at file level by default.
 - A structural diff between two Git revisions.
+- Execution flows (Phase 14 data layer, Phase 15 UI): deterministic entry points and call
+  traces, plus agent-curated flows checked by the validator. See "Execution flows" below.
 
 The plan is ordered by sequence and acceptance gates, not by dates; the available time has not been set yet.
 
@@ -198,7 +200,8 @@ gitvur/
 │   │       └── typescript.scm
 │   ├── gitvur-validate/        # validator + staleness detection
 │   ├── gitvur-diff/            # structural diff between two revisions
-│   └── gitvur-cli/             # commands: index / validate / stale / diff
+│   ├── gitvur-flow/            # deterministic call traces + flow checks
+│   └── gitvur-cli/             # commands: index / validate / stale / packet / diff / trace / flows
 ├── app/                        # Tauri 2
 │   ├── src-tauri/              # calls the crates above
 │   └── src/                    # React + TypeScript
@@ -217,6 +220,8 @@ gitvur index    <repo>
 gitvur validate <repo>
 gitvur stale    <repo>
 gitvur diff     <repo> <commitA> <commitB>
+gitvur trace    <repo> <entryId|nodeId>
+gitvur flows    <repo>
 ```
 
 The `fixtures/` directory matters: each fixture ships with a hand-written expected `structure.json`, and tests compare the extractor's output against it.
@@ -364,13 +369,26 @@ Also record these numbers without a fixed target, since they guide later decisio
 - Editing, integrated terminal, contributors page
 - Running the agent from inside the app (it stays external)
 
+## Execution flows
+
+A Flows view shows how the code runs: where execution starts and which path it takes. It
+keeps the core principle: what can be derived from the code is derived deterministically;
+what needs understanding is written by the agent, with evidence, and validated.
+
+| Piece | Who produces it |
+| --- | --- |
+| Entry points visible in code and config (`__main__`, console scripts, `bin`, npm scripts, top-level calls) | Extractor (`structure.entryPoints`) |
+| Call trace from any entry point or function | Deterministic, computed from existing edges (`gitvur-flow::trace`, `gitvur trace`) |
+| Framework entry points (HTTP routes, jobs, event handlers) | Agent, with evidence (`annotations.entryPoints`) |
+| Curated flows: named, ordered steps with labels | Agent (`annotations.flows`); every step and transition checked by the validator |
+
+The validator reports each flow as `current`, `stale` (a step's code changed) or `broken`
+(any error) in `report.flows`. The work packet carries every entry point's trace so the agent
+builds flows from real edges. Phase 14 delivers the data layer; the UI is Phase 15.
+
 ## Phase 14 contract amendment
 
-The current data contract is v0.3, backward compatible with v0.2. Parts A–B add static
-entry points and curated flow representations; tracing and flow validation follow only
-after the new fixture expectations receive human review. The v0.2 examples above
-remain valid compatibility examples. See crates/gitvur-schema/README.md for additions.
-
-Phase 14 Part C adds the shared bounded trace engine and read-only `trace`/`flows`
-commands. Flow listings remain unchecked until Part D implements validation and
-staleness; the Flows UI remains Phase 15.
+The current data contract is v0.3, backward compatible with v0.2: readers accept v0.2
+files, whose new arrays default to empty. The v0.2 examples above remain valid compatibility
+examples. See `crates/gitvur-schema/README.md` for the additions and
+`crates/gitvur-validate/README.md` for the entry point and flow checks.

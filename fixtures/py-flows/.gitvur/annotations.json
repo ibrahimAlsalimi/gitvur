@@ -1,0 +1,417 @@
+{
+  "modules": [
+    {
+      "id": "module:backends",
+      "name": "Backends",
+      "description": "Interchangeable save backends, a backend-agnostic save helper, and a recursive countdown.",
+      "files": [
+        "file:flowapp/backends.py"
+      ]
+    },
+    {
+      "id": "module:domain",
+      "name": "Domain rules",
+      "description": "Validation and text normalization applied to an order item before it is stored.",
+      "files": [
+        "file:flowapp/domain/__init__.py",
+        "file:flowapp/domain/rules.py",
+        "file:flowapp/domain/text.py"
+      ]
+    },
+    {
+      "id": "module:entry-points",
+      "name": "Entry points",
+      "description": "Command-line, package and route entry points that hand an order item to the order service.",
+      "files": [
+        "file:flowapp/__init__.py",
+        "file:flowapp/__main__.py",
+        "file:flowapp/api.py",
+        "file:flowapp/cli.py"
+      ]
+    },
+    {
+      "id": "module:orders",
+      "name": "Order service",
+      "description": "Coordinates an order: validation, persistence through the domain chain, and the saved-event handler.",
+      "files": [
+        "file:flowapp/service/__init__.py",
+        "file:flowapp/service/orders.py"
+      ]
+    },
+    {
+      "id": "module:storage",
+      "name": "Storage",
+      "description": "In-memory persistence helpers: the repository, its commit driver and the saved-event handler.",
+      "files": [
+        "file:flowapp/storage/__init__.py",
+        "file:flowapp/storage/driver.py",
+        "file:flowapp/storage/events.py",
+        "file:flowapp/storage/repository.py"
+      ]
+    }
+  ],
+  "descriptions": [
+    {
+      "id": "class:flowapp/backends.py:Cache",
+      "text": "Cache backend with a save method that returns the item unchanged.",
+      "basedOnHash": "sha256:21b7030bbdbfd9c8319b8d73b3a7ce65b3ec333dbec01fb3007ddaa210184f71"
+    },
+    {
+      "id": "class:flowapp/backends.py:Disk",
+      "text": "Disk backend with a save method that returns the item unchanged.",
+      "basedOnHash": "sha256:7ec1ee0cea6aa64a9e5cf42fb891ca86989e7a1f90a0aa376c0ae1f4845f9538"
+    },
+    {
+      "id": "file:flowapp/__init__.py",
+      "text": "Package marker for the order fixture application; contains only a docstring.",
+      "basedOnHash": "sha256:c68b2941854b904763c22807a0497fb30bc0872dedb07dff72152540f9e8e6cf"
+    },
+    {
+      "id": "file:flowapp/__main__.py",
+      "text": "Package entry for `python -m flowapp`: imports the CLI main function and runs it at import time.",
+      "basedOnHash": "sha256:69c10f98b1a0215fdd8e13b02f1afcdf9292680273d198dddecbe4fa47d732a3"
+    },
+    {
+      "id": "file:flowapp/api.py",
+      "text": "Route-style API: a handler that submits an order item, registered under `POST /orders` in a route table.",
+      "basedOnHash": "sha256:89603a241bdab9b8c1f25ffff5639566244e8d73381b7cc206a239c6ce5feb69"
+    },
+    {
+      "id": "file:flowapp/backends.py",
+      "text": "Save backends and helpers; at import it creates a cache sink, and when run as a script it saves a sample item.",
+      "basedOnHash": "sha256:a766edc887b5e8e113bd8aeaf2935200edc4197ab9b001260c96d27bc2c78a7b"
+    },
+    {
+      "id": "file:flowapp/cli.py",
+      "text": "Command-line entry point: submits a sample order item, and runs itself when executed as a script.",
+      "basedOnHash": "sha256:525abe946df2bd9c45b6362e82b42ec7fb01576e50c3e0d794ebf740c1d25b18"
+    },
+    {
+      "id": "file:flowapp/domain/__init__.py",
+      "text": "Package marker for domain rules and normalization; contains only a docstring.",
+      "basedOnHash": "sha256:5492123d0338b1050a2588bdbf0e7827d17a5fc53d6ab5576b058b597d2ef288"
+    },
+    {
+      "id": "file:flowapp/domain/rules.py",
+      "text": "Order validation rule that forwards the item to text normalization.",
+      "basedOnHash": "sha256:80628e599ac327351b5134332ce8ed41aa9a4e8accfd410065f7ceefbab26b8c"
+    },
+    {
+      "id": "file:flowapp/domain/text.py",
+      "text": "Text normalization that trims an item and hands it to the repository.",
+      "basedOnHash": "sha256:08853329bd132cc25e5f338bc4f9790ffc44ecdff99c391603437df7f37e7ecd"
+    },
+    {
+      "id": "file:flowapp/service/__init__.py",
+      "text": "Package marker for order coordination; contains only a docstring.",
+      "basedOnHash": "sha256:6d88f049a603bfcc543e77d1815bd44922727b79f279236f1eab7062ac06bbce"
+    },
+    {
+      "id": "file:flowapp/service/orders.py",
+      "text": "Order service: validates an item, then calls the saved handler through an event lookup table.",
+      "basedOnHash": "sha256:718cb84dada1d58c87fa0621fc6ca0fe183098dcdab7472085709d430fecdf7a"
+    },
+    {
+      "id": "file:flowapp/storage/__init__.py",
+      "text": "Package marker for the in-memory persistence helpers; contains only a docstring.",
+      "basedOnHash": "sha256:5c2bc84dacf6eeb60e1a3a30c023425e80025f736a69491a4e8cfc7a0f540c59"
+    },
+    {
+      "id": "file:flowapp/storage/driver.py",
+      "text": "Storage driver that turns an item into a saved record.",
+      "basedOnHash": "sha256:6427da2eee8545ce4f4ec48fdaa2b5732750a638f07e779d23726b3ae3178bcb"
+    },
+    {
+      "id": "file:flowapp/storage/events.py",
+      "text": "Handler for the saved event.",
+      "basedOnHash": "sha256:56a47669902b9dfecb347ec45bc9f67585b8473d7ce05beeabcd29587ce9ccf3"
+    },
+    {
+      "id": "file:flowapp/storage/repository.py",
+      "text": "Repository function that stores an item through the storage driver.",
+      "basedOnHash": "sha256:4428fb953858a01fe3f84b1fb3f17bd029eb8d276d0d23ddfb7f02f2d9254937"
+    },
+    {
+      "id": "function:flowapp/api.py:handle",
+      "text": "Handles an order request by submitting the item to the order service and returning the result.",
+      "basedOnHash": "sha256:bcb316849e72834cc3e73dc81dd7b510dc7017af4d418e0328a6e86fc70887d6"
+    },
+    {
+      "id": "function:flowapp/backends.py:Cache.save",
+      "text": "Saves an item in the cache backend; returns the item unchanged.",
+      "basedOnHash": "sha256:5ca73aaa37199e89bfb09310e8c83d71517034595b0655806d14738460993265"
+    },
+    {
+      "id": "function:flowapp/backends.py:Disk.save",
+      "text": "Saves an item in the disk backend; returns the item unchanged.",
+      "basedOnHash": "sha256:5ca73aaa37199e89bfb09310e8c83d71517034595b0655806d14738460993265"
+    },
+    {
+      "id": "function:flowapp/backends.py:countdown",
+      "text": "Counts down recursively from n and returns 0 once n reaches zero or below.",
+      "basedOnHash": "sha256:40249386d7f78750a57bbd7a4064abee57d44b4e19f30e32111b9bf707fdc598"
+    },
+    {
+      "id": "function:flowapp/backends.py:persist_unknown",
+      "text": "Saves an item through whichever backend object it is given.",
+      "basedOnHash": "sha256:3754afd558e4c8770c41059175736b666ad9188611c3d4d07b5fdca6378b9943"
+    },
+    {
+      "id": "function:flowapp/cli.py:main",
+      "text": "Submits the sample item `example` as an order and returns the result.",
+      "basedOnHash": "sha256:6e6074fd1d03d1658814ed2dbf5b81c2f0969eb5925aa30cd110a43fc733d9d9"
+    },
+    {
+      "id": "function:flowapp/domain/rules.py:validate",
+      "text": "Validates an order item by normalizing it, returning the stored record.",
+      "basedOnHash": "sha256:8484568644a654f23106f8617f94275daae728482c97368f0ef932fc4c9ddfb9"
+    },
+    {
+      "id": "function:flowapp/domain/text.py:normalize",
+      "text": "Trims surrounding whitespace from an item and stores it, returning the stored record.",
+      "basedOnHash": "sha256:ad10d0c764d49f94d711256abf3b9eed81bd29fa9acfb7fc393516cc9183b60d"
+    },
+    {
+      "id": "function:flowapp/service/orders.py:submit",
+      "text": "Validates an order item, calls the `saved` handler with the result via a lookup table, and returns the result.",
+      "basedOnHash": "sha256:102e73dbaac7248ed5734d452dd1ce7af312b08859a2f707063a4c5db1ef6e22"
+    },
+    {
+      "id": "function:flowapp/storage/driver.py:commit",
+      "text": "Wraps an item in a `saved` record and returns it.",
+      "basedOnHash": "sha256:6427da2eee8545ce4f4ec48fdaa2b5732750a638f07e779d23726b3ae3178bcb"
+    },
+    {
+      "id": "function:flowapp/storage/events.py:on_saved",
+      "text": "Receives a saved item and returns it unchanged.",
+      "basedOnHash": "sha256:56a47669902b9dfecb347ec45bc9f67585b8473d7ce05beeabcd29587ce9ccf3"
+    },
+    {
+      "id": "function:flowapp/storage/repository.py:store",
+      "text": "Stores an item by committing it through the driver and returns the record.",
+      "basedOnHash": "sha256:ff44319683de9962e77bbe8ec3231b038700dfd9108653e76eea15642a8b5a8c"
+    }
+  ],
+  "edges": [],
+  "entryPoints": [
+    {
+      "id": "entry:http-route:post-orders",
+      "kind": "http-route",
+      "name": "POST /orders",
+      "target": "function:flowapp/api.py:handle",
+      "calls": [],
+      "evidence": {
+        "file": "flowapp/api.py",
+        "line": 8
+      },
+      "provenance": "ai"
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow:backends-self-check",
+      "name": "Backends self-check",
+      "description": "Running the backends module directly saves a sample item in the cache.",
+      "entryPoint": "entry:main-guard:flowapp-backends-py",
+      "steps": [
+        {
+          "id": "s1",
+          "node": "file:flowapp/backends.py",
+          "label": "Loads the backends module",
+          "basedOnHash": "sha256:a766edc887b5e8e113bd8aeaf2935200edc4197ab9b001260c96d27bc2c78a7b"
+        },
+        {
+          "id": "s2",
+          "node": "class:flowapp/backends.py:Cache",
+          "label": "Creates the cache sink",
+          "basedOnHash": "sha256:21b7030bbdbfd9c8319b8d73b3a7ce65b3ec333dbec01fb3007ddaa210184f71"
+        },
+        {
+          "id": "s3",
+          "node": "function:flowapp/backends.py:Cache.save",
+          "label": "Saves the sample item",
+          "basedOnHash": "sha256:5ca73aaa37199e89bfb09310e8c83d71517034595b0655806d14738460993265"
+        }
+      ],
+      "transitions": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "call",
+          "provenance": "ai",
+          "evidence": {
+            "file": "flowapp/backends.py",
+            "line": 21
+          }
+        },
+        {
+          "from": "s1",
+          "to": "s3",
+          "kind": "branch",
+          "label": "when run as a script",
+          "provenance": "ai",
+          "evidence": {
+            "file": "flowapp/backends.py",
+            "line": 23
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow:cli-places-order",
+      "name": "CLI places an order",
+      "description": "From the flow-shop console script to the committed record and the saved event.",
+      "entryPoint": "entry:console-script:flow-shop",
+      "steps": [
+        {
+          "id": "s1",
+          "node": "function:flowapp/cli.py:main",
+          "label": "Starts an order for the sample item",
+          "basedOnHash": "sha256:6e6074fd1d03d1658814ed2dbf5b81c2f0969eb5925aa30cd110a43fc733d9d9"
+        },
+        {
+          "id": "s2",
+          "node": "function:flowapp/service/orders.py:submit",
+          "label": "Coordinates the order",
+          "basedOnHash": "sha256:102e73dbaac7248ed5734d452dd1ce7af312b08859a2f707063a4c5db1ef6e22"
+        },
+        {
+          "id": "s3",
+          "node": "function:flowapp/domain/rules.py:validate",
+          "label": "Validates the order item",
+          "basedOnHash": "sha256:8484568644a654f23106f8617f94275daae728482c97368f0ef932fc4c9ddfb9"
+        },
+        {
+          "id": "s4",
+          "node": "function:flowapp/domain/text.py:normalize",
+          "label": "Trims the item text",
+          "basedOnHash": "sha256:ad10d0c764d49f94d711256abf3b9eed81bd29fa9acfb7fc393516cc9183b60d"
+        },
+        {
+          "id": "s5",
+          "node": "function:flowapp/storage/repository.py:store",
+          "label": "Stores the cleaned item",
+          "basedOnHash": "sha256:ff44319683de9962e77bbe8ec3231b038700dfd9108653e76eea15642a8b5a8c"
+        },
+        {
+          "id": "s6",
+          "node": "function:flowapp/storage/driver.py:commit",
+          "label": "Commits the saved record",
+          "basedOnHash": "sha256:6427da2eee8545ce4f4ec48fdaa2b5732750a638f07e779d23726b3ae3178bcb"
+        },
+        {
+          "id": "s7",
+          "node": "function:flowapp/storage/events.py:on_saved",
+          "label": "Handles the saved event",
+          "basedOnHash": "sha256:56a47669902b9dfecb347ec45bc9f67585b8473d7ce05beeabcd29587ce9ccf3"
+        }
+      ],
+      "transitions": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s2",
+          "to": "s3",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s3",
+          "to": "s4",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s4",
+          "to": "s5",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s5",
+          "to": "s6",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s2",
+          "to": "s7",
+          "kind": "event",
+          "label": "saved",
+          "provenance": "ai",
+          "evidence": {
+            "file": "flowapp/service/orders.py",
+            "line": 7
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow:http-order-request",
+      "name": "HTTP order request",
+      "description": "From the POST /orders route handler through validation to the saved event.",
+      "entryPoint": "entry:http-route:post-orders",
+      "steps": [
+        {
+          "id": "s1",
+          "node": "function:flowapp/api.py:handle",
+          "label": "Receives the order request",
+          "basedOnHash": "sha256:bcb316849e72834cc3e73dc81dd7b510dc7017af4d418e0328a6e86fc70887d6"
+        },
+        {
+          "id": "s2",
+          "node": "function:flowapp/service/orders.py:submit",
+          "label": "Coordinates the order",
+          "basedOnHash": "sha256:102e73dbaac7248ed5734d452dd1ce7af312b08859a2f707063a4c5db1ef6e22"
+        },
+        {
+          "id": "s3",
+          "node": "function:flowapp/domain/rules.py:validate",
+          "label": "Validates and stores the item",
+          "basedOnHash": "sha256:8484568644a654f23106f8617f94275daae728482c97368f0ef932fc4c9ddfb9"
+        },
+        {
+          "id": "s4",
+          "node": "function:flowapp/storage/events.py:on_saved",
+          "label": "Handles the saved event",
+          "basedOnHash": "sha256:56a47669902b9dfecb347ec45bc9f67585b8473d7ce05beeabcd29587ce9ccf3"
+        }
+      ],
+      "transitions": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s2",
+          "to": "s3",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s3",
+          "to": "s2",
+          "kind": "return",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s2",
+          "to": "s4",
+          "kind": "event",
+          "label": "saved",
+          "provenance": "ai",
+          "evidence": {
+            "file": "flowapp/service/orders.py",
+            "line": 7
+          }
+        }
+      ]
+    }
+  ]
+}

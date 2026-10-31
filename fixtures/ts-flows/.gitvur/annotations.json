@@ -1,0 +1,408 @@
+{
+  "modules": [
+    {
+      "id": "module:backends",
+      "name": "Backends",
+      "description": "Interchangeable save backends, a backend-agnostic save helper, and a recursive countdown.",
+      "files": [
+        "file:src/backends.ts"
+      ]
+    },
+    {
+      "id": "module:domain",
+      "name": "Domain rules",
+      "description": "Validation and text normalization applied to an order item before it is stored.",
+      "files": [
+        "file:src/domain/rules.ts",
+        "file:src/domain/text.ts"
+      ]
+    },
+    {
+      "id": "module:entry-points",
+      "name": "Entry points",
+      "description": "CLI, route and seed-script entry points that hand an order item to the order service.",
+      "files": [
+        "file:src/api.ts",
+        "file:src/cli.ts",
+        "file:src/tools/seed.ts"
+      ]
+    },
+    {
+      "id": "module:orders",
+      "name": "Order service",
+      "description": "Coordinates an order: validation through the domain chain and registration of the saved-event handler.",
+      "files": [
+        "file:src/service/orders.ts"
+      ]
+    },
+    {
+      "id": "module:storage",
+      "name": "Storage",
+      "description": "In-memory persistence helpers: the repository, its commit driver and the saved-event handler.",
+      "files": [
+        "file:src/storage/driver.ts",
+        "file:src/storage/events.ts",
+        "file:src/storage/repository.ts"
+      ]
+    }
+  ],
+  "descriptions": [
+    {
+      "id": "class:src/backends.ts:Cache",
+      "text": "Cache backend with a save method that returns the item unchanged.",
+      "basedOnHash": "sha256:cddd23b18b4d50dafc285539c4e6c6362aa9373ad9a78d441e6c0b25cba3d64d"
+    },
+    {
+      "id": "class:src/backends.ts:Disk",
+      "text": "Disk backend with a save method that returns the item unchanged.",
+      "basedOnHash": "sha256:f49e37b231304c2d897733e3f71396b076d974c4f8fbc26cc9242c07d54496ba"
+    },
+    {
+      "id": "file:src/api.ts",
+      "text": "Route-style API: a handler that submits an order item, registered under `POST /orders` in a route map.",
+      "basedOnHash": "sha256:801849c1c7a00098981b295b4c030bdbf68a9db86ecb530333736d28b937ea6a"
+    },
+    {
+      "id": "file:src/backends.ts",
+      "text": "Save backends and helpers; at load time it creates a cache sink and saves a sample item.",
+      "basedOnHash": "sha256:261b1306bb502c13d547c218e113046ba96022cee514f634d1e749600cff17c4"
+    },
+    {
+      "id": "file:src/cli.ts",
+      "text": "Command-line entry point: defines main and calls it twice at load time.",
+      "basedOnHash": "sha256:fea92594cab96dfdc010706f52298f0cdf410b71b8db535a532a8454a6714cc2"
+    },
+    {
+      "id": "file:src/domain/rules.ts",
+      "text": "Order validation rule that forwards the item to text normalization.",
+      "basedOnHash": "sha256:29b9dd8efe70ffd9fff83b0f6d9b2f273ffe53f1ab63cb4981a1510dd2cf11a1"
+    },
+    {
+      "id": "file:src/domain/text.ts",
+      "text": "Text normalization that trims an item and hands it to the repository.",
+      "basedOnHash": "sha256:525faf1745dc214f2653962d3f3a764299a999aeb19a41f677780f6a2b957877"
+    },
+    {
+      "id": "file:src/service/orders.ts",
+      "text": "Order service with a module-level event emitter; submitting validates an item and registers the saved handler.",
+      "basedOnHash": "sha256:cff84e25897d3fd70f83074becbe6eff73a30f42f77e1715a28f8b54dd3ddf8e"
+    },
+    {
+      "id": "file:src/storage/driver.ts",
+      "text": "Storage driver that turns an item into a saved record.",
+      "basedOnHash": "sha256:727440a7b9303ba7a12741df3349a185cab2c8235c810656ee009b3add79915c"
+    },
+    {
+      "id": "file:src/storage/events.ts",
+      "text": "Handler for the saved event.",
+      "basedOnHash": "sha256:cc5127c1d7456b373c98e14a7c1ccc02e5fdb9d90da698280193bee2ccb34a2d"
+    },
+    {
+      "id": "file:src/storage/repository.ts",
+      "text": "Repository function that stores an item through the storage driver.",
+      "basedOnHash": "sha256:0415ed163d0c876e0ea2b73dd509940839036cba344126c6727324029fa11b87"
+    },
+    {
+      "id": "file:src/tools/seed.ts",
+      "text": "Seed script: submits a `seed` order item when the file is loaded.",
+      "basedOnHash": "sha256:15be14ebdac839210689553c1706f8fd95c75a3648c5dd808f2ebb33aa0e952c"
+    },
+    {
+      "id": "function:src/api.ts:handle",
+      "text": "Handles an order request by submitting the item to the order service and returning the result.",
+      "basedOnHash": "sha256:00745759b3c1aade063fab8b857a30e9c0de9b685715ebfc702b7ece77947396"
+    },
+    {
+      "id": "function:src/backends.ts:Cache.save",
+      "text": "Saves an item in the cache backend; returns the item unchanged.",
+      "basedOnHash": "sha256:6cd1d0125bcde3dce6419d8f6d30b7064cf6140ec915d6f2d268df9bfbdf9c86"
+    },
+    {
+      "id": "function:src/backends.ts:Disk.save",
+      "text": "Saves an item in the disk backend; returns the item unchanged.",
+      "basedOnHash": "sha256:6cd1d0125bcde3dce6419d8f6d30b7064cf6140ec915d6f2d268df9bfbdf9c86"
+    },
+    {
+      "id": "function:src/backends.ts:countdown",
+      "text": "Counts down recursively from n and returns 0 once n reaches zero or below.",
+      "basedOnHash": "sha256:293088df651b2a96ee95be872eba2ea8ff5b1a85e63cf6a0f0253a31ea3c4d09"
+    },
+    {
+      "id": "function:src/backends.ts:persistUnknown",
+      "text": "Saves an item through the given backend, which may be a cache or a disk backend.",
+      "basedOnHash": "sha256:81a6a625f79d92901488d74b2ae339d0aa0c724688ea199563881625a18d4fe8"
+    },
+    {
+      "id": "function:src/cli.ts:main",
+      "text": "Submits the sample item `example` as an order and returns the result.",
+      "basedOnHash": "sha256:d2ec8f25ad34d4e1744e68f19484261dde6162962d63223dd03cdb87c96a4d1e"
+    },
+    {
+      "id": "function:src/domain/rules.ts:validate",
+      "text": "Validates an order item by normalizing it, returning the stored record.",
+      "basedOnHash": "sha256:420b2d5ba78b4c06e87436c04f25c1512f74a0315b47cf8cda8da9433259badf"
+    },
+    {
+      "id": "function:src/domain/text.ts:normalize",
+      "text": "Trims surrounding whitespace from an item and stores it, returning the stored record.",
+      "basedOnHash": "sha256:dd62f6864a36807d2e5c1c40798a43a00c2c53e854210fd019147f2332adf386"
+    },
+    {
+      "id": "function:src/service/orders.ts:submit",
+      "text": "Validates an order item, registers the saved handler on the shared event bus, and returns the result.",
+      "basedOnHash": "sha256:3a00f37dcabe53c1a93ded90873fb5171b1e8670161356731fca8c8c31aa4901"
+    },
+    {
+      "id": "function:src/storage/driver.ts:commit",
+      "text": "Wraps an item in a `saved` record and returns it.",
+      "basedOnHash": "sha256:727440a7b9303ba7a12741df3349a185cab2c8235c810656ee009b3add79915c"
+    },
+    {
+      "id": "function:src/storage/events.ts:onSaved",
+      "text": "Receives a saved item and returns it unchanged.",
+      "basedOnHash": "sha256:cc5127c1d7456b373c98e14a7c1ccc02e5fdb9d90da698280193bee2ccb34a2d"
+    },
+    {
+      "id": "function:src/storage/repository.ts:store",
+      "text": "Stores an item by committing it through the driver and returns the record.",
+      "basedOnHash": "sha256:10b567cf7d5e39feae43fb7ce27225d2f82a5d0dffefe838094b996da645c774"
+    },
+    {
+      "id": "function:src/tools/seed.ts:seed",
+      "text": "Submits the sample item `seed` as an order and returns the result.",
+      "basedOnHash": "sha256:f0d51c2752cb71888f2ded765a2c730424a7bc6e3a474899fb24f9cfc76e1e86"
+    }
+  ],
+  "edges": [],
+  "entryPoints": [
+    {
+      "id": "entry:http-route:post-orders",
+      "kind": "http-route",
+      "name": "POST /orders",
+      "target": "function:src/api.ts:handle",
+      "calls": [],
+      "evidence": {
+        "file": "src/api.ts",
+        "line": 7
+      },
+      "provenance": "ai"
+    },
+    {
+      "id": "entry:other:countdown",
+      "kind": "other",
+      "name": "countdown",
+      "target": "function:src/backends.ts:countdown",
+      "calls": [],
+      "evidence": {
+        "file": "src/backends.ts",
+        "line": 13
+      },
+      "provenance": "ai"
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow:cli-places-order",
+      "name": "CLI places an order",
+      "description": "From the flow-shop bin script to the committed record and the saved event.",
+      "entryPoint": "entry:package-bin:flow-shop",
+      "steps": [
+        {
+          "id": "s1",
+          "node": "file:src/cli.ts",
+          "label": "Runs the CLI when the file loads",
+          "basedOnHash": "sha256:fea92594cab96dfdc010706f52298f0cdf410b71b8db535a532a8454a6714cc2"
+        },
+        {
+          "id": "s2",
+          "node": "function:src/cli.ts:main",
+          "label": "Starts an order for the sample item",
+          "basedOnHash": "sha256:d2ec8f25ad34d4e1744e68f19484261dde6162962d63223dd03cdb87c96a4d1e"
+        },
+        {
+          "id": "s3",
+          "node": "function:src/service/orders.ts:submit",
+          "label": "Coordinates the order",
+          "basedOnHash": "sha256:3a00f37dcabe53c1a93ded90873fb5171b1e8670161356731fca8c8c31aa4901"
+        },
+        {
+          "id": "s4",
+          "node": "function:src/domain/rules.ts:validate",
+          "label": "Validates the order item",
+          "basedOnHash": "sha256:420b2d5ba78b4c06e87436c04f25c1512f74a0315b47cf8cda8da9433259badf"
+        },
+        {
+          "id": "s5",
+          "node": "function:src/domain/text.ts:normalize",
+          "label": "Trims the item text",
+          "basedOnHash": "sha256:dd62f6864a36807d2e5c1c40798a43a00c2c53e854210fd019147f2332adf386"
+        },
+        {
+          "id": "s6",
+          "node": "function:src/storage/repository.ts:store",
+          "label": "Stores the cleaned item",
+          "basedOnHash": "sha256:10b567cf7d5e39feae43fb7ce27225d2f82a5d0dffefe838094b996da645c774"
+        },
+        {
+          "id": "s7",
+          "node": "function:src/storage/driver.ts:commit",
+          "label": "Commits the saved record",
+          "basedOnHash": "sha256:727440a7b9303ba7a12741df3349a185cab2c8235c810656ee009b3add79915c"
+        },
+        {
+          "id": "s8",
+          "node": "function:src/storage/events.ts:onSaved",
+          "label": "Handles the saved event",
+          "basedOnHash": "sha256:cc5127c1d7456b373c98e14a7c1ccc02e5fdb9d90da698280193bee2ccb34a2d"
+        }
+      ],
+      "transitions": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s2",
+          "to": "s3",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s3",
+          "to": "s4",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s4",
+          "to": "s5",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s5",
+          "to": "s6",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s6",
+          "to": "s7",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s3",
+          "to": "s8",
+          "kind": "event",
+          "label": "saved",
+          "provenance": "ai",
+          "evidence": {
+            "file": "src/service/orders.ts",
+            "line": 9
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow:countdown",
+      "name": "Countdown recursion",
+      "description": "The exported countdown calls itself until the count reaches zero.",
+      "entryPoint": "entry:other:countdown",
+      "steps": [
+        {
+          "id": "s1",
+          "node": "function:src/backends.ts:countdown",
+          "label": "Checks whether the count reached zero",
+          "basedOnHash": "sha256:293088df651b2a96ee95be872eba2ea8ff5b1a85e63cf6a0f0253a31ea3c4d09"
+        },
+        {
+          "id": "s2",
+          "node": "function:src/backends.ts:countdown",
+          "label": "Counts down by one and repeats",
+          "basedOnHash": "sha256:293088df651b2a96ee95be872eba2ea8ff5b1a85e63cf6a0f0253a31ea3c4d09"
+        }
+      ],
+      "transitions": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "branch",
+          "label": "while n is above zero",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s2",
+          "to": "s1",
+          "kind": "call",
+          "provenance": "syntactic"
+        }
+      ]
+    },
+    {
+      "id": "flow:http-order-request",
+      "name": "HTTP order request",
+      "description": "From the POST /orders route handler through validation to the saved event.",
+      "entryPoint": "entry:http-route:post-orders",
+      "steps": [
+        {
+          "id": "s1",
+          "node": "function:src/api.ts:handle",
+          "label": "Receives the order request",
+          "basedOnHash": "sha256:00745759b3c1aade063fab8b857a30e9c0de9b685715ebfc702b7ece77947396"
+        },
+        {
+          "id": "s2",
+          "node": "function:src/service/orders.ts:submit",
+          "label": "Coordinates the order",
+          "basedOnHash": "sha256:3a00f37dcabe53c1a93ded90873fb5171b1e8670161356731fca8c8c31aa4901"
+        },
+        {
+          "id": "s3",
+          "node": "function:src/domain/rules.ts:validate",
+          "label": "Validates and stores the item",
+          "basedOnHash": "sha256:420b2d5ba78b4c06e87436c04f25c1512f74a0315b47cf8cda8da9433259badf"
+        },
+        {
+          "id": "s4",
+          "node": "function:src/storage/events.ts:onSaved",
+          "label": "Handles the saved event",
+          "basedOnHash": "sha256:cc5127c1d7456b373c98e14a7c1ccc02e5fdb9d90da698280193bee2ccb34a2d"
+        }
+      ],
+      "transitions": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s2",
+          "to": "s3",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s3",
+          "to": "s2",
+          "kind": "return",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s2",
+          "to": "s4",
+          "kind": "event",
+          "label": "saved",
+          "provenance": "ai",
+          "evidence": {
+            "file": "src/service/orders.ts",
+            "line": 9
+          }
+        }
+      ]
+    }
+  ]
+}

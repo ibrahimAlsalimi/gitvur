@@ -889,6 +889,79 @@ and expected/NOTES.md pairs before continuing Parts C–F in a new session.
   is included in this checkpoint. No new third-party dependency version was added;
   the CLI promotes its existing serde_json dev dependency to runtime to read annotations.
 
+## Phase 14 — Parts D–F: flow validation, packet, agent workflow, docs (2026-10-31)
+
+- Branch `phase-14-flows-validation`, from `main` after PR #3 (Parts A–C). Phase 14 is now
+  complete. The reviewed py-flows/ts-flows goldens and the py-small/ts-small data are unchanged.
+- **Part D.** `gitvur-flow::check_flows` (pure; evidence read through an `EvidenceSource`
+  trait) checks agent entry points and flows; the validator wires it in with its path-safe
+  file cache and writes `report.flows` (`current | stale | broken` + `staleSteps`). All 17
+  prompt codes are implemented and documented in the validator README. Entry points get
+  `documented`/`undocumented` elements by whether a flow starts from them. `gitvur flows`
+  now shows fresh statuses, stale steps and each broken flow's errors (still writes nothing).
+- **Part E.** `codeDOC.md` section 11 "Execution flows" (agent entries, choosing flows,
+  building from the trace, steps, branches, incremental mode, done-means); sections 2/8/10
+  reference it. `gitvur packet` adds `entryPoints`, one default-limit `traces` entry per
+  entry point (static + agent), and in incremental mode `staleFlows`/`brokenFlows` with issue
+  codes and messages.
+- **Documenter section.** Followed codeDOC on isolated scratch copies: initial packet, read
+  every source file, hand-wrote modules (5 each), descriptions (28 py / 25 ts), entries and
+  flows; a helper only copied `contentHash` → `basedOnHash` from the packet. Committed the
+  resulting `.gitvur/` for both fixtures: **0 errors, 0 warnings**, incremental packet empty,
+  every flow `current`; committed `structure.json` is byte-identical to the reviewed golden.
+  - py-flows: AI `http-route` POST /orders; flows `cli-places-order` (6 static calls + `saved`
+    event), `http-order-request` (call, return, event), `backends-self-check` (AI branch "when
+    run as a script" into `Cache.save`, resolving the ambiguous `sink.save`).
+  - ts-flows: AI `http-route` POST /orders and `other` countdown; flows `cli-places-order`
+    (file → main is backed by the top-level-call entry; `saved` event registered by `bus.on`),
+    `http-order-request`, `countdown` (static branch + recursive call).
+- **Part F.** Plan: in-scope bullet, "Execution flows" section with the split table, layout
+  and CLI updates, Phase 14 amendment refreshed. CLAUDE.md: entry/flow IDs, v0.3 summary,
+  flow section replacing the checkpoint note. Schema/flow READMEs and usage guide updated.
+- Tests: `gitvur-validate/tests/flows.rs` — zero-issue baseline, every code (29 mutation
+  cases, broken status asserted for flow errors), 60-char label boundary, edit `submit` →
+  only `flow:cli-order` stale with `["s2"]`, delete it → broken while others stay current,
+  determinism, and the committed fixture `.gitvur/` stays issue-free. Packet unit test for
+  entries/traces/flow work; CLI tests for current and broken listings.
+- Checks: cargo fmt, workspace Clippy (`-D warnings`), **163 Rust tests**; app bindings
+  drift check, typecheck, lint, **69 Vitest tests**. Prompt Verify commands run. Re-indexing
+  and re-validating both fixtures reproduces `structure.json`/`report.json` byte for byte.
+
+Acceptance criteria:
+
+- [x] Contract v0.3; 0.2 files load (tested in Part A); schemas regenerated
+- [x] Every entry kind detected; flow goldens pass after human review; determinism holds
+- [x] py-small / ts-small goldens unchanged and passing
+- [x] `gitvur-flow::trace` with refs, cycles, ambiguous stubs, truncation (Part C)
+- [x] Every new issue code tested; flow staleness scenarios pass
+- [x] codeDOC section and packet extensions; both fixtures documented with zero errors
+- [x] Plan and CLAUDE.md updated
+
+Deviations / assumptions:
+
+- Static (`syntactic`/`semantic`) `branch`, `event` and `async` transitions must be backed
+  by a call edge like `call` (reported as `flow-call-unsupported`); otherwise a "syntactic"
+  branch would be a guessed relationship. A static entry's `calls` from its target file
+  count as structure calls, so flows can start at a script file.
+- Extra safety codes, mirroring the AI-edge ones: `entry-bad-id`, `entry-bad-provenance`,
+  `entry-evidence-out-of-range`, `entry-evidence-mismatch`, `flow-bad-id`. Agent entries may
+  use a static kind (e.g. a `setup.cfg` script the extractor doesn't read); that is what
+  makes `entry-duplicates-static` reachable.
+- Entry elements are left out of `summary` counts and `gitvur stale`: not every entry needs
+  a flow, so coverage still means nodes and modules. Element IDs start with `entry:`.
+- The prompt asks to add the codes to "the UI copy list"; the app has none (issues render
+  their message), so nothing changed in the app. Phase 15 can add per-code copy.
+- "2–3 flows each including one event and one branch": read as each fixture having both.
+  The fixtures' only TS conditional is `countdown`, which has no caller, so ts-flows uses an
+  `other` entry for it; codeDOC 11.1 now limits `other` to exported functions with no
+  in-repo caller that a flow needs. Fixture sources were not changed.
+- A flow with zero steps produces no issue (and is `current`).
+
+Open questions:
+
+- Should `gitvur flows` mark agent vs extractor entries, and should the summary gain flow
+  counts? Both are UI-facing; deferred to Phase 15.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).

@@ -167,10 +167,7 @@ fn check_edges(ctx: &Context<'_>, annotations: &Annotations, issues: &mut Vec<Is
         .iter()
         .map(|e| (e.from.as_str(), e.to.as_str(), e.edge_type))
         .collect();
-    let mut files = EvidenceFiles {
-        input,
-        cache: HashMap::new(),
-    };
+    let mut files = EvidenceFiles::new(input);
     for edge in &annotations.edges {
         let label = format!(
             "{} -> {} ({})",
@@ -219,12 +216,25 @@ fn check_edges(ctx: &Context<'_>, annotations: &Annotations, issues: &mut Vec<Is
 }
 
 /// Evidence file contents, read once each, through the path-safety check.
-struct EvidenceFiles<'i> {
+pub(crate) struct EvidenceFiles<'i> {
     input: &'i ValidateInput,
     cache: HashMap<String, Option<String>>,
 }
 
-impl EvidenceFiles<'_> {
+impl gitvur_flow::EvidenceSource for EvidenceFiles<'_> {
+    fn text(&mut self, file: &str) -> Option<&str> {
+        self.get(file)
+    }
+}
+
+impl<'i> EvidenceFiles<'i> {
+    pub(crate) fn new(input: &'i ValidateInput) -> Self {
+        Self {
+            input,
+            cache: HashMap::new(),
+        }
+    }
+
     fn get(&mut self, relpath: &str) -> Option<&str> {
         let root = &self.input.repo_root;
         self.cache

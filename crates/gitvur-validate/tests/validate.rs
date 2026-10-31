@@ -495,10 +495,15 @@ fn editing_one_method_marks_only_it_and_its_ancestors_stale() {
             "{ancestor}"
         );
     }
+    assert_eq!(
+        element(&report, "entry:main-guard:app-py").status,
+        Status::Undocumented,
+        "no flow starts from the main guard"
+    );
     let stale: Vec<&str> = report
         .elements
         .iter()
-        .filter(|e| e.status != Status::Documented)
+        .filter(|e| e.status != Status::Documented && !e.id.starts_with("entry:"))
         .map(|e| e.id.as_str())
         .collect();
     assert_eq!(

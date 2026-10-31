@@ -61,7 +61,7 @@ fn trace_text_json_limits_and_unknown_ids_do_not_write_repository() {
     assert!(!dir.path().join(".gitvur").exists());
 }
 #[test]
-fn flows_lists_static_and_ai_entries_without_claiming_validation() {
+fn flows_lists_static_and_ai_entries_with_fresh_flow_status() {
     let dir = repository();
     fs::create_dir(dir.path().join(".gitvur")).unwrap();
     fs::write(dir.path().join(".gitvur/annotations.json"),r#"{
@@ -75,7 +75,7 @@ fn flows_lists_static_and_ai_entries_without_claiming_validation() {
     let text = String::from_utf8(out.stdout).unwrap();
     assert!(text.contains("entry:main-guard:app-py"));
     assert!(text.contains("entry:job:nightly"));
-    assert!(text.contains("flow:nightly  Nightly [unchecked]"));
+    assert!(text.contains("flow:nightly  Nightly [current]"), "{text}");
     let out = run(dir.path(), "trace", &["entry:job:nightly", "--json"]);
     assert!(out.status.success());
     assert_eq!(
@@ -110,4 +110,20 @@ fn external_annotation_symlinks_are_rejected() {
     let out = run(dir.path(), "flows", &[]);
     assert_eq!(out.status.code(), Some(1));
     assert!(String::from_utf8_lossy(&out.stderr).contains("inside the repository"));
+}
+
+#[test]
+fn flows_reports_broken_flows_with_their_errors() {
+    let dir = repository();
+    fs::create_dir(dir.path().join(".gitvur")).unwrap();
+    fs::write(dir.path().join(".gitvur/annotations.json"),r#"{
+      "modules":[],"descriptions":[],"edges":[],
+      "flows":[{"id":"flow:gone","name":"Gone","description":"Missing entry.","entryPoint":"entry:job:none","steps":[],"transitions":[]}]
+    }"#).unwrap();
+    let out = run(dir.path(), "flows", &[]);
+    assert!(out.status.success());
+    let text = String::from_utf8(out.stdout).unwrap();
+    assert!(text.contains("flow:gone  Gone [broken]"), "{text}");
+    assert!(text.contains("flow-dangling-entry: "), "{text}");
+    assert!(!dir.path().join(".gitvur/report.json").exists());
 }

@@ -1,0 +1,191 @@
+{
+  "schemaVersion": "0.3",
+  "commitSha": "37f6222",
+  "summary": {
+    "documented": 33,
+    "stale": 0,
+    "undocumented": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  "elements": [
+    {
+      "id": "class:flowapp/backends.py:Cache",
+      "status": "documented"
+    },
+    {
+      "id": "class:flowapp/backends.py:Disk",
+      "status": "documented"
+    },
+    {
+      "id": "entry:console-script:flow-legacy",
+      "status": "undocumented"
+    },
+    {
+      "id": "entry:console-script:flow-shop",
+      "status": "documented"
+    },
+    {
+      "id": "entry:console-script:flow-window",
+      "status": "undocumented"
+    },
+    {
+      "id": "entry:http-route:post-orders",
+      "status": "documented"
+    },
+    {
+      "id": "entry:main-guard:flowapp-backends-py",
+      "status": "documented"
+    },
+    {
+      "id": "entry:main-guard:flowapp-cli-py",
+      "status": "undocumented"
+    },
+    {
+      "id": "entry:package-main:flowapp",
+      "status": "undocumented"
+    },
+    {
+      "id": "file:flowapp/__init__.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/__main__.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/api.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/backends.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/cli.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/domain/__init__.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/domain/rules.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/domain/text.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/service/__init__.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/service/orders.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/storage/__init__.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/storage/driver.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/storage/events.py",
+      "status": "documented"
+    },
+    {
+      "id": "file:flowapp/storage/repository.py",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/api.py:handle",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/backends.py:Cache.save",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/backends.py:Disk.save",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/backends.py:countdown",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/backends.py:persist_unknown",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/cli.py:main",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/domain/rules.py:validate",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/domain/text.py:normalize",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/service/orders.py:submit",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/storage/driver.py:commit",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/storage/events.py:on_saved",
+      "status": "documented"
+    },
+    {
+      "id": "function:flowapp/storage/repository.py:store",
+      "status": "documented"
+    },
+    {
+      "id": "module:backends",
+      "status": "documented"
+    },
+    {
+      "id": "module:domain",
+      "status": "documented"
+    },
+    {
+      "id": "module:entry-points",
+      "status": "documented"
+    },
+    {
+      "id": "module:orders",
+      "status": "documented"
+    },
+    {
+      "id": "module:storage",
+      "status": "documented"
+    }
+  ],
+  "issues": [],
+  "flows": [
+    {
+      "id": "flow:backends-self-check",
+      "status": "current",
+      "staleSteps": []
+    },
+    {
+      "id": "flow:cli-places-order",
+      "status": "current",
+      "staleSteps": []
+    },
+    {
+      "id": "flow:http-order-request",
+      "status": "current",
+      "staleSteps": []
+    }
+  ]
+}

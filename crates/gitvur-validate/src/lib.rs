@@ -8,7 +8,8 @@
 use std::path::PathBuf;
 
 use gitvur_schema::{
-    Annotations, ElementStatus, Issue, Report, SCHEMA_VERSION, Severity, Status, Structure, Summary,
+    Annotations, ElementStatus, FlowStatus, Issue, Report, SCHEMA_VERSION, Severity, Status,
+    Structure, Summary,
 };
 
 mod checks;
@@ -36,20 +37,26 @@ pub struct ValidateInput {
 /// Runs every check that needs only the parsed inputs, and computes staleness.
 pub fn validate(input: &ValidateInput) -> Report {
     let mut issues = Vec::new();
+    let mut flows = Vec::new();
     if let Some(annotations) = &input.annotations {
         checks::check(input, annotations, &mut issues);
+        let mut files = checks::EvidenceFiles::new(input);
+        let result = gitvur_flow::check_flows(&input.structure, annotations, &mut files);
+        issues.extend(result.issues);
+        flows = result.flows;
     }
     let elements = staleness::elements(&input.structure, input.annotations.as_ref());
-    finish(input.commit_sha.clone(), elements, issues)
+    finish(input.commit_sha.clone(), elements, issues, flows)
 }
 
 /// IDs that need (re)documentation: every `stale` or `undocumented` element, sorted.
-/// This is the input list for the agent's incremental mode.
+/// This is the input list for the agent's incremental mode. Entry points are left out:
+/// not every entry point needs a flow, so an undocumented one is not work to do.
 pub fn stale_ids(report: &Report) -> Vec<String> {
     let mut ids: Vec<String> = report
         .elements
         .iter()
-        .filter(|e| e.status != Status::Documented)
+        .filter(|e| e.status != Status::Documented && !e.id.starts_with("entry:"))
         .map(|e| e.id.clone())
         .collect();
     ids.sort();
@@ -57,14 +64,20 @@ pub fn stale_ids(report: &Report) -> Vec<String> {
     ids
 }
 
-/// Builds a canonical report with a summary that matches its contents.
+/// Builds a canonical report with a summary that matches its contents. The status counts
+/// cover nodes and modules only, so entry points do not change documentation coverage.
 pub(crate) fn finish(
     commit_sha: String,
     elements: Vec<ElementStatus>,
     issues: Vec<Issue>,
+    flows: Vec<FlowStatus>,
 ) -> Report {
     let count = |f: &dyn Fn(&ElementStatus) -> bool| {
-        u32::try_from(elements.iter().filter(|e| f(e)).count()).unwrap_or(u32::MAX)
+        let n = elements
+            .iter()
+            .filter(|e| !e.id.starts_with("entry:") && f(e))
+            .count();
+        u32::try_from(n).unwrap_or(u32::MAX)
     };
     let issue_count = |severity| {
         u32::try_from(issues.iter().filter(|i| i.severity == severity).count()).unwrap_or(u32::MAX)
@@ -77,7 +90,7 @@ pub(crate) fn finish(
         warnings: issue_count(Severity::Warning),
     };
     let mut report = Report {
-        flows: Vec::new(),
+        flows,
         schema_version: SCHEMA_VERSION.into(),
         commit_sha,
         summary,
