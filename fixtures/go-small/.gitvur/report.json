@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "0.3",
+  "commitSha": "357d800",
+  "summary": {
+    "documented": 23,
+    "stale": 0,
+    "undocumented": 0,
+    "errors": 0,
+    "warnings": 1
+  },
+  "elements": [
+    {
+      "id": "class:internal/orders/orders.go:Service",
+      "status": "documented"
+    },
+    {
+      "id": "class:internal/store/store.go:Cache",
+      "status": "documented"
+    },
+    {
+      "id": "class:internal/store/store.go:Repo",
+      "status": "documented"
+    },
+    {
+      "id": "class:internal/store/store.go:Saver",
+      "status": "documented"
+    },
+    {
+      "id": "entry:main-function:cmd-shop",
+      "status": "documented"
+    },
+    {
+      "id": "file:cmd/shop/main.go",
+      "status": "documented"
+    },
+    {
+      "id": "file:internal/orders/count.go",
+      "status": "documented"
+    },
+    {
+      "id": "file:internal/orders/orders.go",
+      "status": "documented"
+    },
+    {
+      "id": "file:internal/orders/validate.go",
+      "status": "documented"
+    },
+    {
+      "id": "file:internal/store/store.go",
+      "status": "documented"
+    },
+    {
+      "id": "function:cmd/shop/main.go:main",
+      "status": "documented"
+    },
+    {
+      "id": "function:cmd/shop/main.go:run",
+      "status": "documented"
+    },
+    {
+      "id": "function:internal/orders/count.go:Service.Count",
+      "status": "documented"
+    },
+    {
+      "id": "function:internal/orders/count.go:countdown",
+      "status": "documented"
+    },
+    {
+      "id": "function:internal/orders/orders.go:NewService",
+      "status": "documented"
+    },
+    {
+      "id": "function:internal/orders/orders.go:Service.Place",
+      "status": "documented"
+    },
+    {
+      "id": "function:internal/orders/orders.go:Submit",
+      "status": "documented"
+    },
+    {
+      "id": "function:internal/orders/validate.go:validate",
+      "status": "documented"
+    },
+    {
+      "id": "function:internal/store/store.go:Cache.Save",
+      "status": "documented"
+    },
+    {
+      "id": "function:internal/store/store.go:Repo.Save",
+      "status": "documented"
+    },
+    {
+      "id": "function:internal/store/store.go:Repo.flush",
+      "status": "documented"
+    },
+    {
+      "id": "module:cli",
+      "status": "documented"
+    },
+    {
+      "id": "module:orders",
+      "status": "documented"
+    },
+    {
+      "id": "module:store",
+      "status": "documented"
+    }
+  ],
+  "issues": [
+    {
+      "severity": "warning",
+      "code": "architecture-unresolved",
+      "message": "References are traceable; this interaction has no matching deterministic proof. Semantic interpretation needs review.",
+      "id": "arch:orders-delegate-save"
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow:submit-sample-order",
+      "status": "current",
+      "staleSteps": []
+    }
+  ]
+}

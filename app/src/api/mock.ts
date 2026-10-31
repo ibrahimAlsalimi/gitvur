@@ -20,6 +20,7 @@
  */
 import type {
   AppError,
+  ArchitectureArtifact,
   CommitInfo,
   DiffBundle,
   Annotations,
@@ -35,6 +36,7 @@ import type {
 import { localPath } from "../docs/resolveLink";
 import unsafeDoc from "../../e2e/fixtures/unsafe.md?raw";
 import mockArchitecture from "../../e2e/fixtures/architecture.json";
+import mockArtifact from "../../e2e/fixtures/architecture-artifact.json";
 import mockDiff from "./mockDiff.json";
 import mockTraces from "./mockTraces.json";
 import { trustBundle } from "./mockTrust";
@@ -135,31 +137,68 @@ function bundle(path: string): Promise<RepoBundle> {
         ]
       : [],
   };
+  const storedArchitecture = file(fixture, "architecture.json") as ArchitectureArtifact | undefined;
+  if (storedArchitecture) {
+    result.architecture = storedArchitecture;
+    result.architectureIndexHash = storedArchitecture.indexHash;
+  }
+  result.architectureIssues =
+    result.report?.issues.filter((i) => i.code.startsWith("architecture-")) ?? [];
   if (
     state === "architecture" ||
     state === "architecture-stale" ||
-    state === "architecture-nested"
+    state === "architecture-nested" ||
+    state === "architecture-invalid" ||
+    state === "architecture-legacy" ||
+    state === "architecture-empty"
   ) {
-    const architecture = structuredClone(mockArchitecture) as NonNullable<
-      Annotations["architecture"]
-    >;
-    if (state === "architecture-nested" && architecture.components[1])
-      architecture.components[1].parent = "arch:entry";
+    const artifact = structuredClone(mockArtifact) as ArchitectureArtifact;
+    const architecture =
+      state === "architecture-legacy"
+        ? (structuredClone(mockArchitecture) as NonNullable<Annotations["architecture"]>)
+        : artifact.architecture;
+    if (state === "architecture-legacy") delete result.architecture;
+    else result.architecture = artifact;
+    if (state === "architecture-empty") {
+      architecture.components = [];
+      architecture.relationships = [];
+      architecture.summary = "No meaningful source-backed architecture components were identified.";
+    }
+    if (state === "architecture-nested")
+      for (const component of architecture.components.slice(2)) component.parent = "arch:service";
     result.annotations = {
       ...(result.annotations ?? { modules: [], descriptions: [], edges: [] }),
       architecture,
     };
     result.architectureIssues =
-      state === "architecture-stale"
+      state === "architecture-invalid"
         ? [
             {
-              id: "arch:service",
-              code: "architecture-stale",
-              severity: "warning",
-              message: "Source changed",
+              id: "architecture",
+              code: "architecture-schema",
+              severity: "error",
+              message: "Unsupported architecture schema version",
             },
           ]
-        : [];
+        : state === "architecture-stale"
+          ? [
+              {
+                id: "arch:service",
+                code: "architecture-stale",
+                severity: "warning",
+                message: "Source changed",
+              },
+            ]
+          : state === "architecture-legacy" || state === "architecture-empty"
+            ? []
+            : [
+                {
+                  id: "arch:notifies",
+                  code: "architecture-unresolved",
+                  severity: "warning",
+                  message: "Callback interpretation needs review; no deterministic proof.",
+                },
+              ];
   }
   if (state === "trust") return Promise.resolve(trustBundle(result));
   if (state === "report-stale" && result.report) {

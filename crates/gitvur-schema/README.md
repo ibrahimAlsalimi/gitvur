@@ -284,27 +284,32 @@ is `ai`; the viewer generates independent syntactic directory groups and aggrega
 imports/calls. Status is computed, never an authored confidence score. Findings use
 `architecture-*` report issues; packets include `architectureIssues`. The read-only viewer
 rechecks evidence at open time, independently of cached reports. It writes no architecture data.
-Membership and evidence rules: `agent/codeDOC.md` section 12.
+Legacy membership requires disjoint files and parents with their own sources.
+New authoring rules use the standalone format below and `agent/codeDOC.md` section 12.
 
-## Proposed Phase 16 standalone architecture artifact (not supported yet)
+## Standalone architecture artifact (Phase 16)
 
-The revised design proposes `<repo>/.gitvur/architecture.json`, separate from the supported
-annotation extension above. No standalone schema, CLI input support or validator capability for
-this proposed artifact is claimed here. Existing schema files remain unchanged.
+`.gitvur/architecture.json` is optional and written by the Documentation Agent alongside
+annotations. Its independent `schemaVersion: 1` does not bump the v0.3 structure/annotation
+contract. Generated schema: [`schemas/architecture.schema.json`](../../schemas/architecture.schema.json).
 
-The Documentation Agent will author a repository overview (summary and optional design
-characteristics), components (stable ID, name, category, responsibility, indexed code references,
-optional parent/group, evidence and provenance), and relationships (stable ID, source/target
-components, typed interaction, label, evidence and provenance). Metadata will include schema
-version and relevant index/repository snapshot information, with generation metadata only if
-consistent with current conventions. Exact fields and version negotiation remain proposed.
+Root fields: `schemaVersion`, `commitSha`, `indexHash`, optional `designNotes`, and `architecture`.
+The latter reuses the version-1 architecture model: summary, components and relationships.
+Components contain stable arch IDs, names, categories, responsibilities, indexed sources with
+copied hashes, optional parent, provenance and evidence. Relationships contain stable arch IDs,
+endpoints, typed interactions, readable labels, provenance and evidence. No coordinates,
+authored status/confidence or generation timestamp is stored. `commitSha` is informational;
+`indexHash` identifies the canonical structure snapshot (SHA-256 of canonical serialized,
+canonicalized structure). `gitvur packet` supplies both values for the author to copy.
 
-Reuse authoritative indexed IDs, copied source hashes, repository-relative paths, 1-based
-inclusive evidence locations, provenance distinctions and canonical deterministic serialization.
-Validation computes status and checks references/evidence/freshness; valid citations do not
-prove AI interpretations. Unsupported relationships remain unresolved without deterministic
-proof. Rendering coordinates are separate from semantics; Mermaid/SVG/PNG are derived exports.
+Unlike legacy annotation architecture, subsystem groups can reference descendant sources and
+membership need not be disjoint by file. Groups still require evidence from their own/descendant
+source ranges; leaf components require indexed source references. Parents must be acyclic.
+Relationships accept existing provenance values; AI claims remain interpretations. See
+[agent rules](../../agent/codeDOC.md) section 12 and the validator README for support statuses.
 
-See [the dedicated plan](../../PHASE_16_ARCHITECTURE_DIAGRAM.md) for acceptance criteria and
-open compatibility decisions, including legacy migration and precedence. Missing architecture
-must preserve existing repository functionality; current agent writes and commands stay valid.
+Standalone data takes precedence even when malformed; no silent fallback to conflicting legacy
+annotations occurs. If absent, supported legacy annotations can still supply authored components.
+Unknown standalone versions and malformed data affect Diagram alone. There is no automatic
+migration or repository write on open. Old v0.2/v0.3 bundles without architecture remain usable.
+Rendering layout and Mermaid/SVG/PNG exports remain derived presentation, separate from semantics.

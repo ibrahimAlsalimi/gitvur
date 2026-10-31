@@ -109,7 +109,9 @@
   outline: var(--gv-focus-width) solid var(--gv-accent);
   background: var(--gv-accent-soft);
 }
-.gv-architecture-card[data-dimmed="true"],
+.gv-architecture-card[data-dimmed="true"] {
+  border-color: var(--gv-border-default);
+}
 .gv-architecture-edge.dimmed {
   opacity: var(--gv-opacity-dimmed);
 }
@@ -211,4 +213,88 @@
 }
 .gv-architecture-edge-label[data-selected="true"] {
   color: var(--gv-accent);
+}
+.gv-architecture-modes {
+  display: flex;
+  gap: var(--gv-space-1);
+}
+.gv-architecture-modes [aria-pressed="true"] {
+  background: var(--gv-accent-soft);
+  color: var(--gv-accent);
+  border-color: var(--gv-accent);
+}
+.gv-architecture-card p {
+  -webkit-line-clamp: 3;
+}
+.gv-architecture-group {
+  background: var(--gv-bg-elevated, var(--gv-bg-surface));
+  border: var(--gv-border-emphasis) solid var(--gv-border-default);
+  border-top-color: var(--gv-kind-module);
+}
+.gv-architecture-group p {
+  -webkit-line-clamp: 1;
+  max-width: 72ch;
+}
+.gv-architecture-group footer {
+  display: none;
+}
+.gv-architecture-entry {
+  margin-top: var(--gv-space-2);
+  font-size: var(--gv-text-xs);
+  color: var(--gv-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gv-architecture-empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: var(--gv-space-3);
+  box-sizing: border-box;
+}
+.gv-architecture-empty h3,
+.gv-architecture-empty p {
+  margin: 0;
+  max-width: 58ch;
+}
+.gv-architecture-findings {
+  color: var(--gv-text-secondary);
+  font-size: var(--gv-text-sm);
+  max-height: 120px;
+  overflow: auto;
+}
+.gv-architecture-findings summary {
+  cursor: pointer;
+}
+.gv-architecture-edge-label {
+  max-width: 170px;
+  white-space: normal;
+  text-align: center;
+  line-height: var(--gv-line-normal);
+  border: var(--gv-hairline) solid var(--gv-border-default);
+}
+/* Evidence is prose support here: keep surrounding lines readable in both themes rather
+   than dimming syntax colors below contrast thresholds on an accent background. */
+#panel-diagram .gv-architecture-context .gv-code-line {
+  opacity: 1;
+}
+#panel-diagram .gv-architecture-context .gv-code-text span {
+  color: var(--gv-text-primary);
+}
+.gv-architecture-header {
+  padding: var(--gv-space-4) var(--gv-space-6);
+}
+.gv-architecture-header p {
+  max-width: 90ch;
+}
+.gv-architecture-export[data-exporting="true"] .gv-architecture-card,
+.gv-architecture-export[data-exporting="true"] .gv-architecture-edge {
+  opacity: 1;
+  outline: none;
+}
+.gv-architecture-canvas .react-flow__edgelabel-renderer {
+  z-index: 4;
 }

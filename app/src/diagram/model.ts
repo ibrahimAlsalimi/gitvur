@@ -1,113 +1,39 @@
-/** Architecture is a projection of indexed facts, separate from the source/call graph. */
+/** Saved agent architecture and explicit secondary raw-structure exploration. */
 import type {
-  Architecture,
   ArchitectureComponent,
   ArchitectureRelationship,
   Evidence,
-  Issue,
   Structure,
 } from "../generated/contract";
 export interface Component extends ArchitectureComponent {
-  status: "current" | "structure-derived";
+  status: "current" | "stale" | "structure-derived";
 }
 export interface Relationship extends ArchitectureRelationship {
   count: number;
+  support?: "unresolved" | "traceable";
 }
 export interface Diagram {
   version: 1;
   summary: string;
-  mode: "Structure-derived" | "AI-enriched";
+  mode: "Structure-derived" | "Architecture map" | "Legacy architecture";
   components: Component[];
   relationships: Relationship[];
+  notices?: string[];
 }
 const sort = <T extends { id: string }>(items: T[]): T[] =>
   items.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 const dir = (file: string) => (file.includes("/") ? file.slice(0, file.lastIndexOf("/")) : ".");
 const evidenceKey = (e: Evidence) => `${e.file}:${String(e.line)}`;
 
-export function buildArchitecture(
-  structure: Structure,
-  ai?: Architecture | null,
-  issues: Issue[] = [],
-): Diagram {
+export function buildStructureDiagram(structure: Structure): Diagram {
   const nodes = new Map(structure.nodes.map((n) => [n.id, n]));
   const files = sort(structure.nodes.filter((n) => n.type === "file" && n.source));
   const components: Component[] = [];
   const ownership = new Map<string, string>();
-  const blocked = new Set(
-    issues.filter((i) => i.code.startsWith("architecture-")).map((i) => i.id),
-  );
-  const aiIds = new Set(ai?.components.map((c) => c.id));
-  const accepted: Component[] = [];
-  if (ai?.version === 1 && !blocked.has("architecture")) {
-    const ids = new Set<string>();
-    for (const c of sort([...ai.components])) {
-      const ancestry = new Set([c.id]);
-      let parent = c.parent;
-      let cycle = false;
-      while (parent) {
-        if (ancestry.has(parent) || !aiIds.has(parent)) {
-          cycle = true;
-          break;
-        }
-        ancestry.add(parent);
-        parent = ai.components.find((c) => c.id === parent)?.parent;
-      }
-      if (
-        cycle ||
-        ids.has(c.id) ||
-        blocked.has(c.id) ||
-        !/^arch:[a-z0-9-]+$/.test(c.id) ||
-        c.provenance !== "ai" ||
-        !c.name.trim() ||
-        !c.kind.trim() ||
-        !c.responsibility.trim() ||
-        !c.sources.length ||
-        !c.evidence.length
-      )
-        continue;
-      if (
-        !c.sources.every(
-          (s) => nodes.get(s.node)?.contentHash === s.basedOnHash && nodes.get(s.node)?.source,
-        )
-      )
-        continue;
-      if (
-        !c.evidence.every((e) =>
-          c.sources.some((s) => {
-            const range = nodes.get(s.node)?.source;
-            return range?.file === e.file && e.line >= range.startLine && e.line <= range.endLine;
-          }),
-        )
-      )
-        continue;
-      const sourceFiles = new Set(c.sources.map((s) => nodes.get(s.node)?.source?.file));
-      if ([...sourceFiles].some((f) => f && ownership.has(f))) continue;
-      ids.add(c.id);
-      for (const f of sourceFiles) if (f) ownership.set(f, c.id);
-      accepted.push({ ...c, status: "current" });
-    }
-    // A rejected parent must also remove its descendants, rather than orphaning them.
-    let changed = true;
-    while (changed) {
-      changed = false;
-      for (let i = accepted.length - 1; i >= 0; i--) {
-        const c = accepted[i];
-        if (!c) continue;
-        if (c.parent && !accepted.some((p) => p.id === c.parent)) {
-          accepted.splice(i, 1);
-          changed = true;
-          for (const [f, owner] of ownership) if (owner === c.id) ownership.delete(f);
-        }
-      }
-    }
-  }
-  components.push(...accepted);
   const groups = new Map<string, Component>();
   for (const f of files) {
     if (!f.source) continue;
     const file = f.source.file;
-    if (ownership.has(file)) continue;
     const directory = dir(file);
     const id = `arch:dir:${directory}`;
     let c = groups.get(id);
@@ -182,31 +108,14 @@ export function buildArchitecture(
       r.evidence.push(edge.evidence);
     r.count += 1;
   }
-  const acceptedIds = new Set(accepted.map((c) => c.id));
-  if (ai)
-    for (const r of ai.relationships) {
-      if (
-        blocked.has(r.id) ||
-        !acceptedIds.has(r.from) ||
-        !acceptedIds.has(r.to) ||
-        r.from === r.to ||
-        !r.evidence.length ||
-        r.provenance !== "ai"
-      )
-        continue;
-      relationships.set(r.id, { ...r, evidence: [...r.evidence], count: 1 });
-    }
   for (const r of relationships.values()) {
     r.evidence.sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : a.line - b.line));
     if (r.count > 1) r.label += ` · ${String(r.count)} references`;
   }
   return {
     version: 1,
-    summary:
-      accepted.length && accepted.length === ai?.components.length
-        ? ai.summary
-        : `${String(files.length)} indexed source files, grouped by directory. Arrows show verified code dependencies.`,
-    mode: accepted.length ? "AI-enriched" : "Structure-derived",
+    summary: `${String(files.length)} indexed source files, grouped by directory. This is raw dependency exploration, not an authored architecture map.`,
+    mode: "Structure-derived",
     components: sort(components),
     relationships: sort([...relationships.values()]),
   };
@@ -259,4 +168,112 @@ export function projectArchitecture(a: Diagram, focus: string | null, query = ""
     }
   }
   return { ...a, components: visible, relationships: sort([...edges.values()]) };
+}
+
+/** The explanatory view contains only authored components and interactions. Never fill gaps
+ * with directory nodes or import edges. Fresh backend checks are required, including for legacy
+ * annotation data. A malformed standalone artifact blocks legacy fallback. */
+export function savedArchitecture(
+  bundle: import("../generated/contract").RepoBundle,
+): Diagram | null {
+  const issues = bundle.architectureIssues;
+  if (!issues || issues.some((i) => i.severity === "error")) return null;
+  const model = bundle.architecture?.architecture ?? bundle.annotations?.architecture;
+  if (!model || model.version !== 1) return null;
+  return {
+    version: 1,
+    summary: model.summary,
+    mode: bundle.architecture ? "Architecture map" : "Legacy architecture",
+    notices: [...new Set(issues.map((issue) => issue.message))],
+    components: sort(
+      model.components.map((c) => ({
+        ...c,
+        status: issues.some((i) => i.id === c.id && i.code === "architecture-stale")
+          ? "stale"
+          : "current",
+      })),
+    ),
+    relationships: sort(
+      model.relationships.map((r) => ({
+        ...r,
+        count: 1,
+        support: issues.some((i) => i.id === r.id && i.code === "architecture-unresolved")
+          ? "unresolved"
+          : "traceable",
+      })),
+    ),
+  };
+}
+
+/** Search keeps subsystem ancestors so nested results retain their context. */
+export function filterArchitecture(a: Diagram, query: string): Diagram {
+  if (!query.trim()) return a;
+  const matches = new Set(
+    a.components
+      .filter((c) =>
+        `${c.name} ${c.kind} ${c.responsibility}`.toLowerCase().includes(query.toLowerCase()),
+      )
+      .map((c) => c.id),
+  );
+  // Include children of matching groups and ancestors of matching leaves.
+  for (const c of a.components) {
+    let parent = c.parent;
+    const seen = new Set<string>();
+    while (parent && !seen.has(parent)) {
+      seen.add(parent);
+      if (matches.has(parent)) matches.add(c.id);
+      parent = a.components.find((p) => p.id === parent)?.parent;
+    }
+  }
+  for (const id of [...matches]) {
+    let parent = a.components.find((c) => c.id === id)?.parent;
+    const seen = new Set<string>();
+    while (parent && !seen.has(parent)) {
+      seen.add(parent);
+      matches.add(parent);
+      parent = a.components.find((c) => c.id === parent)?.parent;
+    }
+  }
+  return {
+    ...a,
+    components: a.components.filter((c) => matches.has(c.id)),
+    relationships: a.relationships.filter((r) => matches.has(r.from) && matches.has(r.to)),
+  };
+}
+
+/** Groups expose their descendants' implementation without requiring invented source owners. */
+export function componentSources(a: Diagram, id: string): Component["sources"] {
+  const seen = new Set<string>();
+  const sources = new Map<string, Component["sources"][number]>();
+  const visit = (current: string) => {
+    if (seen.has(current)) return;
+    seen.add(current);
+    for (const source of a.components.find((c) => c.id === current)?.sources ?? [])
+      sources.set(source.node, source);
+    for (const child of a.components.filter((c) => c.parent === current)) visit(child.id);
+  };
+  visit(id);
+  return [...sources.values()];
+}
+
+/** A source reference owns its exact node and contained indexed ranges, not every unrelated
+ * function in the same file. This also handles class-method ownership without inventing IDs. */
+export function referencesNode(
+  structure: Structure,
+  sources: Component["sources"],
+  id: string | null | undefined,
+): boolean {
+  if (!id) return false;
+  const target = structure.nodes.find((n) => n.id === id)?.source;
+  return sources.some((s) => {
+    if (s.node === id) return true;
+    const range = structure.nodes.find((n) => n.id === s.node)?.source;
+    return (
+      !!range &&
+      !!target &&
+      range.file === target.file &&
+      range.startLine <= target.startLine &&
+      range.endLine >= target.endLine
+    );
+  });
 }

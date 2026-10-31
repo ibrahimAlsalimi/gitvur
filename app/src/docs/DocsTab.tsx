@@ -421,11 +421,11 @@ function DocumentBody({
   );
 }
 
-export function MentionedInDocs({ id }: { id: string }) {
+export function MentionedInDocs({ id, label }: { id: string; label?: string }) {
   const mentions = useDocsStore((s) => s.index.mentions[id]);
   if (!mentions?.length) return null;
   return (
-    <section className="gv-insp-section" aria-label={copy.docs.mentioned}>
+    <section className="gv-insp-section" aria-label={label ?? copy.docs.mentioned}>
       <h3 className="gv-insp-heading">{copy.docs.mentioned}</h3>
       {mentions.map((m) => (
         <button

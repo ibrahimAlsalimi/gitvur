@@ -307,3 +307,53 @@ fn never_writes_through_a_symlinked_gitvur_dir() {
         "nothing written outside the repo"
     );
 }
+
+#[test]
+fn architecture_packet_supplies_snapshot_prior_output_and_incremental_action_without_rewriting() {
+    let dir = repo();
+    assert!(gitvur(&["index", path(&dir)]).status.success());
+    let packet = || -> serde_json::Value {
+        let out = gitvur(&["packet", path(&dir), "--mode", "incremental"]);
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        serde_json::from_slice(&out.stdout).unwrap()
+    };
+    let initial = packet();
+    assert_eq!(initial["architectureAction"], "create");
+    assert_eq!(initial["architectureSchemaVersion"], 1);
+    let structure: gitvur_schema::Structure =
+        serde_json::from_slice(&fs::read(dir.path().join(".gitvur/structure.json")).unwrap())
+            .unwrap();
+    let file = structure
+        .nodes
+        .iter()
+        .find(|n| n.id == "file:a.py")
+        .unwrap();
+    let descriptions:Vec<_>=structure.nodes.iter().filter(|n|n.node_type!=gitvur_schema::NodeType::Project).map(|n|serde_json::json!({"id":n.id,"text":"Defines or invokes a no-op function.","basedOnHash":n.content_hash})).collect();
+    fs::write(dir.path().join(".gitvur/annotations.json"),serde_json::to_vec(&serde_json::json!({"modules":[{"id":"module:example","name":"Example","description":"Demonstrates function calls.","files":["file:a.py"]}],"descriptions":descriptions,"edges":[]})).unwrap()).unwrap();
+    let architecture = serde_json::json!({"schemaVersion":1,"commitSha":initial["commitSha"],"indexHash":initial["architectureIndexHash"],"architecture":{"version":1,"summary":"Two no-op functions demonstrate a local call.","components":[{"id":"arch:example","name":"Example functions","kind":"library","responsibility":"Defines a no-op function and its caller.","sources":[{"node":"file:a.py","basedOnHash":file.content_hash}],"provenance":"ai","evidence":[{"file":"a.py","line":1}]}],"relationships":[]}});
+    let text = serde_json::to_string_pretty(&architecture).unwrap();
+    let path_to_artifact = dir.path().join(".gitvur/architecture.json");
+    fs::write(&path_to_artifact, &text).unwrap();
+    let complete = packet();
+    assert_eq!(complete["architectureAction"], "preserve");
+    assert_eq!(complete["architecture"], architecture);
+    fs::write(
+        dir.path().join("added.py"),
+        "def new_boundary():\n    pass\n",
+    )
+    .unwrap();
+    let changed = packet();
+    assert_eq!(changed["architectureAction"], "review");
+    assert_ne!(
+        changed["architectureIndexHash"],
+        initial["architectureIndexHash"]
+    );
+    assert_eq!(fs::read_to_string(&path_to_artifact).unwrap(), text);
+    fs::write(&path_to_artifact, "{broken").unwrap();
+    assert_eq!(packet()["architectureAction"], "repair");
+    assert_eq!(gitvur(&["validate", path(&dir)]).status.code(), Some(1));
+}

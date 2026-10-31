@@ -1,0 +1,279 @@
+{
+  "modules": [
+    {
+      "id": "module:cli",
+      "name": "Shop CLI",
+      "description": "Submits a sample order from the command-line entry point.",
+      "files": [
+        "file:cmd/shop/main.go"
+      ]
+    },
+    {
+      "id": "module:orders",
+      "name": "Order handling",
+      "description": "Constructs the order service, validates names and demonstrates recursive counting.",
+      "files": [
+        "file:internal/orders/count.go",
+        "file:internal/orders/orders.go",
+        "file:internal/orders/validate.go"
+      ]
+    },
+    {
+      "id": "module:store",
+      "name": "Store stubs",
+      "description": "Defines a save interface and no-op repository and cache implementations.",
+      "files": [
+        "file:internal/store/store.go"
+      ]
+    }
+  ],
+  "descriptions": [
+    {
+      "id": "class:internal/orders/orders.go:Service",
+      "text": "Order service that validates names and delegates saving to a concrete store repository.",
+      "basedOnHash": "sha256:c1b48c25036879e57ffc02a013b95fee52370778be86048d5f9ab6fdc7d4968a"
+    },
+    {
+      "id": "class:internal/store/store.go:Cache",
+      "text": "Cache stub with a save method that succeeds without storing data.",
+      "basedOnHash": "sha256:7ef3386c41f76f8f873965c391ac08022d282a7f28e0d1b93c58459d2cb6ea60"
+    },
+    {
+      "id": "class:internal/store/store.go:Repo",
+      "text": "Repository stub whose save method delegates to a no-op flush.",
+      "basedOnHash": "sha256:7a7e7bbbcbe2f0f995303d071d84ae22b7e6205b7dc619a68135e86ec1831f3b"
+    },
+    {
+      "id": "class:internal/store/store.go:Saver",
+      "text": "Interface for saving a named item and reporting an error.",
+      "basedOnHash": "sha256:b33d7c109bf6b4b5e2f5d917da6e725f88b9aecd427f90aa63d583e5fb0a738e"
+    },
+    {
+      "id": "file:cmd/shop/main.go",
+      "text": "Command-line entry point that submits a sample book order, ignores the returned error, and calls a no-op helper.",
+      "basedOnHash": "sha256:ce6a5337befd7b26189d4e10bd2a43fe120fb11aed95194b240711fa7be2c323"
+    },
+    {
+      "id": "file:internal/orders/count.go",
+      "text": "Order-service counting example that recursively counts down to zero.",
+      "basedOnHash": "sha256:26a4c46c8751292e760820ddd73e3b4a5280467c1c9996d18f3aec6878dcfcdf"
+    },
+    {
+      "id": "file:internal/orders/orders.go",
+      "text": "Order-service construction and submission, with name validation and delegation to a store stub.",
+      "basedOnHash": "sha256:aca312d3243feac15286a0dc577eac4bf8d184f3d1f738b4e4254c7b4d5e6a90"
+    },
+    {
+      "id": "file:internal/orders/validate.go",
+      "text": "Order-name validation that rejects empty strings.",
+      "basedOnHash": "sha256:453b1ce266f800bb7baf2b78d4370bcb822328a8ffa4be52fa9c7be44b9b3185"
+    },
+    {
+      "id": "file:internal/store/store.go",
+      "text": "Save interface and repository/cache stubs; neither implementation stores data or performs I/O.",
+      "basedOnHash": "sha256:cef83a17b27951c6a4eb6feb8afb70baedcf5b746bd3aa75ad4780aa4406be4e"
+    },
+    {
+      "id": "function:cmd/shop/main.go:main",
+      "text": "Submits a sample book order, ignores any returned error, and calls a no-op helper.",
+      "basedOnHash": "sha256:762559bf4e66835933f6cad0afd20a966909b94852c06be8b6f3a887fe57cab8"
+    },
+    {
+      "id": "function:cmd/shop/main.go:run",
+      "text": "Returns immediately without performing any work.",
+      "basedOnHash": "sha256:9377290f116831acf0ac02fc15faf331f381199d0db99d6416d43274714d526d"
+    },
+    {
+      "id": "function:internal/orders/count.go:Service.Count",
+      "text": "Returns zero by counting down recursively from three; does not inspect stored orders.",
+      "basedOnHash": "sha256:3e00270805695af9d8f8e42673baf00d6ec91c7da125851082ec1c7ed3a24674"
+    },
+    {
+      "id": "function:internal/orders/count.go:countdown",
+      "text": "Recursively decrements a nonnegative input to zero; negative inputs have no terminating case.",
+      "basedOnHash": "sha256:4c22327b902be5a1a0c67acf1e0a6d79d8a91dc14685533bf9f4bc88a679e4b2"
+    },
+    {
+      "id": "function:internal/orders/orders.go:NewService",
+      "text": "Creates an order service with a concrete store repository stub.",
+      "basedOnHash": "sha256:c9a5290331f9f3dff1318d422088531dafe31890ebb36ea5ed14f71c13a10626"
+    },
+    {
+      "id": "function:internal/orders/orders.go:Service.Place",
+      "text": "Rejects an empty name with a wrapped error; otherwise delegates saving to the repository stub.",
+      "basedOnHash": "sha256:04fa11f8ed9750a0b3b27f95e922b76854178b10dacfd5dea04282a28e8d8397"
+    },
+    {
+      "id": "function:internal/orders/orders.go:Submit",
+      "text": "Creates an order service and returns the result of placing the named order.",
+      "basedOnHash": "sha256:446d511123f9be4e69b63161737db9a79e034af947768ccac64938c9e6b63426"
+    },
+    {
+      "id": "function:internal/orders/validate.go:validate",
+      "text": "Returns an error for an empty name and accepts any nonempty name.",
+      "basedOnHash": "sha256:1bb42c49b6e39a4f8bfd8cd150e16ba46eafeeb96021c5f0cf333fe1b47bc400"
+    },
+    {
+      "id": "function:internal/store/store.go:Cache.Save",
+      "text": "Returns success without storing the supplied name.",
+      "basedOnHash": "sha256:bacf03968dd63cbf08eab1abacbdecbab8b37cdb7ec1f0b5e15a6bb8b75ab55c"
+    },
+    {
+      "id": "function:internal/store/store.go:Repo.Save",
+      "text": "Delegates to the no-op flush and returns its result without storing the name.",
+      "basedOnHash": "sha256:ce4b908ecbd5d10bb486c7941a1d2530dd1f4ba5b6dc4d982da1b283dabfacf9"
+    },
+    {
+      "id": "function:internal/store/store.go:Repo.flush",
+      "text": "Returns success without writing or mutating data.",
+      "basedOnHash": "sha256:20ffcdc88630cff27940660d2f2a35dc6fd4a248edb852cfb3ceb5ba0f2d36a8"
+    }
+  ],
+  "edges": [
+    {
+      "from": "function:internal/orders/orders.go:Submit",
+      "to": "function:internal/orders/orders.go:Service.Place",
+      "type": "calls",
+      "provenance": "ai",
+      "evidence": {
+        "file": "internal/orders/orders.go",
+        "line": 19
+      },
+      "note": "The local s is constructed by NewService on line 18 and has type *Service."
+    },
+    {
+      "from": "function:internal/orders/orders.go:Service.Place",
+      "to": "function:internal/store/store.go:Repo.Save",
+      "type": "calls",
+      "provenance": "ai",
+      "evidence": {
+        "file": "internal/orders/orders.go",
+        "line": 26
+      },
+      "note": "Service.repo is declared *store.Repo on line 10, so Save targets Repo.Save rather than Cache.Save."
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow:submit-sample-order",
+      "name": "Submit a sample order",
+      "description": "From the CLI sample through service construction and name validation to a successful no-op store flush.",
+      "entryPoint": "entry:main-function:cmd-shop",
+      "steps": [
+        {
+          "id": "s1",
+          "node": "function:cmd/shop/main.go:main",
+          "label": "Submits a sample order",
+          "basedOnHash": "sha256:762559bf4e66835933f6cad0afd20a966909b94852c06be8b6f3a887fe57cab8"
+        },
+        {
+          "id": "s2",
+          "node": "function:internal/orders/orders.go:Submit",
+          "label": "Creates and uses an order service",
+          "basedOnHash": "sha256:446d511123f9be4e69b63161737db9a79e034af947768ccac64938c9e6b63426"
+        },
+        {
+          "id": "s3",
+          "node": "function:internal/orders/orders.go:NewService",
+          "label": "Constructs the repository-backed service",
+          "basedOnHash": "sha256:c9a5290331f9f3dff1318d422088531dafe31890ebb36ea5ed14f71c13a10626"
+        },
+        {
+          "id": "s4",
+          "node": "function:internal/orders/orders.go:Submit",
+          "label": "Receives the constructed service",
+          "basedOnHash": "sha256:446d511123f9be4e69b63161737db9a79e034af947768ccac64938c9e6b63426"
+        },
+        {
+          "id": "s5",
+          "node": "function:internal/orders/orders.go:Service.Place",
+          "label": "Validates and delegates the order",
+          "basedOnHash": "sha256:04fa11f8ed9750a0b3b27f95e922b76854178b10dacfd5dea04282a28e8d8397"
+        },
+        {
+          "id": "s6",
+          "node": "function:internal/orders/validate.go:validate",
+          "label": "Rejects an empty name",
+          "basedOnHash": "sha256:1bb42c49b6e39a4f8bfd8cd150e16ba46eafeeb96021c5f0cf333fe1b47bc400"
+        },
+        {
+          "id": "s7",
+          "node": "function:internal/orders/orders.go:Service.Place",
+          "label": "Continues for a nonempty name",
+          "basedOnHash": "sha256:04fa11f8ed9750a0b3b27f95e922b76854178b10dacfd5dea04282a28e8d8397"
+        },
+        {
+          "id": "s8",
+          "node": "function:internal/store/store.go:Repo.Save",
+          "label": "Delegates to the no-op flush",
+          "basedOnHash": "sha256:ce4b908ecbd5d10bb486c7941a1d2530dd1f4ba5b6dc4d982da1b283dabfacf9"
+        },
+        {
+          "id": "s9",
+          "node": "function:internal/store/store.go:Repo.flush",
+          "label": "Returns success without writing data",
+          "basedOnHash": "sha256:20ffcdc88630cff27940660d2f2a35dc6fd4a248edb852cfb3ceb5ba0f2d36a8"
+        }
+      ],
+      "transitions": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s2",
+          "to": "s3",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s3",
+          "to": "s4",
+          "kind": "return",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s4",
+          "to": "s5",
+          "kind": "call",
+          "provenance": "ai",
+          "evidence": {
+            "file": "internal/orders/orders.go",
+            "line": 19
+          }
+        },
+        {
+          "from": "s5",
+          "to": "s6",
+          "kind": "call",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s6",
+          "to": "s7",
+          "kind": "return",
+          "provenance": "syntactic"
+        },
+        {
+          "from": "s7",
+          "to": "s8",
+          "kind": "call",
+          "provenance": "ai",
+          "evidence": {
+            "file": "internal/orders/orders.go",
+            "line": 26
+          },
+          "label": "for a nonempty name"
+        },
+        {
+          "from": "s8",
+          "to": "s9",
+          "kind": "call",
+          "provenance": "syntactic"
+        }
+      ]
+    }
+  ]
+}

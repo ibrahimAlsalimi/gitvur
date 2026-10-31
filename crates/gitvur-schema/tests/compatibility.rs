@@ -51,3 +51,29 @@ fn new_flow_arrays_round_trip_without_reordering_steps() {
     );
     assert!(serde_json::from_str::<Annotations>(&invalid).is_err());
 }
+
+#[test]
+fn standalone_architecture_round_trips_rejects_unknown_fields_and_has_stable_snapshot_hash() {
+    let mut a: gitvur_schema::ArchitectureArtifact = serde_json::from_str(include_str!(
+        "../../../app/e2e/fixtures/architecture-artifact.json"
+    ))
+    .unwrap();
+    a.canonicalize();
+    let text = gitvur_schema::to_canonical_json(&a);
+    assert_eq!(
+        serde_json::from_str::<gitvur_schema::ArchitectureArtifact>(&text).unwrap(),
+        a
+    );
+    let mut unknown: serde_json::Value = serde_json::from_str(&text).unwrap();
+    unknown["coordinates"] = serde_json::json!({"x":1});
+    assert!(serde_json::from_value::<gitvur_schema::ArchitectureArtifact>(unknown).is_err());
+    let mut s: gitvur_schema::Structure = serde_json::from_str(include_str!(
+        "../../../fixtures/py-flows/.gitvur/structure.json"
+    ))
+    .unwrap();
+    let hash = gitvur_schema::architecture_index_hash(&s);
+    s.nodes.reverse();
+    s.edges.reverse();
+    assert_eq!(hash, gitvur_schema::architecture_index_hash(&s));
+    assert_eq!(a.index_hash, hash);
+}

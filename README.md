@@ -25,20 +25,20 @@ pnpm tauri dev
 
 ### Architecture diagram
 
-Open **Diagram** (`Ctrl/Cmd+4`) for a high-level view of indexed source directories and their
-verified dependencies. Select components or arrows to inspect responsibilities, source references
-and evidence, then navigate to Map or related Docs. Large source trees expose nested groups.
-Filter components, zoom, fit or reset the layout; copy grouped Mermaid or export SVG/PNG through
-the save dialog. Exports are refused inside the analyzed repository.
+Open **Diagram** (`Ctrl/Cmd+4`) for a ready-made system overview: major components,
+responsibilities, entry points, subsystems and meaningful interactions. The Documentation Agent
+saves this map in optional `.gitvur/architecture.json` during normal documentation. Opening the
+tab reads validated saved data and never invokes AI. Select components or relationships for
+source evidence and navigation to Map, Docs and related flows. Fit/reset, component search,
+Mermaid copy and SVG/PNG save-dialog exports are available in both themes.
 
-The diagram works without AI. The existing documentation agent can optionally enrich it using
-the legacy version-1 `architecture` annotations (`agent/codeDOC.md`, section 12). Invalid or outdated
-annotations revert to structural groups. Evidence establishes traceability; semantic descriptions
-still need review. Existing repositories require no migration.
+Without architecture documentation, Diagram explains how to generate it and offers **Raw
+structure** as separate directory/dependency exploration. Malformed maps show a repair state;
+stale sources and unresolved AI interactions are marked for review. Validation checks references
+and traceability, not the correctness of every interpretation. Missing architecture leaves Map,
+Docs and Flows usable. Legacy annotation architecture remains readable when the standalone
+artifact is absent; no automatic migration or writes occur on open.
 
-The [revised Phase 16 design](PHASE_16_ARCHITECTURE_DIAGRAM.md) is planned separately:
-the Documentation Agent will produce proposed `.gitvur/architecture.json` during documentation,
-and Diagram will read that saved validated artifact without invoking AI. This additional
-visualization preserves Map, Docs and Flows; missing architecture leaves them usable. The
-standalone artifact and its compatibility/migration policy are not implemented by this
-documentation update. The current directory-based view described above predates this decision.
+See [the Phase 16 contract and acceptance plan](PHASE_16_ARCHITECTURE_DIAGRAM.md) and
+[documentation-agent instructions](agent/codeDOC.md). Everything remains local-first; analyzed
+repository code is never executed.

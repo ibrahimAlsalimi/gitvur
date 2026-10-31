@@ -393,17 +393,17 @@ files, whose new arrays default to empty. The v0.2 examples above remain valid c
 examples. See `crates/gitvur-schema/README.md` for the additions and
 `crates/gitvur-validate/README.md` for the entry point and flow checks.
 
-## Phase 16 — Agent-Generated Architecture Diagrams (revised design, planned)
+## Phase 16 — Agent-Generated Architecture Diagrams (implemented contract)
 
 This roadmap amendment adds an independent architecture visualization to Map, Docs and Flows:
 `Map | Docs | Flows | Diagram`. It does not replace the full repository map, execution flows,
 indexing or documentation. Earlier phase descriptions and compatibility examples above retain
-their historical scope; their one-file agent writer rule remains active until implementation.
+their historical scope; the current agent writer contract is now annotations plus the optional architecture artifact.
 
 Pipeline: **Indexer → Documentation Agent → Architecture Artifact → Validator → Diagram UI**.
 The indexer remains the deterministic source of structural facts and code identities. The
 Documentation Agent interprets high-level architecture during its normal workflow and will
-produce proposed `.gitvur/architecture.json` alongside normal documentation. The validator
+produce `.gitvur/architecture.json` alongside normal documentation. The validator
 checks schema, references, evidence and freshness; it cannot prove every semantic interpretation.
 Interactions without deterministic proof remain unresolved. The UI reads saved validated data
 without a new AI invocation, and absent architecture leaves existing functionality usable.
@@ -418,5 +418,6 @@ The existing directory-based Diagram with optional annotation enrichment predate
 Its historical implementation does not complete the revised artifact pipeline. See
 [the dedicated implementation plan](PHASE_16_ARCHITECTURE_DIAGRAM.md) for nine workstreams,
 explicit acceptance criteria, dependency ordering and compatibility decisions. The revised Phase
-16 is planned, not implemented by this documentation-only task. Timeline uses Phase 17 in the
-prompt sequence; no historical completed phase is being credited with the new design.
+16 artifact pipeline is implemented; `PROGRESS.md` records verification and remaining evaluation
+limits. Timeline uses Phase 17 in the prompt sequence. Historical planning-only sessions remain
+accurately recorded as documentation-only work.

@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "commitSha": "uncommitted",
+  "indexHash": "sha256:c16ce67b12c5d433ffb151e69052cbec1a6eb56482e4d0d3dff2fe4f4e76f899",
+  "designNotes": [
+    "The storage adapter returns an in-memory record; it performs no database or file writes."
+  ],
+  "architecture": {
+    "version": 1,
+    "summary": "CLI and HTTP entry points submit orders to a service. It trims input, builds an in-memory saved-item record and invokes a callback before returning the result.",
+    "components": [
+      {
+        "id": "arch:entry",
+        "name": "Entry points",
+        "kind": "api",
+        "responsibility": "Accepts CLI and HTTP requests and passes orders to the service.",
+        "sources": [
+          {
+            "node": "file:flowapp/cli.py",
+            "basedOnHash": "sha256:525abe946df2bd9c45b6362e82b42ec7fb01576e50c3e0d794ebf740c1d25b18"
+          },
+          {
+            "node": "file:flowapp/api.py",
+            "basedOnHash": "sha256:89603a241bdab9b8c1f25ffff5639566244e8d73381b7cc206a239c6ce5feb69"
+          },
+          {
+            "node": "file:flowapp/__main__.py",
+            "basedOnHash": "sha256:69c10f98b1a0215fdd8e13b02f1afcdf9292680273d198dddecbe4fa47d732a3"
+          }
+        ],
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "flowapp/cli.py",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "arch:service",
+        "name": "Order service",
+        "kind": "service",
+        "responsibility": "Coordinates order normalization and invokes a saved-item callback before returning the result.",
+        "sources": [
+          {
+            "node": "file:flowapp/service/orders.py",
+            "basedOnHash": "sha256:718cb84dada1d58c87fa0621fc6ca0fe183098dcdab7472085709d430fecdf7a"
+          }
+        ],
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "flowapp/service/orders.py",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "arch:normalization",
+        "name": "Input normalization",
+        "kind": "service",
+        "responsibility": "Trims order input and passes it to the storage adapter to build a saved-item record.",
+        "sources": [
+          {
+            "node": "file:flowapp/domain/rules.py",
+            "basedOnHash": "sha256:80628e599ac327351b5134332ce8ed41aa9a4e8accfd410065f7ceefbab26b8c"
+          },
+          {
+            "node": "file:flowapp/domain/text.py",
+            "basedOnHash": "sha256:08853329bd132cc25e5f338bc4f9790ffc44ecdff99c391603437df7f37e7ecd"
+          }
+        ],
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "flowapp/domain/rules.py",
+            "line": 5
+          }
+        ]
+      },
+      {
+        "id": "arch:callback",
+        "name": "Saved-item callback",
+        "kind": "event-handler",
+        "responsibility": "Returns the saved-item record supplied by the service without additional side effects.",
+        "sources": [
+          {
+            "node": "file:flowapp/storage/events.py",
+            "basedOnHash": "sha256:56a47669902b9dfecb347ec45bc9f67585b8473d7ce05beeabcd29587ce9ccf3"
+          }
+        ],
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "flowapp/storage/events.py",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "arch:record",
+        "name": "Storage adapter",
+        "kind": "persistence",
+        "responsibility": "Wraps the normalized item in a saved-item record in memory; performs no I/O.",
+        "sources": [
+          {
+            "node": "file:flowapp/storage/repository.py",
+            "basedOnHash": "sha256:4428fb953858a01fe3f84b1fb3f17bd029eb8d276d0d23ddfb7f02f2d9254937"
+          },
+          {
+            "node": "file:flowapp/storage/driver.py",
+            "basedOnHash": "sha256:6427da2eee8545ce4f4ec48fdaa2b5732750a638f07e779d23726b3ae3178bcb"
+          }
+        ],
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "flowapp/storage/driver.py",
+            "line": 2
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "id": "arch:submit",
+        "from": "arch:entry",
+        "to": "arch:service",
+        "kind": "invokes",
+        "label": "Submits orders",
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "flowapp/cli.py",
+            "line": 5
+          }
+        ]
+      },
+      {
+        "id": "arch:normalizes",
+        "from": "arch:service",
+        "to": "arch:normalization",
+        "kind": "invokes",
+        "label": "Normalizes order input",
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "flowapp/service/orders.py",
+            "line": 6
+          }
+        ]
+      },
+      {
+        "id": "arch:notifies",
+        "from": "arch:service",
+        "to": "arch:callback",
+        "kind": "triggers",
+        "label": "Invokes saved-item callback",
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "flowapp/service/orders.py",
+            "line": 8
+          }
+        ]
+      },
+      {
+        "id": "arch:build-record",
+        "from": "arch:normalization",
+        "to": "arch:record",
+        "kind": "invokes",
+        "label": "Builds saved-item record",
+        "provenance": "ai",
+        "evidence": [
+          {
+            "file": "flowapp/domain/text.py",
+            "line": 5
+          }
+        ]
+      }
+    ]
+  }
+}

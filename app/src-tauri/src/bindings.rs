@@ -28,7 +28,7 @@ pub fn typescript() -> String {
         s::Trace, s::TraceNode, s::TraceKind,
         s::EntryPoint, s::EntryKind, s::Flow, s::FlowStep, s::FlowTransition, s::TransitionKind, s::FlowStatus, s::FlowState,
         s::Edge, s::EdgeType, s::Provenance, s::Evidence, s::SourceRange,
-        s::Architecture, s::ArchitectureComponent, s::ArchitectureSource, s::ArchitectureRelationship,
+        s::ArchitectureArtifact, s::Architecture, s::ArchitectureComponent, s::ArchitectureSource, s::ArchitectureRelationship,
         s::Annotations, s::Module, s::Description,
         s::Report, s::Summary, s::ElementStatus, s::Status, s::Issue, s::Severity,
         s::StructureDiff, s::ChangeKind, s::ElementChange, s::EdgeChange, s::DiffSummary,
