@@ -962,6 +962,35 @@ Open questions:
 - Should `gitvur flows` mark agent vs extractor entries, and should the summary gain flow
   counts? Both are UI-facing; deferred to Phase 15.
 
+## Phase 15 — in progress: data plumbing and layout (2026-10-31)
+
+- Branch `phase-15-flows-tab`, stacked on `phase-14-flows-validation` (PR #4, open).
+- **Part A done.** Tauri `get_trace(path, start, depth, maxNodes)` wraps `gitvur_flow::trace`
+  over the repository's `.gitvur/` structure plus agent entry points (an agent entry reusing an
+  extractor ID is skipped); depth ≤ 64 and nodes ≤ 5000. `ViewState` gains `flowSelection` and
+  `flowMode` for per-repository persistence; bindings regenerated. The browser mock serves
+  `src/api/mockTraces.json`, generated from the real trace engine for every entry and node of
+  py-flows/ts-flows by a drift-checked test (`GITVUR_WRITE_MOCK_TRACES=1 cargo test -p
+  gitvur-app mock_traces`). `buildModel` attaches `model.flows` (`app/src/flows/flowModel.ts`):
+  `entryPointsById`, `flowsByEntry`, `flowStatusById`, `flowsThroughNode`. The report's verdict
+  wins; without one, status is computed from hashes (`broken` if the entry or a step node is
+  missing, `stale` on a hash change).
+- **Part C core done.** `app/src/flows/layoutFlow.ts`: pure swimlane layout (lanes by first
+  appearance, DFS back-edges, longest-path ranks, side-by-side same-lane/rank nodes, orthogonal
+  routing, right-side loop-back channels, label side switching with recorded overlaps). Runs in
+  the existing layout worker (`runFlowLayout`). 11 unit tests incl. a 25-step budget check.
+- Known layout limitation (for the visual review): forward edges cross lanes in the gap just
+  below the source rank, so an edge skipping ranks runs vertically through the target column
+  and may pass behind intermediate cards in that lane.
+- Remaining: Parts B–K (tab and list, step/transition rendering, legend and banners, playback,
+  Trace mode UI, map overlay and inspector sections, export, states, tokens and accessibility,
+  e2e tests, screenshot review), then CLAUDE.md and prompts/README.md.
+- **Needs a decision:** `fixtures/py-small/.gitvur/{manifest,structure,report}.json` were
+  rewritten at 15:31:33–38 today (index then validate, v0.3 output, commit `071469f`), not by
+  this session's commands — it looks like Index/Validate in a running app. The frozen data now
+  includes a main-guard entry, which fails two `app/src-tauri/tests/bundle.rs` tests. Left
+  uncommitted and untouched pending the user's call.
+
 ## Parking lot
 
 - Indexing progress with a file count needs a progress callback in `gitvur-index` (Phase 11 shows an indeterminate bar).
